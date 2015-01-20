@@ -1,0 +1,26 @@
+#!/bin/bash
+
+#  Matrice Maker 
+#  From the Regulation Spatial of genomes, Pasteur Institut
+
+
+
+bank='/home/axel/Bureau/data_pc/quiescence/BC184_GATT_G0WT/';  echo $bank; 
+fast1='/home/axel/Bureau/data_pc/quiescence/BC184_GATT_G0WT.dat.end1.pcrfree' 
+fast2='/home/axel/Bureau/data_pc/quiescence/BC184_GATT_G0WT.dat.end2.pcrfree' 
+path_to_index='/home/axel/Bureau/python/fasta/sacCer3/sacCer3';
+path_to_fasta='/home/axel/Bureau/python/fasta/sacCer3';
+name_of_enzyme='DpnII'
+
+python iterative_mapping_all_MQ.py $bank $fast1 $fast2 $path_to_index $path_to_fasta $name_of_enzyme  
+sudo bash script_conversion_text.bh  $bank/
+
+/home/axel/Bureau/python/scripts_scere/./assignment  $bank/tmp/output_alignment_idpt.dat /home/axel/Bureau/python/fasta/sacCer3/dpnii_sc.dat24
+/home/axel/Bureau/python/scripts_scere/./config      $bank/tmp/output_alignment_idpt.dat.ind3
+/home/axel/Bureau/python/scripts_scere/./scn_matrix  $bank/tmp/output_alignment_idpt.dat.ind3 /home/axel/Bureau/python/fasta/sacCer3/dpnii_sc.dat24
+
+octave oct_blur17.m
+mkdir    $bank/matrices
+mv matt* $bank/matrices
+
+#-------------------------------------------------------------------------------------------------------------
