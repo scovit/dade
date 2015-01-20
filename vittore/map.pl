@@ -10,12 +10,13 @@ require 'appendmap.pl'
 # This the mapping pipeline (Mirny)
 #
 
-if ($#ARGV != 3) {
-	print "usage: ./map.pl fastqfile readlength leftmap rightmap\n";
+if (($#ARGV != 3) or ($#ARGV !=4)) {
+	print "usage: ./map.pl fastqfile <fastqfile2> readlength leftmap rightmap\n";
 	exit;
 };
 
-my ($fastqfilename, $readlength, $leftmapfn, $rightmapfn) = @ARGV;
+if ($#ARGV == 3)
+    my ($fastqfilename, $readlength, $leftmapfn, $rightmapfn) = @ARGV;
 
 my $TMPDIR="/data/temporary";
 
