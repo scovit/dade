@@ -1,6 +1,10 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
 sub appendmap {
-    if ($#_ != 4 ) {
-	print "readtrimmer needs 3 arguments: mapfile, samfile, length, step, minq\n";
+    if ($#_ != 6 ) {
+	print "appendmap needs 5 arguments: mapfile, samfile, length, step, minq\n";
 	exit;
     };
     
@@ -33,3 +37,5 @@ sub appendmap {
         }
     }
 }
+
+1;
