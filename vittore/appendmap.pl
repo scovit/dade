@@ -3,12 +3,12 @@ use strict;
 use warnings;
 
 sub appendmap {
-    if ($#_ != 4 ) {
-	print "appendmap needs 5 arguments: mapfile, samfile, length, step, minq\n";
+    if ($#_ != 5 ) {
+	print "appendmap needs 6 arguments: mapfile, samfile, length, step, readlength, minq\n";
 	exit;
     };
     
-    my ($mapfile, $samfile, $length, $step, $minq) = @_;
+    my ($mapfile, $samfile, $length, $step, $rlength, $minq) = @_;
 
     my $index = 0;
     while (<$samfile>) {
@@ -26,15 +26,27 @@ sub appendmap {
 
             if ($MAPQ < $minq) {
 # Unmapped
-		${ $length }[$index] += $step;
-                $index++;
-                next;
-            }
+		my $lengthvar = ${ $length }[$index];
+
+		# if it's last iteration, just print it.
+		if ($lengthvar == $rlength) {
+		    print $mapfile $index, "\t", $NAME, "\t", $FLAG, "\t", $CHR
+			,"\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\n";
+		} else {
+		    my $newlength = $lengthvar + $step;
+		    if ($newlength > $rlength) {
+			$newlength = $rlength;
+		    }
+		    ${ $length }[$index] = $newlength;
+		}
+            } else {
 # Mapped
-	    print $mapfile $index, "\t", $NAME,  "\t", $FLAG, "\t", $CHR, "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\n";
-            ${ $length }[$index] = 0;
-            $index++;
-        }
+		print $mapfile $index, "\t", $NAME, "\t", $FLAG, "\t", $CHR
+		    ,"\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\n";
+		${ $length }[$index] = 0;
+	    }
+	    index++;
+	}
     }
 }
 

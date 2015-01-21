@@ -94,14 +94,18 @@ open( my $rightmap, "| sort -g --temporary-directory=$TMPDIR $gzipit > $rightmap
 #################################################
 
 print "Starting trimmering\n";
-while (readtrimmer($leftsource, $rightsource, \@leftl, \@rightl, $leftreads, $rightreads) <= $readlength) {
+while (1) {
+    my $trimmed = readtrimmer($leftsource, $rightsource, \@leftl, \@rightl, $leftreads, $rightreads);
+
     my $alignedfile = bowtie2align($leftreads);
-    appendmap($leftmap, $alignedfile, \@leftl, $stepl, $minqual);
+    appendmap($leftmap, $alignedfile, \@leftl, $stepl, $readlength, $minqual);
     close ($alignedfile);
 
     $alignedfile = bowtie2align($rightreads);
-    appendmap($rightmap, $alignedfile, \@rightl, $stepl, $minqual);
+    appendmap($rightmap, $alignedfile, \@rightl, $stepl, $readlength, $minqual);
     close ($alignedfile);
+
+    last if ($trimmed >= $readlength);
 }
 
 close $leftmap;

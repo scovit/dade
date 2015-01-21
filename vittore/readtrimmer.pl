@@ -23,8 +23,8 @@ sub readtrimmer
     while (<LFILE>) {
 	my $A = $_;
 	my $B = <RFILE>;
-
 	my $i = ($. - 1) / 4;
+
 	$lefttrim=${ $leftlength }[$i];
 	$righttrim=${ $rightlength }[$i];
 	$maxtrim = $lefttrim if $lefttrim > $maxtrim;
