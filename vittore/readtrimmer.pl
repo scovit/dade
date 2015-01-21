@@ -2,22 +2,14 @@
 use strict;
 use warnings;
 
-# The function takes two files as input:
-#   the first is the fastq.gz file,
-#   the second is the two columned file with the read size
-# The output are the trimmed reads, still two files
-#
-
 sub readtrimmer
 {
     if ($#_ != 5 ) {
-	print "readtrimmer needs 4 arguments: fastqfile leftlength rightlength outputleft.fastq.gz outputright.fastq.gz indexl indexr\n";
+	print "readtrimmer needs 6 arguments: fastqleft fastqright leftlength rigthlength outputleft.fastq.gz outputright.fastq.gz\n";
 	exit;
     };
-    
-    print "readtrimmer.pl Warning: This subroutine has been made for equal length pair-ended sequencing\n";
-    
-    my ($fastqfilename, $readl, $leftlength, $rightlength, $outputleftfilename, $outputrightfilename)=@_;
+        
+    my ($fastqleft, $fastqright, $leftlength, $rightlength, $outputleftfilename, $outputrightfilename)=@_;
     
     open OUTPUT1, "| gzip > $outputleftfilename";
     open OUTPUT2, "| gzip > $outputrightfilename";
@@ -26,8 +18,12 @@ sub readtrimmer
     my $lefttrim;
     my $righttrim;
     
-    open FILE, $fastqfilename;
-    while (<FILE>) {
+    open LFILE, $fastqleft;
+    open RFILE, $fastqright;
+    while (<LFILE>) {
+	my $A = $_;
+	my $B = <RFILE>;
+
 	my $i = ($. - 1) / 4;
 	$lefttrim=${ $leftlength }[$i];
 	$righttrim=${ $rightlength }[$i];
@@ -36,11 +32,10 @@ sub readtrimmer
 
 	if ($. % 2 == 0) {
 	    if ($lefttrim != 0) {
-		print OUTPUT1 substr($_,0,$lefttrim), "\n";
+		print OUTPUT1 substr($A,0,$lefttrim), "\n";
 	    }
 	    if ($righttrim != 0) {
-		print OUTPUT2 substr($_, $readl/2, $righttrim), "\n";
-# other side: length() - 1 - $righttrim,$righttrim), "\n";
+		print OUTPUT2 substr($B,0,$righttrim), "\n";
 	    }
 	} else {
 	    if ($lefttrim != 0) {
@@ -51,7 +46,8 @@ sub readtrimmer
 	    }
 	}
     }
-    close FILE;
+    close LFILE;
+    close RFILE;
 
     close OUTPUT1;
     close OUTPUT2;
