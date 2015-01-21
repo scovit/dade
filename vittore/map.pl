@@ -70,6 +70,7 @@ print "Counting number of reads\n";
 my $N=int(`cat $leftsource | wc -l`) / 4;
 die "Error: leftsource and rightsource files have different number of reads"
     unless int(`cat $rightsource | wc -l`) / 4 == $N;
+print $leftsource, "\n", $rightsource, "\n";
 print $N, " reads found\n";
 
 my $stepl = 10;

@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 sub appendmap {
-    if ($#_ != 6 ) {
+    if ($#_ != 4 ) {
 	print "appendmap needs 5 arguments: mapfile, samfile, length, step, minq\n";
 	exit;
     };
@@ -19,7 +19,7 @@ sub appendmap {
         }
         else
         {
-            my ($NAME, $FLAG, $POS, $MAPQ) = split("\t");
+            my ($NAME, $FLAG, $CHR, $POS, $MAPQ) = split("\t");
             while (${ $length }[$index] == 0) {
                 $index++;
             }
@@ -31,7 +31,7 @@ sub appendmap {
                 next;
             }
 # Mapped
-	    print $mapfile $index, "\t", $NAME, "\t", $FLAG, "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\n";
+	    print $mapfile $index, "\t", $NAME,  "\t", $FLAG, "\t", $CHR, "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\n";
             ${ $length }[$index] = 0;
             $index++;
         }
