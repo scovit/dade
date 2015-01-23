@@ -3,7 +3,9 @@ use strict;
 use warnings;
 
 if ($#ARGV < 1) {
-    print "usage: ./findrst.pl name chr1.fa <chr2.fa ... chrN.fa>\n";
+    print "usage: ./findrst.pl name chr1.fa <chr2.fa ... chrN.fa>\n"
+	, "  output will be printed on console\n"
+	, "  (redirect to a file with \"> filename\")\n";
     exit;
 }
 
