@@ -23,6 +23,7 @@ sub findinrst {
     die "Should call readrsttable first" if $rstloaded == 0;
 
     my $ele = $_[0]; my $chrnam = $_[1];
+    print $ele, " " , $chrnam, "\n";
 
     my $aref = $rsttable{$chrnam};
 
@@ -31,7 +32,8 @@ sub findinrst {
         my $index = int(($top + $bottom)/2);
 
         if ($ele >= ${$aref}[$index][0] && $ele < ${$aref}[$index][1]) {
-            return ($index, ${$aref}[$index][0], ${$aref}[$index][1]);
+            print $index, " " , ${$aref}[$index][0], " ", ${$aref}[$index][1], "\n";
+            return $index;
             last;
         } elsif ($ele < ${$aref}[$index][0]) {
             $top = $index - 1;

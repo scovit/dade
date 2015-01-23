@@ -16,11 +16,11 @@ if (($#ARGV != 4) and ($#ARGV != 5)) {
     exit;
 }
 
-my ($leftsource, $rightsource, $readlength, $rsttablefn, $leftmapfn, $rightmapfn) = (undef, undef, undef, undef, undef);
+my ($leftsource, $rightsource, $readlength, $rsttablefn, $leftmapfn, $rightmapfn) = (undef, undef, undef, undef, undef, undef);
 if ($#ARGV == 5) {
-    ($leftsource, $rightsource, $readlength, $leftmapfn, $rightmapfn) = @ARGV;
+    ($leftsource, $rightsource, $readlength, $rsttablefn, $leftmapfn, $rightmapfn) = @ARGV;
 } else {
-    ($leftsource, $readlength, $leftmapfn, $rightmapfn) = @ARGV;
+    ($leftsource, $readlength, $rsttablefn, $leftmapfn, $rightmapfn) = @ARGV;
 }
 
 my $TMPDIR="/data/temporary";
