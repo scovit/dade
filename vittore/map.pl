@@ -6,17 +6,18 @@ require 'mktemp_linux.pl';
 require 'readtrimmer.pl';
 require 'bowtie2align.pl';
 require 'appendmap.pl';
+require 'findinrst.pl';
     
 # This the mapping pipeline (Mirny)
 #
     
-if (($#ARGV != 3) and ($#ARGV != 4)) {
-    print "usage: ./map.pl leftsource <rightsource> readlength leftmap rightmap\n";
+if (($#ARGV != 4) and ($#ARGV != 5)) {
+    print "usage: ./map.pl leftsource <rightsource> readlength rsttable leftmap rightmap\n";
     exit;
 }
 
-my ($leftsource, $rightsource, $readlength, $leftmapfn, $rightmapfn) = (undef, undef, undef, undef, undef);
-if ($#ARGV == 4) {
+my ($leftsource, $rightsource, $readlength, $rsttablefn, $leftmapfn, $rightmapfn) = (undef, undef, undef, undef, undef);
+if ($#ARGV == 5) {
     ($leftsource, $rightsource, $readlength, $leftmapfn, $rightmapfn) = @ARGV;
 } else {
     ($leftsource, $readlength, $leftmapfn, $rightmapfn) = @ARGV;
@@ -72,6 +73,8 @@ die "Error: leftsource and rightsource files have different number of reads"
     unless int(`cat $rightsource | wc -l`) / 4 == $N;
 print $leftsource, "\n", $rightsource, "\n";
 print $N, " reads found\n";
+
+readrsttable($rsttablefn);
 
 my $stepl = 10;
 my $minlength = 20;

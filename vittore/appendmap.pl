@@ -2,6 +2,8 @@
 use strict;
 use warnings;
 
+require 'findinrst.pl';
+
 sub appendmap {
     if ($#_ != 5 ) {
 	print "appendmap needs 6 arguments: mapfile, samfile, length, step, readlength, minq\n";
@@ -31,7 +33,8 @@ sub appendmap {
 		# if it's last iteration, just print it.
 		if ($lengthvar == $rlength) {
 		    print $mapfile $index, "\t", $NAME, "\t", $FLAG, "\t", $CHR
-			, "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\n";
+			, "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index]
+			, -1, "\n";
 		} else {
 		    my $newlength = $lengthvar + $step;
 		    if ($newlength > $rlength) {
@@ -42,7 +45,8 @@ sub appendmap {
             } else {
 # Mapped
 		print $mapfile $index, "\t", $NAME, "\t", $FLAG, "\t", $CHR
-		    , "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\n";
+		    , "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index]
+		    , findinrst($POS, $CHR), "\n";
 		${ $length }[$index] = 0;
 	    }
 	    $index++;
