@@ -1,6 +1,0 @@
-./find.pl ccs.genome.singleline.txt AGATCT > RSTsites.BglII.dat
-./find.pl ccs.genome.singleline.txt CCATGG > RSTsites.NcoI.dat
-for i in RSTsites.* ; do
-  awk 'BEGIN {old = 0; OFS="\t"} {print NR - 1, old, $1; old= $1} END {print NR, old, 4042928}' $i > $i.table
-done
-
