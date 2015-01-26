@@ -2,11 +2,11 @@
 use strict;
 use warnings;
 
-require 'mktemp_linux.pl';
-require 'readtrimmer.pl';
-require 'bowtie2align.pl';
-require 'appendmap.pl';
-require 'findinrst.pl';
+require 'share/mktemp_linux.pl';
+require 'share/readtrimmer.pl';
+require 'share/bowtie2align.pl';
+require 'share/appendmap.pl';
+require 'share/findinrst.pl';
     
 # This the mapping pipeline (Mirny)
 #

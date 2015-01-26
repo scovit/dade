@@ -6,6 +6,7 @@ use warnings;
 
 my %rsttable;
 my $rstloaded = 0;
+my %chrlength;
 sub readrsttable {
     open RSTTABLE, "<", $_[0] or die $!;
     while (<RSTTABLE>) {
@@ -14,6 +15,7 @@ sub readrsttable {
 
 	$rsttable{$chrnam} = [] unless exists $rsttable{$chrnam};
 	push $rsttable{$chrnam}, [ $st, $en ];
+	$chrlength{$chrnam} = $en;
     }
     close RSTTABLE;
     $rstloaded = 1;
@@ -24,6 +26,9 @@ sub findinrst {
 
     my $ele = $_[0]; my $chrnam = $_[1];
     print $ele, " " , $chrnam, "\n";
+    die "Chromosome not found, ", $chrnam unless exists $chrlength{$chrnam};
+    die "Read out of chromosome, ", $chrnam, " ", $ele 
+	if $ele > $chrlength{$chrnam};
 
     my $aref = $rsttable{$chrnam};
 

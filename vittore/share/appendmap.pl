@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-require 'findinrst.pl';
+require 'share/findinrst.pl';
 
 sub appendmap {
     if ($#_ != 5 ) {
