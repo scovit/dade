@@ -33,8 +33,8 @@ sub appendmap {
 		# if it's last iteration, just print it.
 		if ($lengthvar == $rlength) {
 		    print $mapfile $index, "\t", $NAME, "\t", $FLAG, "\t", $CHR
-			, "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index]
-			, -1, "\n";
+			, "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\t"
+			, findinrst($POS, $CHR), "\n";
 		} else {
 		    my $newlength = $lengthvar + $step;
 		    if ($newlength > $rlength) {
@@ -45,7 +45,7 @@ sub appendmap {
             } else {
 # Mapped
 		print $mapfile $index, "\t", $NAME, "\t", $FLAG, "\t", $CHR
-		    , "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index]
+		    , "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\t"
 		    , findinrst($POS, $CHR), "\n";
 		${ $length }[$index] = 0;
 	    }

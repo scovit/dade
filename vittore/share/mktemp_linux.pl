@@ -8,7 +8,9 @@ sub mktemp_linux
     return $fname;
 }
 
+my $ORIG_PID = $$;
 END {
+    return unless $$ == $ORIG_PID;
     print "Cleaning up!\n";
     foreach (@deletion_list) {
 	unlink($_) or warn "Could not unlink $origreads: $!";

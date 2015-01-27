@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 sub trimthread {
-    open OUTPUT, "| gzip > $_[0]";
+    open OUTPUT, "> $_[0]";
     open FILE, $_[1];
     my $length = $_[2];
 

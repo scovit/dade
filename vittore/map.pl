@@ -88,8 +88,8 @@ my @leftl = ($minlength) x $N;
 my @rightl = ($minlength) x $N;
 
 # open temporary files
-my $leftreads=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.fastq.gz");
-my $rightreads=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.fastq.gz");
+my $leftreads=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.fastq");
+my $rightreads=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.fastq");
 
 # open output files
 my $gzipit =  ($leftmapfn =~ /\.gz$/) ? "| gzip" : "";
