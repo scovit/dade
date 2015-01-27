@@ -37,7 +37,7 @@ sub findinrst {
         my $index = int(($top + $bottom)/2);
 
         if ($ele >= ${$aref}[$index][0] && $ele < ${$aref}[$index][1]) {
-            print $index, " " , ${$aref}[$index][0], " ", ${$aref}[$index][1], "\n";
+#            print $index, " " , ${$aref}[$index][0], " ", ${$aref}[$index][1], "\n";
             return $index;
             last;
         } elsif ($ele < ${$aref}[$index][0]) {

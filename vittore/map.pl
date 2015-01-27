@@ -2,6 +2,8 @@
 use strict;
 use warnings;
 
+use Scalar::Util qw(looks_like_number);
+
 require 'share/mktemp_linux.pl';
 require 'share/readtrimmer.pl';
 require 'share/bowtie2align.pl';
@@ -11,17 +13,20 @@ require 'share/findinrst.pl';
 # This the mapping pipeline (Mirny)
 #
     
-if (($#ARGV != 4) and ($#ARGV != 5)) {
-    print "usage: ./map.pl leftsource <rightsource> readlength rsttable leftmap rightmap\n";
+if (($#ARGV != 5) and ($#ARGV != 6)) {
+    print "usage: ./map.pl leftsource <rightsource> readlength refgenome rsttable leftmap rightmap\n";
     exit;
 }
 
-my ($leftsource, $rightsource, $readlength, $rsttablefn, $leftmapfn, $rightmapfn) = (undef, undef, undef, undef, undef, undef);
-if ($#ARGV == 5) {
-    ($leftsource, $rightsource, $readlength, $rsttablefn, $leftmapfn, $rightmapfn) = @ARGV;
+my ($leftsource, $rightsource, $readlength, $refgenome, $rsttablefn, $leftmapfn, $rightmapfn) = 
+    (undef, undef, undef, undef, undef, undef, undef);
+if ($#ARGV == 6) {
+    ($leftsource, $rightsource, $readlength, $refgenome, $rsttablefn, $leftmapfn, $rightmapfn) = @ARGV;
 } else {
-    ($leftsource, $readlength, $rsttablefn, $leftmapfn, $rightmapfn) = @ARGV;
+    ($leftsource, $readlength, $refgenome, $rsttablefn, $leftmapfn, $rightmapfn) = @ARGV;
 }
+
+die "Readlength should be a number" if (!looks_like_number($readlength));
 
 my $TMPDIR="/data/temporary";
 
@@ -100,11 +105,11 @@ print "Starting trimmering\n";
 while (1) {
     my $trimmed = readtrimmer($leftsource, $rightsource, \@leftl, \@rightl, $leftreads, $rightreads);
 
-    my $alignedfile = bowtie2align($leftreads);
+    my $alignedfile = bowtie2align($leftreads, $refgenome);
     appendmap($leftmap, $alignedfile, \@leftl, $stepl, $readlength, $minqual);
     close ($alignedfile);
 
-    $alignedfile = bowtie2align($rightreads);
+    $alignedfile = bowtie2align($rightreads, $refgenome);
     appendmap($rightmap, $alignedfile, \@rightl, $stepl, $readlength, $minqual);
     close ($alignedfile);
 
