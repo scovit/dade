@@ -2,6 +2,32 @@
 use strict;
 use warnings;
 
+sub trimthread {
+    open OUTPUT, "| gzip > $_[0]";
+    open FILE, $_[1];
+    my $length = $_[2];
+
+    my $maxtrim = 0;
+    while (<FILE>) {
+	my $i = ($. - 1) / 4;
+
+	my $trim=${ $length }[$i];
+	$maxtrim = $trim if $trim > $maxtrim;
+
+	if ($. % 2 == 0) {
+	    if ($trim != 0) {
+		print OUTPUT substr($_,0,$trim), "\n";
+	    }
+	} else {
+	    if ($trim != 0) {
+		print OUTPUT;
+	    }
+	}
+    }
+    close FILE;
+    close OUTPUT;
+};
+
 sub readtrimmer
 {
     if ($#_ != 5 ) {
@@ -10,49 +36,22 @@ sub readtrimmer
     };
         
     my ($fastqleft, $fastqright, $leftlength, $rightlength, $outputleftfilename, $outputrightfilename)=@_;
-    
-    open OUTPUT1, "| gzip > $outputleftfilename";
-    open OUTPUT2, "| gzip > $outputrightfilename";
-    
-    my $maxtrim = 0;
-    my $lefttrim;
-    my $righttrim;
-    
-    open LFILE, $fastqleft;
-    open RFILE, $fastqright;
-    while (<LFILE>) {
-	my $A = $_;
-	my $B = <RFILE>;
-	my $i = ($. - 1) / 4;
 
-	$lefttrim=${ $leftlength }[$i];
-	$righttrim=${ $rightlength }[$i];
-	$maxtrim = $lefttrim if $lefttrim > $maxtrim;
-        $maxtrim = $righttrim if $righttrim > $maxtrim;
-
-	if ($. % 2 == 0) {
-	    if ($lefttrim != 0) {
-		print OUTPUT1 substr($A,0,$lefttrim), "\n";
-	    }
-	    if ($righttrim != 0) {
-		print OUTPUT2 substr($B,0,$righttrim), "\n";
-	    }
-	} else {
-	    if ($lefttrim != 0) {
-		print OUTPUT1;
-	    }
-	    if ($righttrim != 0) {
-		print OUTPUT2;
-	    }
-	}
+    my $pid = fork;
+    if (!defined $pid) {
+	die "Cannot fork: $!";
     }
-    close LFILE;
-    close RFILE;
+    elsif ($pid == 0) {
+	# client process
+	trimthread($outputrightfilename, $fastqright, $rightlength);
+	exit 0;
+    }
+    else {
+	# parent process
+	trimthread($outputleftfilename, $fastqleft, $leftlength);
+	waitpid $pid, 0;
+    }
 
-    close OUTPUT1;
-    close OUTPUT2;
-
-    return $maxtrim;
 }
 
 1;
