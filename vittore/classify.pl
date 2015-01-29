@@ -16,12 +16,12 @@ my $minqual = 30;
 
 # open input files
 if ($leftmapfn =~ /\.gz$/) {
-    open(LEFTMAP, "zcat $leftmapfn |");
+    open(LEFTMAP, "gzip -d -c $leftmapfn |");
 } else {
     open(LEFTMAP, "< $leftmapfn");
 }
 if ($rightmapfn =~ /\.gz$/) {
-    open(RIGHTMAP, "zcat $rightmapfn |");
+    open(RIGHTMAP, "gzip -d -c $rightmapfn |");
 } else {
     open(RIGHTMAP, "< $rightmapfn");
 }
@@ -39,7 +39,8 @@ use constant {
     FL_RIGHT_ALIGN => 1,
     FL_LEFT_INVERSE => 8,
     FL_RIGHT_INVERSE => 4,
-    FL_INTRA_CHR => 16,
+    FL_INVERSE => 16,
+    FL_INTRA_CHR => 32,
 };
 
 
@@ -64,6 +65,7 @@ for (my $num = 0; ; $num++) {
 	if ($leftpos >= $rightpos) {
 	    $distance = $leftpos - $rightpos;
 	    $rstdist = $leftrst - $rightrst;
+	    $flag |= FL_INVERSE;
 	} else {
 	    $distance = $rightpos - $leftpos;
 	    $rstdist = $rightrst - $leftrst;
