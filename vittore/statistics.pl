@@ -2,6 +2,8 @@
 use strict;
 use warnings;
 
+require 'share/flagdefinitions.pl';
+
 # Takes as input the contact list with flags; outputs statistics
 #
 
@@ -10,43 +12,6 @@ if ($#ARGV != 0) {
 	exit;
 };
 my ($classificationfn) = @ARGV;
-
-use constant {
-    FL_LEFT_ALIGN => 2,
-    FL_RIGHT_ALIGN => 1,
-    FL_LEFT_INVERSE => 8,
-    FL_RIGHT_INVERSE => 4,
-    FL_INVERSE => 16,
-    FL_INTRA_CHR => 32,
-};
-
-sub isnot { return ($_[0] & ($_[0] ^ $_[1])); }
-sub is { return ($_[0] & $_[1]); }
- 
-sub aligned {
-    return (is(FL_LEFT_ALIGN, $_[0]) && is(FL_RIGHT_ALIGN, $_[0]));
-}
-
-sub bothunaligned {
-    return (isnot(FL_LEFT_ALIGN, $_[0]) && isnot(FL_RIGHT_ALIGN, $_[0]));
-}
-
-sub single {
-    return ((is(FL_LEFT_ALIGN, $_[0]) || is(FL_RIGHT_ALIGN, $_[0]))
-	    && !aligned($_[0]));
-}
-
-sub dangling {
-    return 
-	(
-	 (
-	  (isnot(FL_INVERSE, $_[0]) && is(FL_RIGHT_INVERSE, $_[0]) 
-	   && isnot(FL_LEFT_INVERSE, $_[0])) ||
-	  (is(FL_INVERSE, $_[0]) && is(FL_LEFT_INVERSE, $_[0])
-	   && isnot(FL_RIGHT_INVERSE, $_[0]))
-	 ) && aligned($_[0])
-	);
-}
 
 # open input files
 if ($classificationfn =~ /\.gz$/) {
@@ -67,7 +32,7 @@ while (<CLASS>) {
 }
 
 print "$tot Total, ", "$sin Single, "
-    , "$un Both unaligned, ", "$al Aligned, of which ", "$dan Dangling", "\n";
+    , "$un Both unaligned, ", "$al Aligned, of which ", "$dan PlusMinus", "\n";
 
 die "Something weird is happening, counts are not coherent, will die in shame\n"
     if ($tot - $sin - $un - $al);
