@@ -4,12 +4,14 @@ use warnings;
 
 use Scalar::Util qw(looks_like_number);
 
-require 'share/mktemp_linux.pl';
-require 'share/readtrimmer.pl';
-require 'share/bowtie2align.pl';
-require 'share/appendmap.pl';
-require 'share/findinrst.pl';
-    
+BEGIN {
+    require 'share/mktemp_linux.pl';
+    require 'share/readtrimmer.pl';
+    require 'share/bowtie2align.pl';
+    require 'share/appendmap.pl';
+    require 'share/findinrst.pl';
+}
+
 # This the mapping pipeline (Mirny), it takes as input the sequencing data and output the alignemnt data
 #
     

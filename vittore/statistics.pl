@@ -2,7 +2,9 @@
 use strict;
 use warnings;
 
-require 'share/flagdefinitions.pl';
+BEGIN {
+    require 'share/flagdefinitions.pl';
+}
 
 # Takes as input the contact list with flags; outputs statistics
 #
