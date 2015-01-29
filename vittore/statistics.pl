@@ -30,6 +30,7 @@ while (<CLASS>) {
     $un++ if bothunaligned($flag);
     $dan++ if dangling($flag);
 }
+close(CLASS);
 
 print "$tot Total, ", "$sin Single, "
     , "$un Both unaligned, ", "$al Aligned, of which ", "$dan PlusMinus", "\n";
