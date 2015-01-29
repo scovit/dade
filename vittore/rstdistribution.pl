@@ -53,10 +53,10 @@ open(MP, "> $minplusfn");
 open(MM, "> $minminfn");
 
 for (my $i = 0; $i < $nrst; $i++) {
-    print PP $nrst, "\t", $pp[$i], "\n";
-    print PM $nrst, "\t", $pm[$i], "\n";
-    print MP $nrst, "\t", $mp[$i], "\n";
-    print MM $nrst, "\t", $mm[$i], "\n";
+    print PP $i, "\t", $pp[$i], "\n";
+    print PM $i, "\t", $pm[$i], "\n";
+    print MP $i, "\t", $mp[$i], "\n";
+    print MM $i, "\t", $mm[$i], "\n";
 } 
 
 close(PP);
