@@ -32,7 +32,7 @@ while (<CLASS>) {
     $sin++ if single($flag);
     $un++ if bothunaligned($flag);
     $schr++ if is(FL_INTRA_CHR, $flag);
-    $danhling++ if plusmin($flag);
+    $dangling++ if plusmin($flag);
 }
 close(CLASS);
 
