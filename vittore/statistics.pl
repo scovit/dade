@@ -65,7 +65,11 @@ while (<CLASS>) {
     $un++ if bothunaligned($flag);
     $dan++ if dangling($flag);
 }
+
 print "$tot Total, ", "$sin Single, "
     , "$un Both unaligned, ", "$al Aligned, of which ", "$dan Dangling", "\n";
+
+die "Something weird is happening, counts are not coherent, will die in shame\n"
+    if ($tot - $sin - $un - $al);
 
 0;
