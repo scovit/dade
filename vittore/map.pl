@@ -10,7 +10,7 @@ require 'share/bowtie2align.pl';
 require 'share/appendmap.pl';
 require 'share/findinrst.pl';
     
-# This the mapping pipeline (Mirny)
+# This the mapping pipeline (Mirny), it takes as input the sequencing data and output the alignemnt data
 #
     
 if (($#ARGV != 5) and ($#ARGV != 6)) {
@@ -102,7 +102,7 @@ open( my $rightmap, "| sort -g --temporary-directory=$TMPDIR $gzipit > $rightmap
 #################################################
 
 print "Starting trimmering\n";
-for (my $trimmered = $minlength; $trimmered <= $readlength;
+for (my $trimmered = $minlength; $trimmered < $readlength + $stepl;
      $trimmered += $stepl) {
     readtrimmer($leftsource, $rightsource, \@leftl, \@rightl,
 		$leftreads, $rightreads);
