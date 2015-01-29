@@ -20,7 +20,7 @@ if ($classificationfn =~ /\.gz$/) {
     open(CLASS, "< $classificationfn");
 }
 
-my $tot = 0; my $al = 0; my $sin = 0; my $un = 0; my $dan = 0;
+my $tot = 0; my $al = 0; my $sin = 0; my $un = 0; my $schr = 0; my $dan = 0;
 while (<CLASS>) {
     my @campi = split("\t");
     my $flag = $campi[1];
@@ -28,12 +28,14 @@ while (<CLASS>) {
     $al++ if aligned($flag);
     $sin++ if single($flag);
     $un++ if bothunaligned($flag);
+    $schr++ if is(FL_INTRA_CHR, $flag);
     $dan++ if dangling($flag);
 }
 close(CLASS);
 
 print "$tot Total, ", "$sin Single, "
-    , "$un Both unaligned, ", "$al Aligned, of which ", "$dan PlusMinus", "\n";
+    , "$un Both unaligned, ", "$al Aligned\n"
+    , "of which $schr SameChromosome, of which ", "$dan PlusMinus", "\n";
 
 die "Something weird is happening, counts are not coherent, will die in shame\n"
     if ($tot - $sin - $un - $al);

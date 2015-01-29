@@ -26,14 +26,13 @@ sub single {
 
 sub plusmin {
     return 
-	(
+	(aligned($_[0]) && is(FL_INTRA_CHR, $_[0]) &&
 	 (
 	  (isnot(FL_INVERSE, $_[0]) && is(FL_RIGHT_INVERSE, $_[0]) 
 	   && isnot(FL_LEFT_INVERSE, $_[0])) ||
 	  (is(FL_INVERSE, $_[0]) && is(FL_LEFT_INVERSE, $_[0])
 	   && isnot(FL_RIGHT_INVERSE, $_[0]))
-	 ) && aligned($_[0])
-	);
+	 ));
 }
 
 sub dangling {

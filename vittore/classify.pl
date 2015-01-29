@@ -2,6 +2,8 @@
 use strict;
 use warnings;
 
+require 'share/flagdefinitions.pl';
+
 # Takes as input the mapped reads and output the contact list with flags
 #
 
@@ -33,16 +35,6 @@ if  ($classificationfn =~ /\.gz$/) {
 }
 
 print "Starting classification\n";
-
-use constant {
-    FL_LEFT_ALIGN => 2,
-    FL_RIGHT_ALIGN => 1,
-    FL_LEFT_INVERSE => 8,
-    FL_RIGHT_INVERSE => 4,
-    FL_INVERSE => 16,
-    FL_INTRA_CHR => 32,
-};
-
 
 for (my $num = 0; ; $num++) {
 
