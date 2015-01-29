@@ -24,14 +24,47 @@ sub single {
 	    && !aligned($_[0]));
 }
 
+sub plusplus {
+    return 
+	(aligned($_[0]) && is(FL_INTRA_CHR, $_[0]) &&
+	 (
+	  (isnot(FL_INVERSE, $_[0]) &&
+	   isnot(FL_LEFT_INVERSE, $_[0]) && isnot(FL_RIGHT_INVERSE, $_[0])) ||
+	  (is(FL_INVERSE, $_[0]) &&
+	   is(FL_LEFT_INVERSE, $_[0]) && is(FL_RIGHT_INVERSE, $_[0]))
+	 ));
+}
+
 sub plusmin {
     return 
 	(aligned($_[0]) && is(FL_INTRA_CHR, $_[0]) &&
 	 (
-	  (isnot(FL_INVERSE, $_[0]) && is(FL_RIGHT_INVERSE, $_[0]) 
-	   && isnot(FL_LEFT_INVERSE, $_[0])) ||
-	  (is(FL_INVERSE, $_[0]) && is(FL_LEFT_INVERSE, $_[0])
-	   && isnot(FL_RIGHT_INVERSE, $_[0]))
+	  (isnot(FL_INVERSE, $_[0]) &&
+	   isnot(FL_LEFT_INVERSE, $_[0]) && is(FL_RIGHT_INVERSE, $_[0])) ||
+	  (is(FL_INVERSE, $_[0]) &&
+	   is(FL_LEFT_INVERSE, $_[0]) && isnot(FL_RIGHT_INVERSE, $_[0]))
+	 ));
+}
+
+sub minplus {
+    return 
+	(aligned($_[0]) && is(FL_INTRA_CHR, $_[0]) &&
+	 (
+	  (isnot(FL_INVERSE, $_[0]) &&
+	   is(FL_LEFT_INVERSE, $_[0]) && isnot(FL_RIGHT_INVERSE, $_[0])) ||
+	  (is(FL_INVERSE, $_[0]) &&
+	   isnot(FL_LEFT_INVERSE, $_[0]) && is(FL_RIGHT_INVERSE, $_[0]))
+	 ));
+}
+
+sub minmin {
+    return 
+	(aligned($_[0]) && is(FL_INTRA_CHR, $_[0]) &&
+	 (
+	  (isnot(FL_INVERSE, $_[0]) &&
+	   is(FL_LEFT_INVERSE, $_[0]) && is(FL_RIGHT_INVERSE, $_[0])) ||
+	  (is(FL_INVERSE, $_[0]) &&
+	   isnot(FL_LEFT_INVERSE, $_[0]) && isnot(FL_RIGHT_INVERSE, $_[0]))
 	 ));
 }
 
