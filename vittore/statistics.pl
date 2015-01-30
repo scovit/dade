@@ -36,9 +36,13 @@ while (<CLASS>) {
 }
 close(CLASS);
 
-print "$tot Total, ", "$sin Single, "
-    , "$un Both unaligned, ", "$al Aligned\n"
-    , "of which $schr SameChromosome, of which ", "$dangling PlusMinus", "\n";
+print sprintf("%d Total, ", $tot)
+    , sprintf("%d (%.1f%) Single, ", $sin, $sin/$tot*100)
+    , sprintf("%d (%.1f%) Both unaligned, ", $un, $un/$tot*100)
+    , sprintf("%d (%.1f%) Aligned\n", $al, $al/$tot*100)
+    , sprintf("of which %d (%.1f%) SameChromosome, ", $schr, $schr/$al*100)
+    , sprintf("of which %d (%.1f%) PlusMinus\n", $dangling,
+	      $dangling/$schr*100);
 
 die "Something weird is happening, counts are not coherent, will die in shame\n"
     if ($tot - $sin - $un - $al);
