@@ -31,7 +31,7 @@ while (<CLASS>) {
     $al++ if aligned($flag);
     $sin++ if single($flag);
     $un++ if bothunaligned($flag);
-    $schr++ if is(FL_INTRA_CHR, $flag);
+    $schr++ if (is(FL_INTRA_CHR, $flag) && aligned($flag));
     $dangling++ if plusmin($flag);
 }
 close(CLASS);
