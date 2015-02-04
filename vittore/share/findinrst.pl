@@ -14,7 +14,7 @@ sub readrsttable {
 	my ($chrnum, $chrnam, $num, $st, $en) = split(" ", $_);
 
 	$rsttable{$chrnam} = [] unless exists $rsttable{$chrnam};
-	push $rsttable{$chrnam}, [ $st, $en ];
+	push @{ $rsttable{$chrnam} }, [ $st, $en ];
 	$chrlength{$chrnam} = $en;
     }
     close RSTTABLE;
