@@ -10,7 +10,9 @@ BEGIN {
 #
 
 if ($#ARGV != 0) {
-	print "usage: ./statistics.pl classification\n";
+	print "usage: ./statistics.pl classification\n"
+	    , "  output will be printed to console, use the \">\" operator\n"
+	    , "  for redirecting to a file\n" ;
 	exit;
 };
 my ($classificationfn) = @ARGV;
