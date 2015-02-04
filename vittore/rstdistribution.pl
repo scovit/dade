@@ -12,13 +12,14 @@ BEGIN {
 # aligned reads
 #
 
-if ($#ARGV != 5) {
-	print "usage: ./rstdistribution.pl classification nrst"
-	    , " plusplus plusmin minplus minmin\n";
+if ($#ARGV != 1) {
+	print "usage: ./rstdistribution.pl classification nrst\n"
+	    , "  output will be named after classification with additional\n"
+	    , "  extension .TYPE.hist\n"
+	    , "  where TYPE will be pp (+/+), pm (+/-), mp (-/+), mm (-/-)\n";
 	exit;
 };
-my ($classificationfn, $nrst,
-    $plusplusfn, $plusminfn, $minplusfn, $minminfn) = @ARGV;
+my ($classificationfn, $nrst) = @ARGV;
 die "Nrst should be a number" if (!looks_like_number($nrst));
 
 # open input files
@@ -47,10 +48,10 @@ while (<CLASS>) {
 close(CLASS);
 
 # open output files
-open(PP, "> $plusplusfn");
-open(PM, "> $plusminfn");
-open(MP, "> $minplusfn");
-open(MM, "> $minminfn");
+open(PP, "> $classificationfn.pp.hist");
+open(PM, "> $classificationfn.pm.hist");
+open(MP, "> $classificationfn.mp.hist");
+open(MM, "> $classificationfn.mm.hist");
 
 for (my $i = 0; $i < $nrst; $i++) {
     print PP $i, "\t", $pp[$i], "\n";
