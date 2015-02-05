@@ -49,8 +49,9 @@ $rstcode =~ s{V}{[GACVMSR]}g;
 $rstcode =~ s{D}{[GATDKWR]}g;
 $rstcode =~ s{N}{[GATCNDVBHKMSWYR]}g;
 
+my $index = 0;
 # Let's search the string in every file
-for my $i (0 .. $numfiles - 1) {
+for (my $i = 0; $i <  $numfiles; $i++) {
     open FILE, "< $chrfiles[$i]" or die "could not open $chrfiles[$i]: $!"; 
     my @content = <FILE>;
     close FILE;
@@ -86,8 +87,12 @@ for my $i (0 .. $numfiles - 1) {
 
     my $old = 0;
     for my $j (0 .. $#matches) {
-	print join(" ", $i, $chrnames[$i], $j, $old, $matches[$j], "\n");
+	print join("\t", $index, $i, $chrnames[$i],
+		   $j, $old, $matches[$j], "\n");
 	$old = $matches[$j];
+	$index++;
     }
-    print join(" ", $i, $chrnames[$i], $#matches+1, $old, $chrlength, "\n");
+    print join("\t", $index, $i, $chrnames[$i],
+	       $#matches+1, $old, $chrlength, "\n");
+    $index++;
 }

@@ -4,22 +4,33 @@ use warnings;
 
 # Read in the restriction table
 
-my %rsttable;
+our %rsttable;
+our @rstarray;
 my $rstloaded = 0;
-my %chrlength;
+our %chrlength;
+our %chrrstnum;
+our $totalrst = 0;
 sub readrsttable {
-    open RSTTABLE, "<", $_[0] or die $!;
+    my $fname = $_[0];
+    open RSTTABLE, "<", $fname or die $!;
     while (<RSTTABLE>) {
 	chomp;
-	my ($chrnum, $chrnam, $num, $st, $en) = split(" ", $_);
+	my ($index, $chrnum, $chrnam, $num, $st, $en) = split("\t", $_);
 
 	$rsttable{$chrnam} = [] unless exists $rsttable{$chrnam};
-	push @{ $rsttable{$chrnam} }, [ $st, $en ];
+
+	die "File format error in $fname" if ($index != $rstarray);
+
+	my $rstinfo = [ $st, $en, $index ];
+	push @{ $rsttable{$chrnam} }, $rstinfo;
+	push @rstarray, $rstinfo;
 	$chrlength{$chrnam} = $en;
+	$chrrstnum{$chrnam} = scalar(@{ $rsttable{$chrnam} });
+	$totalrst++;
     }
     close RSTTABLE;
     $rstloaded = 1;
-}
+} 
 
 sub findinrst {
     die "Should call readrsttable first" if $rstloaded == 0;
