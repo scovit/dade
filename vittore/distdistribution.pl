@@ -4,6 +4,7 @@ use warnings;
 
 use Scalar::Util qw(looks_like_number);
 use POSIX qw/floor/;
+use List::Util qw(sum);
 
 BEGIN {
     require 'share/flagdefinitions.pl';
@@ -14,11 +15,12 @@ BEGIN {
 #
 
 if ($#ARGV != 3) {
-	print "usage: ./rstdistribution.pl classification nrstfilter"
+	print "usage: ./rstdistribution.pl classification nrstfilter "
 	    , "stepsize (log|lin)\n"
 	    , "  output will be named after classification with additional\n"
-	    , "  extension .CHR.hist\n"
-	    , "  where CHR is the name of chromosome as per alignment\n";
+	    , "  extension .CHR.EXT\n"
+	    , "  where CHR is the name of chromosome as per alignment\n"
+	    , "  and EXT can be either linhist or loghist\n";
 	exit;
 };
 my ($classificationfn, $nrst,
@@ -28,7 +30,7 @@ die "Nrstfilter should be a number" if (!looks_like_number($nrst));
 die "Stepsize should be a number" if (!looks_like_number($steps));
 die "Stepsize is expected to be greater than 1" if ($steps <= 1);
 die "(log|lin) should be either \"log\", or \"lin\""
-    if (($type ne "log") || ($type ne "lin"));
+    if (($type ne "log") && ($type ne "lin"));
 my $islog = ($type eq "log" ? 1 : 0);
 
 # open input files
@@ -42,10 +44,14 @@ if ($classificationfn =~ /\.gz$/) {
 my $histosize = 10000;
 my %histograms;
 my @binscale = (0) x $histosize;
+my @binsize = (0) x $histosize;
 for (my $i = 0; $i < $histosize; $i++) {
     $binscale[$i] = ($islog
 		      ? $steps ** ((2.0 * $i + 1.0) / 2)
 		      : $steps *  ((2.0 * $i + 1.0) / 2));
+    $binsize[$i] = ($islog
+		    ? ($steps ** ($i + 1)) - ($steps ** $i)
+		    : $steps );
 }
 
 while (<CLASS>) {
@@ -66,10 +72,10 @@ while (<CLASS>) {
 
     die "Histograms are defined too small: found bin = ", $bin, "\n"
 	, 'while $histosize = ', $histosize, " , please increase me!\n"
-	, 'Dieing now.\n'
+	, '(or increase stepsize), BTW I\'m dieing now.\n'
         unless $bin < $histosize;
 
-    # Global renormalization (don't consider locus variability)
+    # Global normalization (don't consider locus variability)
     if  ($rstdst > $nrst) {
 	${ $histograms{$chr} }[$bin]++ if ($rstdst > $nrst);
     } elsif (minmin($flag) || plusplus($flag)) {
@@ -78,6 +84,7 @@ while (<CLASS>) {
 }
 close(CLASS);
 
+my $ext = ($islog ? "loghist" : "linhist");
 # save output files
 for my $chr ( keys %histograms ) {
     my $chrext = $chr;
@@ -91,10 +98,16 @@ for my $chr ( keys %histograms ) {
     }
     $maxind++ if $maxind != 0;
 
-    # output the histogram
-    open(HISTFILE, "> $classificationfn.$chrext.hist");
+    # normalize and make density
+    my $summa = sum(@{ $histograms{$chr} });
     for (my $i = 0; $i < $maxind; $i++) {
-	print HISTFILE $binscale[$i], "\t", ${ $histograms{$chr} }[$i];
+	${ $histograms{$chr} }[$i] = ${ $histograms{$chr} }[$i] / $summa / $binsize[$i];
+    }
+
+    # output the histogram
+    open(HISTFILE, "> $classificationfn.$chrext.$ext");
+    for (my $i = 0; $i < $maxind; $i++) {
+	print HISTFILE $binscale[$i], "\t", ${ $histograms{$chr} }[$i], "\n";
     }
     close(HISTFILE);
 }
