@@ -101,13 +101,31 @@ for my $chr ( keys %histograms ) {
     # normalize and make density
     my $summa = sum(@{ $histograms{$chr} });
     for (my $i = 0; $i < $maxind; $i++) {
-	${ $histograms{$chr} }[$i] = ${ $histograms{$chr} }[$i] / $summa / $binsize[$i];
+	${ $histograms{$chr} }[$i] = (${ $histograms{$chr} }[$i]
+				      / $summa / $binsize[$i]);
     }
 
+    # calculate log derivative
+    my @logderivative =  (0) x $histosize;
+    if ($islog) {
+	my $old = ${ $histograms{$chr} }[0];
+	for (my $i = 1; $i < $maxind; $i++) {
+	    if ($old == 0) {
+		$old = ${ $histograms{$chr} }[$i];
+		next;
+	    }
+	    $logderivative[$i] = (log(${ $histograms{$chr} }[$i] / $old) 
+				  / log($binsize[$i - 1]));
+	    $old = ${ $histograms{$chr} }[$i];
+	}
+    }
+    
     # output the histogram
     open(HISTFILE, "> $classificationfn.$chrext.$ext");
     for (my $i = 0; $i < $maxind; $i++) {
-	print HISTFILE $binscale[$i], "\t", ${ $histograms{$chr} }[$i], "\n";
+	print HISTFILE $binscale[$i], "\t", ${ $histograms{$chr} }[$i];
+	print HISTFILE "\t", $logderivative[$i] if $islog;
+	print HISTFILE "\n";
     }
     close(HISTFILE);
 }
