@@ -8,25 +8,21 @@ our %rsttable;
 our @rstarray;
 my $rstloaded = 0;
 our %chrlength;
-our %chrrstnum;
-our $totalrst = 0;
 sub readrsttable {
     my $fname = $_[0];
     open RSTTABLE, "<", $fname or die $!;
     while (<RSTTABLE>) {
 	chomp;
-	my ($index, $chrnum, $chrnam, $num, $st, $en) = split("\t", $_);
+	my ($index, $chrnam, $num, $st, $en) = split("\t", $_);
 
 	$rsttable{$chrnam} = [] unless exists $rsttable{$chrnam};
 
 	die "File format error in $fname" if ($index != $rstarray);
 
-	my $rstinfo = [ $st, $en, $index ];
+	my $rstinfo = [ $index, $chrnam, $num, $st, $en ];
 	push @{ $rsttable{$chrnam} }, $rstinfo;
 	push @rstarray, $rstinfo;
 	$chrlength{$chrnam} = $en;
-	$chrrstnum{$chrnam} = scalar(@{ $rsttable{$chrnam} });
-	$totalrst++;
     }
     close RSTTABLE;
     $rstloaded = 1;
