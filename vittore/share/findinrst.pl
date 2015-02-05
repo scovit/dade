@@ -17,7 +17,7 @@ sub readrsttable {
 
 	$rsttable{$chrnam} = [] unless exists $rsttable{$chrnam};
 
-	die "File format error in $fname" if ($index != $rstarray);
+	die "File format error in $fname" if ($index != scalar(@rstarray));
 
 	my $rstinfo = [ $index, $chrnam, $num, $st, $en ];
 	push @{ $rsttable{$chrnam} }, $rstinfo;
@@ -26,7 +26,34 @@ sub readrsttable {
     }
     close RSTTABLE;
     $rstloaded = 1;
-} 
+}
+
+our %centrotable;
+my $centroloaded = 0;
+sub readcentrotable {
+    die "Should call readrsttable first" if $rstloaded == 0;
+
+    my $fname = $_[0];
+    open CENTROTABLE, "<", $fname or die $!;
+    while (<CENTROTABLE>) {
+	chomp;
+	my ($chrnam, $st, $en) = split("\t", $_);
+	my $centroinfo = [ $chrnam, $st, $en ];
+	die "Fileformat error in $fname" unless exists $rsttable{$chrnam};
+	die "Wierd centromere" 
+	    if ($st >= $en);
+	die "Centromere out of boundaries" 
+	    if (($st >= $chrlength{$chrnam}) || ($en >= $chrlength{$chrnam}));
+	$centrotable{$chrnam} = $centroinfo;
+    }
+    close CENTROTABLE;
+
+    for my $i (keys %rsttable) {
+	warn "No centromere in chromosome $i"
+	    unless exists $centrotable{$i};
+    }
+    $centroloaded = 1;
+}
 
 sub findinrst {
     die "Should call readrsttable first" if $rstloaded == 0;
