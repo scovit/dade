@@ -87,6 +87,7 @@ for (my $i = 0; $i <  $numfiles; $i++) {
 
     my $old = 0;
     for my $j (0 .. $#matches) {
+	next if ($old == $matches[$j]);
 	print join("\t", $index, $chrnames[$i],
 		   $j, $old, $matches[$j], "\n");
 	$old = $matches[$j];
