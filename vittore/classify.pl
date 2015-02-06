@@ -3,7 +3,8 @@ use strict;
 use warnings;
 
 BEGIN {
-    require 'share/flagdefinitions.pl';
+    use FindBin '$Bin';
+    require "$Bin/share/flagdefinitions.pl";
 }
 
 # Takes as input the mapped reads and output the contact list with flags

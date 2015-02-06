@@ -2,6 +2,10 @@
 use strict;
 use warnings;
 
+BEGIN {
+    use FindBin '$Bin';
+}
+
 if ($#ARGV < 1) {
     print "usage: ./findrst.pl name chr1.fa <chr2.fa ... chrN.fa>\n"
 	, "  output will be printed on console\n"
@@ -21,7 +25,7 @@ for (@chrnames) {
 }
 
 # Get restriction factor code
-open REBASE, "< share/bionetc.txt";
+open REBASE, "< $Bin/share/bionetc.txt";
 my @rebaselines = grep(/^$name /, <REBASE>);
 die "Restriction factor search error, not found" if ($#rebaselines != 0);
 my $rebaseline = shift @rebaselines;
