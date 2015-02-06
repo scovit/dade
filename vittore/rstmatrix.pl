@@ -16,8 +16,7 @@ BEGIN {
 if ($#ARGV != 2) {
 	print "usage: ./rstmatrix.pl classification rsttable nrstfilter"
 	    , "\n"
-	    , "  output will be named after classification with additional\n"
-	    , "  extensions .matrix\n";
+	    , "  output will be printed to stdout.\n";
 	exit;
 };
 my ($classificationfn, $rsttablefn, $nrst) = @ARGV;
@@ -59,4 +58,31 @@ while (<CLASS>) {
 close(CLASS);
 close(ALIGN);
 
-die;
+link($alignedfn, $alignedfn . ".dbg");
+
+open(ALIGN, "< $alignedfn");
+
+our @rstarray;
+my @intervector = (0) x scalar(@rstarray);
+my $oldleftgrst = 0; my $oldrightgrst = 0;
+while (<ALIGN>) {
+    my @campi = split("\t");
+    my ($leftgrst, $rightgrst) = @campi;
+
+    die "Wierd things happening"
+	if (($leftgrst < $oldleftgrst) || ($rightgrst < $oldrightgrst));
+
+    if ($leftgrst != $oldleftgrst) {
+	print join("\t", @intervector), "\n";
+	for (@intervector) { $_ = 0; };
+	for ( $oldleftgrst++; $oldleftgrst < $leftgrst; $oldleftgrst++) {
+	    print join("\t", @intervector), "\n";
+	}
+    }
+
+    $intervector[$rightgrst]++;
+    $oldleftgrst = $leftgrst; $oldrightgrst = $rightgrst;
+}
+close(ALIGN);
+
+0;
