@@ -16,7 +16,8 @@ BEGIN {
 if ($#ARGV != 2) {
 	print "usage: ./rstmatrix.pl classification rsttable nrstfilter"
 	    , "\n"
-	    , "  output will be printed to stdout.\n";
+	    , "  output will be named after classification with additional\n"
+	    , "  extensions .matrix.gz , open with \"gzip -d -c\"\n";
 	exit;
 };
 my ($classificationfn, $rsttablefn, $nrst) = @ARGV;
@@ -61,6 +62,7 @@ close(ALIGN);
 link($alignedfn, $alignedfn . ".dbg");
 
 open(ALIGN, "< $alignedfn");
+open(OUTPUT, "| gzip -c > $classificationfn.matrix.gz");
 
 our @rstarray;
 my @intervector = (0) x scalar(@rstarray);
@@ -73,10 +75,10 @@ while (<ALIGN>) {
 	if (($leftgrst < $oldleftgrst) || ($rightgrst < $oldrightgrst));
 
     if ($leftgrst != $oldleftgrst) {
-	print join("\t", @intervector), "\n";
+	print OUTPUT join("\t", @intervector), "\n";
 	for (@intervector) { $_ = 0; };
 	for ( $oldleftgrst++; $oldleftgrst < $leftgrst; $oldleftgrst++) {
-	    print join("\t", @intervector), "\n";
+	    print OUTPUT join("\t", @intervector), "\n";
 	}
     }
 
@@ -84,5 +86,6 @@ while (<ALIGN>) {
     $oldleftgrst = $leftgrst; $oldrightgrst = $rightgrst;
 }
 close(ALIGN);
+close(OUTPUT);
 
 0;
