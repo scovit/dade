@@ -18,7 +18,9 @@ sub readrsttable {
 	$rsttable{$chrnam} = [] unless exists $rsttable{$chrnam};
 
 	die "File format error in $fname" if ($index != scalar(@rstarray));
-
+	die "Wierd rsttable" 
+	    if ($st >= $en); 
+	
 	my $rstinfo = [ $index, $chrnam, $num, $st, $en ];
 	push @{ $rsttable{$chrnam} }, $rstinfo;
 	push @rstarray, $rstinfo;
@@ -72,12 +74,12 @@ sub findinrst {
     while (1) {
         my $index = int(($top + $bottom)/2);
 
-        if ($ele >= ${$aref}[$index][0] && $ele < ${$aref}[$index][1]) {
+        if ($ele >= ${$aref}[$index][3] && $ele < ${$aref}[$index][4]) {
             return $index;
             last;
-        } elsif ($ele < ${$aref}[$index][0]) {
+        } elsif ($ele < ${$aref}[$index][3]) {
             $top = $index - 1;
-        } elsif ($ele >= ${$aref}[$index][1]) {
+        } elsif ($ele >= ${$aref}[$index][4]) {
             $bottom = $index + 1;
         }
     }
