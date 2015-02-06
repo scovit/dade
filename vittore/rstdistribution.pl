@@ -5,7 +5,8 @@ use warnings;
 use Scalar::Util qw(looks_like_number);
 
 BEGIN {
-    require 'share/flagdefinitions.pl';
+    use FindBin '$Bin';
+    require "$Bin/share/flagdefinitions.pl";
 }
 
 # Takes as input the contact list with flags; outputs histograms of

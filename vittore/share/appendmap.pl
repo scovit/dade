@@ -3,7 +3,8 @@ use strict;
 use warnings;
 
 BEGIN {
-    require 'share/findinrst.pl';
+    use FindBin '$Bin';
+    require "$Bin/share/findinrst.pl";
 }
 
 sub appendmap {
