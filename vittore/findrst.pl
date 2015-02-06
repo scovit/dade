@@ -86,10 +86,14 @@ for (my $i = 0; $i <  $numfiles; $i++) {
     }
 
     my $old = 0;
+    my $discarded = 0;
     for my $j (0 .. $#matches) {
-	next if ($old == $matches[$j]);
+	if ($old == $matches[$j]) {
+	    $discarded++;
+	    next;
+	}
 	print join("\t", $index, $chrnames[$i],
-		   $j, $old, $matches[$j], "\n");
+		   $j-$discarded, $old, $matches[$j], "\n");
 	$old = $matches[$j];
 	$index++;
     }
