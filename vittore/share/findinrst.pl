@@ -15,7 +15,10 @@ sub readrsttable {
 	chomp;
 	my ($index, $chrnam, $num, $st, $en) = split("\t", $_);
 
-	$rsttable{$chrnam} = [] unless exists $rsttable{$chrnam};
+	unless (exists $rsttable{$chrnam}) {
+	    $rsttable{$chrnam} = [];
+	    die "Index errors" if (($st != 0) || ($num != 0)); 
+	}
 
 	die "File format error in $fname" if ($index != scalar(@rstarray));
 	die "Wierd rsttable" 
