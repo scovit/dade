@@ -84,7 +84,7 @@ print $N, " reads found\n";
 
 readrsttable($rsttablefn);
 
-my $stepl = 10;
+my $stepl = 5;
 my $minlength = 20;
 my $minqual = 30;
 my @leftl = ($minlength) x $N;

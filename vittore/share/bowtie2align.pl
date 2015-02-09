@@ -12,13 +12,13 @@ sub bowtie2align
     }
 
 #    my $settings="--score-min L,0.6,0.2 --very-sensitive -p 8";
-    my $settings="--very-sensitive -p 8";
+    my $settings="--very-sensitive -p 14";
 
     my $comando="$progfile $settings $notchangeset -x $_[1] -U $_[0]";
 
     local *FH;
     print $comando, "\n";
-    open (FH, $comando . " | cut -f 1,2,3,4,5 |") or return undef;
+    open (FH, $comando . " |") or return undef;
     return *FH;
 }
 

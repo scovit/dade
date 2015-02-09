@@ -21,15 +21,13 @@ sub appendmap {
         if ($_ =~ /^@/)
         {
             print $_,"\n";
-        }
-        else
-        {
+        } else {
             my ($NAME, $FLAG, $CHR, $POS, $MAPQ) = split("\t");
             while (${ $length }[$index] == 0) {
                 $index++;
             }
 
-            if ($MAPQ < $minq) {
+            if (($MAPQ < $minq) && !($_ =~ /XS:i:[0-9-]/)) {
 # Unmapped
 		my $lengthvar = ${ $length }[$index];
 
