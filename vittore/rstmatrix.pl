@@ -8,6 +8,7 @@ BEGIN {
     use FindBin '$Bin';
     require "$Bin/share/findinrst.pl";
     require "$Bin/share/flagdefinitions.pl";
+    require "$Bin/share/mktemp_linux.pl";
 }
 
 # Takes as input the contact list with flags; outputs interaction matrices
@@ -36,7 +37,7 @@ if ($classificationfn =~ /\.gz$/) {
 readrsttable($rsttablefn);
 
 my $alignedfn=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.couples");
-open(ALIGN, "| sort --parallel=8 --temporary-directory=$TMPDIR ",
+open(ALIGN, "| sort --parallel=8 --temporary-directory=$TMPDIR " .
      "-g -k 1 -k 2 > $alignedfn");
 
 # Filter and sort
@@ -46,10 +47,9 @@ while (<CLASS>) {
     my (undef, $flag, $leftchr, undef, $leftrst, $rightchr,
 	undef, $rightrst, undef, undef) = @campi;
 
-    my $leftgrst = ${ $rsttable{$leftchr} }[$leftrst][0];
-    my $rightgrst = ${ $rsttable{$leftchr} }[$rightrst][0];
-    
-    if (isaligned($flag)) {
+    if (aligned($flag)) {
+	my $leftgrst = ${ $rsttable{$leftchr} }[$leftrst][0];
+	my $rightgrst = ${ $rsttable{$rightchr} }[$rightrst][0];
 	if ($leftgrst < $rightgrst) {
 	    print ALIGN $leftgrst, "\t", $rightgrst, "\t", $flag, "\n";
 	} else {
