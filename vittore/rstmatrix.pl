@@ -36,8 +36,8 @@ if ($classificationfn =~ /\.gz$/) {
 readrsttable($rsttablefn);
 
 my $alignedfn=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.couples");
-open(ALIGN, "| sort -t \"\\t\" --parallel=8 -k 1,2 -g " 
-     . "--temporary-directory=$TMPDIR > $alignedfn");
+open(ALIGN, "| sort --parallel=8 --temporary-directory=$TMPDIR ",
+     "-g -k 1 -k 2 > $alignedfn");
 
 # Filter and sort
 our %rsttable;
@@ -51,9 +51,9 @@ while (<CLASS>) {
     
     if (isaligned($flag)) {
 	if ($leftgrst < $rightgrst) {
-	    print ALIGN $leftgrst, "\t", $rightgrst, "\n";
+	    print ALIGN $leftgrst, "\t", $rightgrst, "\t", $flag, "\n";
 	} else {
-	    print ALIGN $rightgrst, "\t", $leftgrst, "\n";
+	    print ALIGN $rightgrst, "\t", $leftgrst, "\t", $flag, "\n";
 	}
     }
 }
@@ -71,7 +71,7 @@ my @intervector = (0) x scalar(@rstarray);
 my $oldleftgrst = 0; my $oldrightgrst = 0;
 while (<ALIGN>) {
     my @campi = split("\t");
-    my ($leftgrst, $rightgrst) = @campi;
+    my ($leftgrst, $rightgrst, $flag) = @campi;
 
     die "Wierd things happening"
 	if (($leftgrst < $oldleftgrst) || ($rightgrst < $oldrightgrst));
@@ -91,7 +91,12 @@ while (<ALIGN>) {
 	}
     }
 
-    $intervector[$rightgrst]++;
+    if (($rightgrst - $leftgrst < $nrst)
+	&& is(FL_INTRA_CHR, $flag)) {
+	$intervector[$rightgrst] += 2 if (plusplus($flag) || minmin($flag));
+    } else {
+	$intervector[$rightgrst]++;
+    }
     $oldleftgrst = $leftgrst; $oldrightgrst = $rightgrst;
 }
 
