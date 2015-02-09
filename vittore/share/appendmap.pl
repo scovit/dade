@@ -27,7 +27,7 @@ sub appendmap {
                 $index++;
             }
 
-            if (($MAPQ < $minq) && !($_ =~ /XS:i:[0-9-]/)) {
+            if (($MAPQ < $minq) || ($_ =~ /XS:i:[0-9-]/)) {
 # Unmapped
 		my $lengthvar = ${ $length }[$index];
 
