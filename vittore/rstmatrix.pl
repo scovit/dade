@@ -10,15 +10,15 @@ BEGIN {
     require "$Bin/share/flagdefinitions.pl";
 }
 
-# Takes as input the contact list with flags; outputs histograms of
-# aligned reads in function of distance
+# Takes as input the contact list with flags; outputs interaction matrices
 #
 
 if ($#ARGV != 2) {
 	print "usage: ./rstmatrix.pl classification rsttable nrstfilter"
 	    , "\n"
 	    , "  output will be named after classification with additional\n"
-	    , "  extensions .matrix.gz , open with \"gzip -d -c\"\n";
+	    , "  extensions .matrix.gz and .sparse.gz\n"
+	    , "  (open with \"gzip -d -c\")\n";
 	exit;
 };
 my ($classificationfn, $rsttablefn, $nrst) = @ARGV;
@@ -64,6 +64,7 @@ link($alignedfn, $alignedfn . ".dbg");
 
 open(ALIGN, "< $alignedfn");
 open(OUTPUT, "| gzip -c > $classificationfn.matrix.gz");
+open(SPARSE, "| gzip -c > $classificationfn.sparse.gz");
 
 our @rstarray;
 my @intervector = (0) x scalar(@rstarray);
@@ -75,9 +76,16 @@ while (<ALIGN>) {
     die "Wierd things happening"
 	if (($leftgrst < $oldleftgrst) || ($rightgrst < $oldrightgrst));
 
+    if (($leftgrst != $oldleftgrst) || ($rightgrst != $oldrightgrst)) {
+	if ($intervector[$oldrightgrst] != 0) {
+	    print SPARSE $oldleftgrst, "\t", $oldrightgrst, "\t"
+		, $intervector[$oldrightgrst], "\n";
+	}
+    }
+
     if ($leftgrst != $oldleftgrst) {
 	print OUTPUT join("\t", @intervector), "\n";
-	for (@intervector) { $_ = 0; };
+	for my $i (0 .. $#intervector) { $intervector[$i] = 0; };
 	for ( $oldleftgrst++; $oldleftgrst < $leftgrst; $oldleftgrst++) {
 	    print OUTPUT join("\t", @intervector), "\n";
 	}
@@ -86,7 +94,19 @@ while (<ALIGN>) {
     $intervector[$rightgrst]++;
     $oldleftgrst = $leftgrst; $oldrightgrst = $rightgrst;
 }
+
+if ($intervector[$oldrightgrst] != 0) {
+    print SPARSE $oldleftgrst, "\t", $oldrightgrst, "\t"
+	, $intervector[$oldrightgrst], "\n";
+}
+print OUTPUT join("\t", @intervector), "\n";
+for my $i (0 .. $#intervector) { $intervector[$i] = 0; };
+for ( $oldleftgrst++; $oldleftgrst <= $#intervector; $oldleftgrst++) {
+    print OUTPUT join("\t", @intervector), "\n";
+}
+
 close(ALIGN);
+close(SPARSE);
 close(OUTPUT);
 
 0;
