@@ -74,7 +74,9 @@ while (<ALIGN>) {
     my ($leftgrst, $rightgrst, $flag) = @campi;
 
     die "Wierd things happening"
-	if (($leftgrst < $oldleftgrst) || ($rightgrst < $oldrightgrst));
+	if (($leftgrst < $oldleftgrst) || 
+	    (($rightgrst < $oldrightgrst) &&
+	     ($leftgrst == $oldleftgrst)));
 
     if (($leftgrst != $oldleftgrst) || ($rightgrst != $oldrightgrst)) {
 	if ($intervector[$oldrightgrst] != 0) {
