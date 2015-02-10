@@ -60,10 +60,13 @@ print scalar(@rstarray), "\n";
 # rebin
 open(OUTPUT, "> $matrixfn.rebinned");
 # Line index
-for my $bina (@bins) {
+for my $binan (0 .. $#bins) {
     my @inputs;
     my @output = (0) x scalar(@bins);
-    for my $i (0 .. $#$bina) {
+
+    print "Elaborating bin $binan out of $#bins\r" unless ($binan % 100);
+    
+    for my $i (0 .. $#${$bins[$binan]}) {
 	my $line = <MATRIX>;
 	chomp($line);
 	push @inputs, [ split("\t", $line) ];
