@@ -60,13 +60,14 @@ print  $#bins, "\n";
 # rebin
 open(OUTPUT, "> $matrixfn.rebinned");
 # Line index
+$|++;
 for my $binan (0 .. $#bins) {
     my @inputs;
     my @output = (0) x scalar(@bins);
 
-    print "Elaborating bin $binan out of $#bins\r" unless ($binan % 100);
+    print "Elaborating bin $binan out of $#bins\r";
     
-    for my $i (0 .. $#${$bins[$binan]}) {
+    for my $i (0 .. $#{$bins[$binan]}) {
 	my $line = <MATRIX>;
 	chomp($line);
 	push @inputs, [ split("\t", $line) ];
