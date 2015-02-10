@@ -48,6 +48,8 @@ while (<CLASS>) {
 	undef, $rightrst, undef, undef) = @campi;
 
     if (aligned($flag)) {
+	die "Chromosome not found" unless
+	    ((exists $rsttable{$leftchr}) && (exists $rsttable{$rightchr})); 
 	my $leftgrst = ${ $rsttable{$leftchr} }[$leftrst][0];
 	my $rightgrst = ${ $rsttable{$rightchr} }[$rightrst][0];
 	if ($leftgrst < $rightgrst) {
