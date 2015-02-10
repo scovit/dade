@@ -46,7 +46,7 @@ for my $rst (@rstarray) {
 	push @bins, [];
 	$currchr = $chrnam;
 	$binstart = 0;
-	print $currchr, "\t", $#bins;
+	print $currchr, "\t", $#bins, "\t";
     }
     while ($binstart + $binsize < $rstpos) {
 	push @bins, [];
