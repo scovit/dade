@@ -42,11 +42,11 @@ for my $rst (@rstarray) {
     
     # new bin?
     if ($chrnam ne $currchr) {
-	print $index - 1, "\n" if $index > 0;
+	print $#bins, "\n" if $index > 0;
 	push @bins, [];
 	$currchr = $chrnam;
 	$binstart = 0;
-	print $currchr, "\t", $index;
+	print $currchr, "\t", $#bins;
     }
     while ($binstart + $binsize < $rstpos) {
 	push @bins, [];
@@ -55,7 +55,7 @@ for my $rst (@rstarray) {
 
     push @{ $bins[$#bins] }, $index; 
 }
-print scalar(@rstarray), "\n";
+print  $#bins, "\n";
 
 # rebin
 open(OUTPUT, "> $matrixfn.rebinned");
