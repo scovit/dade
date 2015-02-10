@@ -43,7 +43,8 @@ sub readcentrotable {
     while (<CENTROTABLE>) {
 	chomp;
 	my ($chrnam, $st, $en) = split("\t", $_);
-	my $centroinfo = [ $chrnam, $st, $en ];
+	my $centroinfo = [ $chrnam, $st, $en
+			   , findinrst($st), findinrst($en) ];
 	die "Fileformat error in $fname" unless exists $rsttable{$chrnam};
 	die "Wierd centromere" 
 	    if ($st >= $en);
