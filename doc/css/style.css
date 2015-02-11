@@ -1,0 +1,19 @@
+body {
+    font-family: sans-serif;
+}
+nav ol li a {
+    color: #000000;
+    text-decoration: none;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+nav ol li a:hover {
+    background: #deff90;
+    color: #000000;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    margin: 0;
+    text-decoration: none;
+}
