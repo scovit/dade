@@ -44,7 +44,8 @@ sub readcentrotable {
 	chomp;
 	my ($chrnam, $st, $en) = split("\t", $_);
 	my $centroinfo = [ $chrnam, $st, $en
-			   , findinrst($st), findinrst($en) ];
+			   , findinrst($st, $chrnam)
+			   , findinrst($en, $chrnam) ];
 	die "Fileformat error in $fname" unless exists $rsttable{$chrnam};
 	die "Wierd centromere" 
 	    if ($st >= $en);
@@ -55,7 +56,7 @@ sub readcentrotable {
     close CENTROTABLE;
 
     for my $i (keys %rsttable) {
-	warn "No centromere in chromosome $i"
+	warn "Warning: no centromere in chromosome $i"
 	    unless exists $centrotable{$i};
     }
     $centroloaded = 1;

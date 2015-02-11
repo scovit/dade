@@ -65,7 +65,7 @@ for my $binan (0 .. $#bins) {
     my @inputs;
     my @output = (0) x scalar(@bins);
 
-    print "Elaborating bin $binan out of $#bins\r";
+    print "\33[2K\rElaborating bin $binan out of $#bins";
     
     for my $i (0 .. $#{$bins[$binan]}) {
 	my $line = <MATRIX>;
@@ -86,5 +86,7 @@ for my $binan (0 .. $#bins) {
 }
 close(OUTPUT);
 close(MATRIX);
+
+print "\33[2K\rEND\n";
 
 0;
