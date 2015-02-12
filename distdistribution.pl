@@ -97,7 +97,7 @@ for my $int (@intervals) {
     my @normal = (0) x $histosize;
     my @histogram = (0) x $histosize;
     my @variance = (0) x $histosize;
-    for ( ; $.-1 <= $en; $line = <MATRIX> or last) {
+    for ( ; $.-1 <= $en; defined($line = <MATRIX>) or last) {
 	my $i = $. - 1;
 	die "Wierd things happening" if (($i < $st) || ($i > $en));
 	my $ipos = floor((${$rstarray[$i]}[3] + ${$rstarray[$i]}[4])/2);
@@ -148,12 +148,18 @@ for my $int (@intervals) {
 
     # get maximun nonzero value
     my $maxind = $histosize;
-    for (; $maxind >= 0; $maxind--) {
+    for ( ; $maxind >= 0; $maxind--) {
         last if $histogram[$maxind];
     }
     $maxind++ if $maxind != 0;
 
+    # get last zero before maxind 
+    my $minind;
     for (my $k = 0; $k < $maxind; $k++) {
+        $minind = $k unless $histogram[$minind];
+    }
+
+    for (my $k = $minind; $k < $maxind; $k++) {
 	$histogram[$k] /= $normal[$k];
 	$variance[$k] = $variance[$k] / $normal[$k]
 	    - $histogram[$k] * $histogram[$k];
@@ -163,33 +169,26 @@ for my $int (@intervals) {
     my @logderivative = (0) x $histosize;
     my @logdervariance = (0) x $histosize;
     if ($islog) {
-	my $old = $histogram[0];
-	my $oldvar = $variance[0];
-	for (my $k = 1; $k < $maxind; $k++) {
-	    if ($old == 0) {
-		$old = $histogram[$k];
-		$oldvar = $variance[$k];
-		next;
-	    }
-	    if ($histogram[$k] != 0) {
-		$logderivative[$k] = (log($histogram[$k] / $old) 
-				      / log($binsize[$k - 1]));
-                # Crappy method that ignore non-linearities
-		$logdervariance[$k] = 1.0 / (log($binsize[$k - 1])**2) * (
-		    1.0/($histogram[$k]**2) * $variance[$k] +
-		    1.0/($old**2)) * $oldvar;
-	    }
-	    $old = $histogram[$k];
+	my $old = $histogram[$minind];
+	my $oldvar = $variance[$minind];
+	for (my $k = $minind + 1; $k < $maxind; $k++) {
+	    $logderivative[$k] = (log($histogram[$k]-log($old)) 
+				  / log($binsize[$k - 1]));
+	    # Crappy method that ignore non-linearities
+	    $logdervariance[$k] = 1.0 / (log($binsize[$k - 1])**2) * (
+		1.0/($histogram[$k]**2) * $variance[$k] +
+		1.0/($old**2)) * $oldvar;
+	    $old = $histogram[$k]; $oldvar = $variance[$k];
 	}
     }
     
     # output the histogram
     open(HISTFILE, "> $matrixfn.$chrext.$ext");
-    for (my $k = 0; $k < $maxind; $k++) {
+    for (my $k = $minind; $k < $maxind; $k++) {
 	print HISTFILE $binscale[$k], "\t", $histogram[$k]
-	    , "\t", sqrt($variance[$k])/($normal[$k] - 1);
+	    , "\t", sqrt($variance[$k]/$normal[$k]);
 	print HISTFILE "\t", $logderivative[$k]
-	    , "\t", sqrt($logdervariance[$k])/($normal[$k] - 1) if $islog;
+	    , "\t", sqrt($logdervariance[$k]/$normal[$k]) if $islog;
 	print HISTFILE "\n";
     }
     close(HISTFILE);
