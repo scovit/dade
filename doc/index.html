@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="author" content="Vittore F. Scolari,
 				 (C) Institut Pasteur 2015">
-    <title>RR3DDP - the RR3DDP RSFG 3C DATA Devouring Protocol</title>
+    <title>Dade - our 3C DATA Devouring Protocol</title>
     <link rel="stylesheet" href="css/style.css">
     <link type="image/vnd.microsoft.icon"
 	  href="images/favicon.ico"
@@ -13,9 +13,11 @@
 
   <body>
     <header>
-      <h1>RR3DDP - the RR3DDP RSFG 3C DATA devouring protocol</h1>
+      <h1>Dade - our 3C DATA Devouring Protocol</h1>
+      <!-- <h2 id="rickroll"><a href="http://rickrolled.fr/">NEW: Click here -->
+      <!-- 	  for French version!!!</a></h2> -->
       <nav>
-	<h2>Index</h2>
+	<h2>Contents</h2>
         <ol>  
           <li><a href="#introduction">Introduction</a></li>  
           <li><a href="#tools">Tools</a></li>
@@ -24,17 +26,352 @@
       </nav>
     </header>
     
-    <a name="Introduction"><h2>Introduction</h2></a>
+    <a name="introduction"></a>
+    <h2>1. Introduction</h2>
     <p>
-      RR3DDP, to be pronounced in english as "ahr ahr three dee dee
-      pee", is our toolbox to naturally evolve the 3C data coming out
-      of the sequencing machine into quantitative observations.
+      Dade, to be pronounced as the English noun Dave with a "d"
+      instead of a "v", is our toolbox to evolve "in silico" the 3C
+      data from the 
+      sequencing machine into quantitative observations. The software
+      collect tools aimed at:
+      <ul>
+	<li>Identify restriction fragments on a reference genome</li>
+	<li>Align 3C data on a reference genome</li>
+	<li>Classify aligned read pairs</li>
+	<li>Make statistics on the classification</li>
+	<li>Make contact matrix</li>
+	<li>Plot the contact distributions</li>
+      </ul>
+      If you need to do all the above things, than using this software
+      will allow you to get your step done quick to better spend your
+      time on further original analysis and data interpretation.
     </p>
     <h3>Installation</h3>
-    <a name="Tools"><h2>Tools</h2></a>
-    <a name="Tutorial"><h2>Tutorial</h2></a>
+    <p>
+      The software can be downloaded <a href="">here</a>, in order to
+      extract the tar-ball type the following code in a Linux terminal:
+      <code>tar -xzf tarball.tar.gz</code>
+      the code depends on an installation
+      of the <a href="https://www.perl.org/">Perl</a> programming
+      language, which come standard in all Unix-like operating
+      systems, and on an installation of
+      <a href="http://bowtie-bio.sourceforge.net/bowtie2/">bowtie2</a>
+      read alignment tool.
+    </p>
+    <a name="tools"><h2>2. Tools</h2></a>
+    <p>
+      This section describes all the tools comprised in Dade. The
+      following tools are currently completed:
+      <ol>  
+        <li><a href="#findrst">findrst.pl</a></li>  
+        <li><a href="#map">map.pl</a></li>  
+        <li><a href="#classify">classify.pl</a></li>
+        <li><a href="#statistics">statistics.pl</a></li>	
+	<li><a href="#rstdistribution">rstdistrubution.pl</a></li>
+	<li><a href="#rstmatrix">rstmatrix.pl</a></li>
+	<li><a href="#rebin">rebin.pl</a></li>
+	<li><a href="#distdistribution">distdistribution.pl</a></li>
+      </ol>  
+    </p>
+    <a name="findrst"><h3>2.1 findrst.pl</h3></a>
+    <p>Identify restriction fragments on a reference genome
+      <code>
+	./findrst.pl name chr1.fa chr2.fa ... chrN.fa
+      </code>
+      Parameters: "name" is the name of the restriction enzyme used in
+      the experiment, "chr1.fa chr2.fa ... chrN.fa" is a
+      space-separated list of fasta sequences, one for each chromosome
+      of the reference genome.
+    </p><p>
+      The list of restriction enzymes has been taken from
+      the <a href="http://rebase.neb.com/rebase/rebase.html">REBASE</a>
+      database, their name and their target sequences are stored
+      in the file
+      <code>
+	share/bionetc.txt
+      </code>
+      The output consists in a table which describes each restriction
+      fragment of every chromosome printed to standard output. The
+      columns of the table correspond to the following information:
+      <ul>
+	<li>INDEX: unique global numeric value</li>
+	<li>CHR: chromosome identifier string</li>
+        <li>INDEXCHR: fragment numeric value local to
+          chromosome</li>
+	<li>START: Starting base-pair in the chromosome</li>
+	<li>END: Ending base-pair in the chromosome</li> 
+      </ul>
+      In
+      order to save the output to a file, use
+      the <a href="https://www.gnu.org/software/bash/manual/html_node/Redirections.html">
+	&gt; operator</a>. Example:
+      <code>
+	./findrst.pl DpnII chr1.fa chr2.fa chr3.fa > DpnIIrst.txt
+      </code>
+      will output the table in the file DpnIIrst.txt .
+    </p>
+    <a name="map"><h3>2.2 map.pl</h3></a>
+    <p>
+      Map the sequencing data to the reference genome. The algorithm
+      is a reimplementation of Leonid Mirny lab HICLib tool as
+      described in their
+      <a href="http://www.nature.com/nmeth/journal/v9/n10/full/nmeth.2148.html">
+      Nature Methods paper</a>.
+      <code>
+	./map.pl leftsource rightsource readlength refgenome
+	rsttable leftmap rightmap
+      </code>
+      Parameters: "leftsource" is the fastq file of the left read-end,
+      "rightsource" is the fastq file of the right read-end, data may
+      be gzipped, "readlenght" is the size in base pairs of the
+      single sequenced read ends, "refgenome" is the reference genome
+      basename of the
+      <a href="http://bowtie-bio.sourceforge.net/bowtie2/">bowtie2</a>
+      alignment index, the basename is the name of any of the index
+      files up to but not including the final
+      .1.bt2/.rev.1.bt2/etc. Index should have been built with the
+      bowtie2-build tool from bowtie2 software collection. "rsttable" is the
+      restriction fragment table built with ./findrst.pl tool,
+      "leftmap" and "rightmap" are the output files with alignment
+      informations respectively for the "leftsource" and "rightsource"
+      input.
+    </p>
+    <p>
+      The output files contain a table, which columns correspond to
+      the following information:
+      <ul>
+	<li>INDEX: unique global numeric value</li>
+	<li>NAME: name of aligned pair</li>
+	<li>FLAG: <a href="http://samtools.github.io/hts-specs/SAMv1.pdf">
+	    SAM format</a> bitwise flag</li>
+	<li>CHR: chromosome identifier string (* if not aligned)</li>
+	<li>POS: 1-based leftmost mapping position (* if not aligned)</li> 
+	<li>MAPQ: Mapping quality</li>
+	<li>RSIZE: Size of the trimmed read at alignment (iterative
+	  mapping)</li>
+	<li>RST: restriction fragment, identified its by INDEXCHR index in
+	  "rsttable" input file (* if not aligned)</li>
+      </ul>
+      Append the extension .gz to output files in order to get them
+      compressed.
+    </p>
+    <p>
+      Attention: read mapping should be done only after demultiplexing
+      and PCR duplicates removal.
+    </p>
+    <a name="classify"><h3>2.3 classify.pl</h3></a>
+    <p>
+      Classifies the read couples, categorize them by type. Useful for
+      filtering the reads.
+      <code>
+      ./classify.pl leftmap rightmap classification
+      </code>
+      Parameters: the script takes the two file mapped
+      by <a href="#map">./map.pl</a> as
+      an input ("leftmap" and "rightmap") and outputs in the
+      "classification" file (output is gzipped if .gz extension). The
+      classification file contains for each line important
+      informations about read couples, the output table is conceived for
+      easy-parsing. The column in the output table correspond to the
+      following informations:
+      <ul>
+	<li>INDEX: unique global numeric value
+	(<a href="#map">./map.pl</a> output)</li> 
+	<li>FLAG: Classification format bitwise flag (important: this is not
+	  the SAM format flag, see details in the next section)</li>
+	<li>LEFTCHR: Left read chromosome identifier
+	(<a href="#map">./map.pl</a> output)</li> 
+	<li>LEFTPOS: Left read alignment position
+	(<a href="#map">./map.pl</a> output)</li> 
+	<li>LEFTRST: Left read restriction fragment
+	(<a href="#map">./map.pl</a> output)</li> 
+	<li>RIGHTCHR: Right read chromosome identifier
+	(<a href="#map">./map.pl</a> output)</li> 
+	<li>RIGHTPOS: Right read alignment position
+	(<a href="#map">./map.pl</a> output)</li> 
+	<li>RIGHTRST: Right read restriction fragment
+	  (<a href="#map">./map.pl</a> 
+	  output)</li>
+	<li>DIST: Chromosomal distance between left and right alignment</li>
+	<li>RSTDIST: Chromosomal distance in restriction fragments</li>
+      </ul>
+      The FLAG field is a
+      <a href="http://en.wikipedia.org/wiki/Bit_field">bitwise
+      flag</a>, which means that it is a number that is ought to be
+      interpreted in binary representation as a collection of boolean
+      conditions. The boolean conditions and their reference bit are
+      the following:
+      <ul>
+	<li>FL_LEFT_ALIGN => 2 : Left read aligned</li>
+	<li>FL_RIGHT_ALIGN => 1 : Right read aligned</li>
+	<li>FL_LEFT_INVERSE => 8 : Left read aligned being reverse
+	  complemented</li>
+	<li>FL_RIGHT_INVERSE => 4 : Right read aligned being reverse
+	  complemented</li>
+	<li>FL_INVERSE => 16 : Left read aligned at a position on
+	  the chromosome greater than the mapping position of the
+	  right read</li>
+	<li>FL_INTRA_CHR => 32 : Left and right read aligned on the
+	  same chromosome</li>
+      </ul>
+      The Perl code for interpreting and reading this flag
+      is written in the file
+      <code>
+	share/flagdefinitions.pl
+      </code>
+      and can be trivially translated to other languages (e.g. R or
+      Phyton); the code should be self-explanatory. Example: using
+      share/flagdefinitions.pl is possible to 
+      check is a couple of aligned read ends are belonging to the same
+      chromosome using the condition:
+      <code>
+	(aligned($FLAG) && is(FL_INTRA_CHR, $FLAG))
+      </code>
+    </p>
+    <a name="statistics"><h3>2.4 statistics.pl</h3></a>
+    <p>
+      Make trivial statistics about 3C mapped reads
+      <code>
+	./statistics.pl classification
+      </code>
+      Parameters: the script takes the output file of
+      <a href="#classify">./classify.pl</a> as input and output
+      statistics to stdout.
+      The program outputs number of reads and percentage of reads for
+      the following classes:
+      <ul>
+	<li>Totality of reads ends in dataset</li>
+	<li>Reads ends that aligned only on 1 side</li>
+	<li>Reads ends that did not align on any side</li>
+	<li>Reads ends that aligned on both sides</li>
+	<li>Reads ends that aligned on the same chromosome</li>
+	<li>Reads ends that aligned on the same chromosome and that
+	  are of the +/- kind</li>
+      </ul>
+      Please contact <a href="email:vittore.scolari@pasteur.fr">me</a>
+      if you think other observable classes are of interest
+      and should be included in the official version of the script.
+    </p><p>
+      Reads of "+/-" kindness are for a big percentage self ligated
+      contiguous fragments. Knowing this number is important since in
+      order to make the interaction matrix reads of this kind at small
+      distances (in restriction fragments) will be filtered. The
+      meaning of the sign "+" and "-"
+      and the reason of the filtering is explained in
+      <a href="http://www.biomedcentral.com/1471-2164/13/436">this
+      important paper</a>
+      (<a href="http://www.biomedcentral.com/content/supplementary/1471-2164-13-436-s1.pdf">Figure S1</a>), the graph for evaluating the
+      filtering distance can be produced with the
+      <a href="#rstdistribution">./rstdistribution.pl</a> script.
+    </p><p>
+      In order to save the output to a file, use
+      the <a href="https://www.gnu.org/software/bash/manual/html_node/Redirections.html">
+      &gt; operator</a>.
+    </p>
+    <a name="rstdistribution"><h3>2.5 rstdistribution.pl</h3></a>
+    <p>
+      Plot the number of aligned reads in function of the genomic
+      distance for the different classes ("+/+", "+/-", "-/+" and
+      "-/-") of reads ends:
+      <code>
+	usage: ./rstdistribution.pl classification nrst
+      </code>
+      Parameters: the script takes the output file of
+      <a href="#classify">./classify.pl</a> as the input parameter
+      "classification", while "nrst" is the maximum distance between
+      restriction fragment to consider in the graph; in doubt, put 
+      "nrst" equal to 20. The output is 4
+      histograms in 4 different files: the name of the files will be
+      the same as "classification" with an additional extension in the
+      format of .TYPE.hist
+      where TYPE can be pp ("+/+"), pm ("+/-"), mp ("-/+"), mm ("-/-")
+      in function of the read ends classification. Histograms can be
+      plotted with any plotting software (e.g.
+      <a href="http://plasma-gate.weizmann.ac.il/Grace/">Grace</a>,
+      <a href="http://www.r-project.org/">R</a> or
+      <a href="http://rickrolled.fr/">Excel</a>). In order to properly
+      proceed with the analysis, plot those plot together, and extract
+      the filtering restriction distance as the distance at which the
+      four curves converge together.
+    </p>
+    <a name="rstmatrix"><h3>2.6 rstmatrix.pl</h3></a>
+    <p>
+      Generate the matrix of interaction between the restriction
+      fragments
+      <code>
+	./rstmatrix.pl classification rsttable nrstfilter
+      </code>
+      Parameters: the script takes the output file of
+      <a href="#classify">./classify.pl</a> as the input parameter
+      "classification"; the second argument of the script, "rsttable"
+      is supposed to be the restriction fragment table generated using
+      the <a href="findrst">./findrst.pl</a> script; the third
+      argument of the script "nrstfilter" sets the filtering in the
+      restriction fragment distance.
+      What the filtering does is to drop all read ends couples of type
+      "+/-" and "-/+" at distances lower than "nrstfilter" and count
+      two times the read ends of type "-/-" and "+/+" at those small
+      distances, this is necessary in order to filter the self-ligated
+      fragments. The number "nrstfilter" should be chosen only after
+      the analysis of the restriction fragment interactions distances
+      by class implemented in
+      the  <a href="rstdistribution">./rstdistribution.pl</a> script.
+    </p><p>
+      The script outputs a square matrix with number of rows and
+      columns equal to the number of restriction fragments in the
+      "rsttable" file. Each cell, identifiable by row and column
+      numbers which correspond to
+      restriction fragments indexed using the INDEX field in
+      "rsttable" file, contains the number reads ends which aligned to
+      the two corresponding restriction fragments. The matrix is
+      symmetric so only the upper part is filled. The script generate
+      two equivalent versions of the matrix and put them in files
+      named after "classification" with additional extensions
+      .matrix.gz and .sparse.gz: the first file is a dense
+      representation of the matrix while the latter is sparse. The
+      files are gzipped, in order to open them decompress them with the
+      gzip command. For example, the command
+      <code>
+	gzip -d -c classification.matrix.gz > TheMatrix.dat
+      </code>
+      will output the uncompressed matrix in the file TheMatrix.dat . 
+    </p>
+    <a name="rebin"><h3>2.7 rebin.pl</h3></a>
+    <p>
+      Rebin the interaction matrix in chromosomal coordinates
+      <code>
+	./rebin.pl matrix rsttable binsize
+      </code>
+      Parameters: the script takes three parameters as input, "matrix"
+      is a dense matrix representing the interactions between
+      restriction fragments (typically the output of
+      the <a href="rstmatrix">./rstmatrix.pl</a> script); "rsttable"
+      is supposed to be the restriction fragment table of the
+      reference genome generated using
+      the <a href="findrst">./findrst.pl</a> script; "binsize" sets
+      the size in base-pairs of the chromosomal coordinate bin. Bins
+      are computed taking into account the presence of multiple
+      chromosomes and their border on the reference sequence.
+      The output is a dense matrix containing the interactions between
+      bins; the output file name is named after "matrix" with an
+      additional extension ".rebinned".
+    </p>
+    <a name="distdistribution"><h3>2.8 distdistribution.pl</h3></a>
+    <p>
+      Make histograms of aligned read-ends in function of their
+      genomic distance
+      <code>
+	./rstdistribution.pl rstmatrix rsttable centromtable stepsize (log|lin)
+      </code>
+    </p>
+    <a name="tutorial"></a>
+    <h2>3. Tutorial</h2>
+    <p>
+      If somebody would like to describe his first experience with the
+      tools in this section, he's strongly encouraged to do so.
+    </p>
     <footer>
-      <p>RR3DDP - programmed by Vittore F. Scolari -
+      <p>Dade - programmed by Vittore F. Scolari -
 	© Institut Pasteur 2015</p>
     </footer>
   </body>
