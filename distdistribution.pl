@@ -44,9 +44,9 @@ my $histosize = 10000;
 my @binscale = (0) x $histosize;
 my @binsize = (0) x $histosize;
 for (my $i = 0; $i < $histosize; $i++) {
-    $binscale[$i] = ($islog
-		      ? $steps ** ((2.0 * $i + 1.0) / 2)
-		      : $steps *  ((2.0 * $i + 1.0) / 2));
+    $binscale[$i] = floor($islog
+			  ? $steps ** ((2.0 * $i + 1.0) / 2)
+			  : $steps *  ((2.0 * $i + 1.0) / 2));
     $binsize[$i] = ($islog
 		    ? ($steps ** ($i + 1)) - ($steps ** $i)
 		    : $steps );
@@ -93,7 +93,7 @@ for my $int (@intervals) {
     $chrext =~ s/ /_/g;
     $chrext =~ s/[^A-Za-z0-9_.~]/~/g;
     print "\33[2K\rInterval $chrext";
-    
+
     my @normal = (0) x $histosize;
     my @histogram = (0) x $histosize;
     my @variance = (0) x $histosize;
@@ -124,18 +124,18 @@ for my $int (@intervals) {
 	    $tmphisto[$bin]+=$hits;
 	}
 
-	# normalize and make density
-	my $summa = sum(@tmphisto);
-	next if ($summa == 0);
-	for (my $k = 0; $k < $histosize; $k++) {
-	    $tmphisto[$k] = ($tmphisto[$k]
-			     / $summa / $binsize[$k]);
-	}
+        # normalize and make density                        
+        my $summa = sum(@tmphisto);
+        next if ($summa == 0);
+        for (my $k = 0; $k < $histosize; $k++) {
+            $tmphisto[$k] = ($tmphisto[$k]
+                             / $summa / $binsize[$k]);
+        }
 
-	my $dist = $enpos - $ipos;
-	my $maxind = ($islog
-		      ? floor(log($dist) / log($steps))
-		      : floor($dist / $steps));
+        my $dist = $enpos - $ipos;
+        my $maxind = ($islog
+                      ? floor(log($dist) / log($steps))
+                      : floor($dist / $steps));
 
 	# Histogram is the mean of histograms
 	# variance will be sigma squared
@@ -156,8 +156,9 @@ for my $int (@intervals) {
     # get last zero before maxind 
     my $minind;
     for (my $k = 0; $k < $maxind; $k++) {
-        $minind = $k unless $histogram[$minind];
+        $minind = $k unless $histogram[$k];
     }
+    $minind++;
 
     for (my $k = $minind; $k < $maxind; $k++) {
 	$histogram[$k] /= $normal[$k];
@@ -172,10 +173,10 @@ for my $int (@intervals) {
 	my $old = $histogram[$minind];
 	my $oldvar = $variance[$minind];
 	for (my $k = $minind + 1; $k < $maxind; $k++) {
-	    $logderivative[$k] = (log($histogram[$k]-log($old)) 
-				  / log($binsize[$k - 1]));
+	    $logderivative[$k] = (log($histogram[$k])-log($old)) 
+				  / (log($steps**$k) - log($steps**($k-1)));
 	    # Crappy method that ignore non-linearities
-	    $logdervariance[$k] = 1.0 / (log($binsize[$k - 1])**2) * (
+	    $logdervariance[$k] = 1.0 / ((log($steps**$k) - log($steps**($k-1)))**2) * (
 		1.0/($histogram[$k]**2) * $variance[$k] +
 		1.0/($old**2)) * $oldvar;
 	    $old = $histogram[$k]; $oldvar = $variance[$k];
