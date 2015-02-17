@@ -21,6 +21,8 @@ if (($#ARGV != 5) and ($#ARGV != 6)) {
     exit;
 }
 
+our $TMPDIR;
+
 my ($leftsource, $rightsource, $readlength, $refgenome, $rsttablefn, $leftmapfn, $rightmapfn) = 
     (undef, undef, undef, undef, undef, undef, undef);
 if ($#ARGV == 6) {
@@ -31,8 +33,6 @@ if ($#ARGV == 6) {
 
 die "Readlength should be a number" if (!looks_like_number($readlength));
 
-my $TMPDIR="/data/temporary";
-
 ################################################
 # Initial file manipulations, if two file are
 # used and are not gzipped then nothing is done
@@ -42,15 +42,15 @@ print "Opening input files\n";
 
 # Check for gzipped input
 if (`file $leftsource` =~ /gzip/) {
-    my $tmpfile=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.fastq");
+    my $tmpfile=mktemp_linux("tmp.XXXXXXXX.fastq");
     system("gzip -c -d $leftsource > $tmpfile");
     $leftsource = $tmpfile;
 }
 
 unless (defined $rightsource) {
     # If there is only one file, let's divide it in two
-    my $tmpfile1=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.fastq");
-    my $tmpfile2=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.fastq");
+    my $tmpfile1=mktemp_linux("tmp.XXXXXXXX.fastq");
+    my $tmpfile2=mktemp_linux("tmp.XXXXXXXX.fastq");
     open OUT1, "> $tmpfile1";
     open OUT2, "> $tmpfile2";
     open IN, "< $leftsource";
@@ -69,7 +69,7 @@ unless (defined $rightsource) {
 } else {
     # Check for gzipped input
     if (`file $rightsource` =~ /gzip/) {
-	my $tmpfile=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.fastq");
+	my $tmpfile=mktemp_linux("tmp.XXXXXXXX.fastq");
 	system("gzip -c -d $rightsource > $tmpfile");
 	$rightsource = $tmpfile;
     }
@@ -91,8 +91,8 @@ my @leftl = ($minlength) x $N;
 my @rightl = ($minlength) x $N;
 
 # open temporary files
-my $leftreads=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.fastq");
-my $rightreads=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.fastq");
+my $leftreads=mktemp_linux("tmp.XXXXXXXX.fastq");
+my $rightreads=mktemp_linux("tmp.XXXXXXXX.fastq");
 
 # open output files
 my $gzipit =  ($leftmapfn =~ /\.gz$/) ? "| gzip" : "";
