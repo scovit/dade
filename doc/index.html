@@ -221,12 +221,72 @@
       </code>
       and can be trivially translated to other languages (e.g. R or
       Phyton); the code should be self-explanatory. Example: using
-      share/flagdefinitions.pl is possible to 
-      check is a couple of aligned read ends are belonging to the same
+      "share/flagdefinitions.pl" it is possible to 
+      check if a couple of aligned read ends are belonging to the same
       chromosome using the condition:
       <code>
 	(aligned($FLAG) && is(FL_INTRA_CHR, $FLAG))
       </code>
+      thus, selecting all the read couples belonging to a certain
+      class (i.e. aligned and same chromosome) and copying them in a
+      file (named for example "selection"), in Perl, can be done with
+      a one-liner (to be typed on the shell)
+      <code>
+	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
+	($INDEX,$FLAG,$LEFTCHR,$LEFTPOS,$LEFTRST,
+	 $RIGHTCHR,$RIGHTPOS,$RIGHTRST,$DIST,$RSTDIST) =
+	split("\t");<br />
+	print if (aligned($FLAG) && is(FL_INTRA_CHR, $FLAG)) ;
+	' classification > selection
+      </code>
+      after the execution of the script.
+    </p><p>
+      The FLAG variable can be tested with any combinations of boolean
+      conditions, the file "share/flagdefinitions.pl" contains, along
+      with the definition of boolean conditions (FL_LEFT_ALIGN,
+      FL_RIGHT_ALIGN, FL_LEFT_INVERSE, FL_RIGHT_INVERSE, FL_INVERSE,
+      FL_INTRA_CHR)  the
+      following pre-programmed tests and functions:
+      <ul>
+	<li><code class="inplace">is(cond, flag)</code> : check for bit
+	  set, e.g. is(FL_INTRA_CHR, $FLAG)</li>
+	<li><code class="inplace">isnot(cond, flag)</code> : check for
+	  bit not set, 
+	  e.g. isnot(FL_LEFT_ALIGN, $FLAG)</li> 
+	<li><code class="inplace">aligned(flag)</code> : check if read
+	is aligned, e.g. aligned($FLAG)</li> 
+	<li><code class="inplace">bothunaligned(flag)</code> : check
+	  if both ends didn't align, 
+	  e.g. bothunaligned($FLAG)</li>
+	<li><code class="inplace">single(flag)</code> : check if only
+	  one read did align, 
+	  e.g. single($FLAG)</li>
+	<li><code class="inplace">plusmin(flag)</code> : check
+	  alignment of type +/-, e.g. plusmin($FLAG); 
+	  normally reads of this type at short distances may correspond to
+	  uncut events. Useful check for filtering.
+	<li><code class="inplace">minplus(flag)</code> : check
+	  alignment of type -/+, e.g. minplus($FLAG); 
+	  normally reads of this type at short distances may correspond to
+	  uncut religated events. Useful check for filtering.
+	<li><code class="inplace">plusplus(flag)</code> : check
+	  alignment of type +/+, e.g. plusplus($FLAG). Useful check for
+	  filtering.
+	<li><code class="inplace">minmin(flag)</code> : check
+	alignment of type -/-, e.g. minmin($FLAG). Useful check for filtering.
+      </ul>
+      also, the test on boolean conditions can be combined with a test
+      on distance, for example the one-liner:
+      <code>
+	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
+	($INDEX,$FLAG,$LEFTCHR,$LEFTPOS,$LEFTRST,
+	 $RIGHTCHR,$RIGHTPOS,$RIGHTRST,$DIST,$RSTDIST) =
+	split("\t");<br />
+	print if (plusmin($FLAG) && ($RSTDIST < 5)) ;
+	' classification > selection
+      </code>
+      would select only aligned read ends of type +/- with distance in
+      restriction fragments less than 5 and copy them in file selection.
     </p>
     <a name="statistics"><h3>2.4 statistics.pl</h3></a>
     <p>
@@ -253,20 +313,85 @@
       and should be included in the official version of the script.
     </p><p>
       Reads of "+/-" kindness are for a big percentage self ligated
-      contiguous fragments. Knowing this number is important since in
-      order to make the interaction matrix reads of this kind at small
-      distances (in restriction fragments) will be filtered. The
-      meaning of the sign "+" and "-"
-      and the reason of the filtering is explained in
+      contiguous fragments. Knowing this number is important since
+      reads of this kind at small 
+      distances (in restriction fragments) may be due noise. See 
       <a href="http://www.biomedcentral.com/1471-2164/13/436">this
       important paper</a>
-      (<a href="http://www.biomedcentral.com/content/supplementary/1471-2164-13-436-s1.pdf">Figure S1</a>), the graph for evaluating the
-      filtering distance can be produced with the
-      <a href="#rstdistribution">./rstdistribution.pl</a> script.
+      (<a href="http://www.biomedcentral.com/content/supplementary/1471-2164-13-436-s1.pdf">Figure
+      S1</a>).
     </p><p>
       In order to save the output to a file, use
       the <a href="https://www.gnu.org/software/bash/manual/html_node/Redirections.html">
       &gt; operator</a>.
+    </p>
+    <a name="rstmatrix"><h3>2.6 rstmatrix.pl</h3></a>
+    <p>
+      Generate the matrix of interaction between the restriction
+      fragments
+      <code>
+	./rstmatrix.pl classification rsttable matrix
+      </code>
+      Parameters: the script takes a file in the format of the output
+      file "classification" of 
+      <a href="#classify">./classify.pl</a> as the input parameter and
+      "rsttable", the restriction fragment table generated using
+      the <a href="findrst">./findrst.pl</a> script. Note: this is a
+      low level script, if you run the script without previous
+      selecting and filtering of the data the result will have nasty
+      and unwanted biases; for this reason, before
+      running this script you may want to select different
+      subsets/selections of ./classify.pl output
+      using "share/flagdefinitions.pl" functions, as described in
+      the  <a href="#classify">./classify.pl</a> section of this
+      document, and merge the matrices at a later stage of the
+      analysis; check the <a href="#tutorial">tutorial</a> for
+      detailed instruction on how to filter/normalize data using this
+      and other tools.
+    </p>
+    <!--   the third -->
+    <!--   argument of the script "nrstfilter" sets the filtering method: -->
+    <!--   <ul> -->
+    <!-- 	<li> -->
+    <!-- 	  If it is a positive integer number, the filtering -->
+    <!-- 	  drops all read ends couples of type  -->
+    <!-- 	  "+/-" and "-/+" at distances lower than "nrstfilter" and count -->
+    <!-- 	  two times the read ends of type "-/-" and "+/+" at those small -->
+    <!-- 	  distances, in this case, the number "nrstfilter" should be -->
+    <!-- 	  chosen only after the analysis of the restriction fragment -->
+    <!-- 	  interactions histograms in function of distance by class -->
+    <!-- 	  implemented in  -->
+    <!-- 	  the  <a href="rstdistribution">./rstdistribution.pl</a> -->
+    <!-- 	  script; -->
+    <!-- 	</li><li> -->
+    <!-- 	  If it is set to "0", no -->
+    <!-- 	  filtering is applyed at all and all reads are taken into -->
+    <!-- 	  account; -->
+    <!-- 	</li><li> -->
+    <!-- 	  If it is set to "-1", all read ends of type "+/-" and "-/+" -->
+    <!-- 	  are dropped, and only read ends of type "-/-" and "+/+" are -->
+    <!-- 	  taken into consideration. -->
+    <!-- 	</li><li> -->
+    <!-- 	  If it is set to "-2", the new local normalization method is used. -->
+    <!-- 	</li> -->
+    <!--   </ul> -->
+    <!-- </p><p> -->
+    <p>
+      The script outputs an upper triangular matrix with number of rows and
+      columns equal to the number of restriction fragments in the
+      "rsttable" file. The row and column number of the matrix is
+      indexed using the INDEX field in 
+      "rsttable" file so that each row/column corresponds to a
+      specific restriction fragment. Each cell contains the number of
+      reads ends which which align to
+      the two corresponding restriction fragments. The matrix is
+      symmetric so only the upper part is filled and the lower part is
+      omitted in the output file. The
+      tools <a href="todense.pl">./todense.pl</a>
+      and <a href="tosparse.pl">./tosparse.pl</a> can be used to
+      export the matrix to standard formats. If the matrix file name
+      ends with ".gz", the output is automatically gzipped for
+      compression. 
     </p>
     <a name="rstdistribution"><h3>2.5 rstdistribution.pl</h3></a>
     <p>
@@ -294,48 +419,6 @@
       the filtering restriction distance as the distance at which the
       four curves converge together.
     </p>
-    <a name="rstmatrix"><h3>2.6 rstmatrix.pl</h3></a>
-    <p>
-      Generate the matrix of interaction between the restriction
-      fragments
-      <code>
-	./rstmatrix.pl classification rsttable nrstfilter
-      </code>
-      Parameters: the script takes the output file of
-      <a href="#classify">./classify.pl</a> as the input parameter
-      "classification"; the second argument of the script, "rsttable"
-      is supposed to be the restriction fragment table generated using
-      the <a href="findrst">./findrst.pl</a> script; the third
-      argument of the script "nrstfilter" sets the filtering in the
-      restriction fragment distance.
-      What the filtering does is to drop all read ends couples of type
-      "+/-" and "-/+" at distances lower than "nrstfilter" and count
-      two times the read ends of type "-/-" and "+/+" at those small
-      distances, this is necessary in order to filter the self-ligated
-      fragments. The number "nrstfilter" should be chosen only after
-      the analysis of the restriction fragment interactions distances
-      by class implemented in
-      the  <a href="rstdistribution">./rstdistribution.pl</a> script.
-    </p><p>
-      The script outputs a square matrix with number of rows and
-      columns equal to the number of restriction fragments in the
-      "rsttable" file. Each cell, identifiable by row and column
-      numbers which correspond to
-      restriction fragments indexed using the INDEX field in
-      "rsttable" file, contains the number reads ends which aligned to
-      the two corresponding restriction fragments. The matrix is
-      symmetric so only the upper part is filled. The script generate
-      two equivalent versions of the matrix and put them in files
-      named after "classification" with additional extensions
-      .matrix.gz and .sparse.gz: the first file is a dense
-      representation of the matrix while the latter is sparse. The
-      files are gzipped, in order to open them decompress them with the
-      gzip command. For example, the command
-      <code>
-	gzip -d -c classification.matrix.gz > TheMatrix.dat
-      </code>
-      will output the uncompressed matrix in the file TheMatrix.dat . 
-    </p>
     <a name="rebin"><h3>2.7 rebin.pl</h3></a>
     <p>
       Rebin the interaction matrix in chromosomal coordinates
@@ -352,9 +435,12 @@
       the size in base-pairs of the chromosomal coordinate bin. Bins
       are computed taking into account the presence of multiple
       chromosomes and their border on the reference sequence.
-      The output is a dense matrix containing the interactions between
+      The output consists of a dense matrix containing the
+      interactions between
       bins; the output file name is named after "matrix" with an
-      additional extension ".rebinned".
+      additional extension ".rebinned". Additionally, the list of
+      chromosomes and their start and end position in the rebinned
+      matrix (expressed in bin numbers) is printed to standard output.
     </p>
     <a name="distdistribution"><h3>2.8 distdistribution.pl</h3></a>
     <p>
@@ -363,12 +449,33 @@
       <code>
 	./rstdistribution.pl rstmatrix rsttable centromtable stepsize (log|lin)
       </code>
+      TO BE WRITTEN
     </p>
     <a name="tutorial"></a>
     <h2>3. Tutorial</h2>
     <p>
-      If somebody would like to describe his first experience with the
-      tools in this section, he's strongly encouraged to do so.
+      Producing 3C interaction
+      matrices for a multi-chromosome organism is a technically
+      challenging problem; I've written the scripts described in this
+      tutorial and in the above sections of this document at the
+      beginning of my postdoc in RSFG group at Institut Pasteur for
+      the task of analysing this data. In this tutorial I will
+      describe the steps that has been made to analyze in parallel two
+      datasets.
+    </p><p>
+      The two dataset belong to an experiment which aims at describing
+      the genome conformation douring the cell cycle of a Saccaromices
+      Cerevisiae mutant with a syntetic 150kb long segment of the 4th
+      chromosome which have equally spaced restriction
+      fragments. Thus, the experiments aim at two objectives: the first
+      is to describe and analyze the differences in chromosome
+      conformation along the cell cycle, the second is to highlight
+      the properties of the syntetic segment of chromosome 4. In turn
+      this second objective should serve as a starting point to
+      create new computational methods of 3C data normalization and
+      observable quantification.
+    </p><p>
+      
     </p>
     <footer>
       <p>Dade - programmed by Vittore F. Scolari -
