@@ -11,14 +11,11 @@ BEGIN {
 
 # Takes as input the rstmatrix, rebin into genomic distance
 
-if ($#ARGV != 2) {
-	print "usage: ./rebin.pl matrix rsttable binsize(bp)"
-	    , "\n"
-	    , "  output will be named after matrix with additional\n"
-	    , "  extensions .rebinned\n";
+if ($#ARGV != 3) {
+	print "usage: ./rebin.pl matrix rsttable binsize(bp) binmatrix\n";
 	exit;
 };
-my ($matrixfn, $rsttablefn, $binsize) = @ARGV;
+my ($matrixfn, $rsttablefn, $binsize, $binmatrix) = @ARGV;
 
 die "Binsize should be a number" if (!looks_like_number($binsize));
 
@@ -58,26 +55,31 @@ for my $rst (@rstarray) {
 print  $#bins, "\n";
 
 # rebin
-open(OUTPUT, "> $matrixfn.rebinned");
+my $gzipit =  ($binmatrix =~ /\.gz$/) ? "| gzip -c" : "";
+open(OUTPUT, "$gzipit > $binmatrix");
 # Line index
 $|++;
 for my $binan (0 .. $#bins) {
     my @inputs;
+    my @inputsln;
     my @output = (0) x scalar(@bins);
 
     print "\33[2K\rElaborating bin $binan out of $#bins";
-    
+
+    # Load a whole row bin into memory
     for my $i (0 .. $#{$bins[$binan]}) {
 	my $line = <MATRIX>;
+	my $ln = $. - 1;
 	chomp($line);
 	push @inputs, [ split("\t", $line) ];
+	push @inputsln, $ln;
     }
 
     # column index
-    for my $binbn (0 .. $#bins) {
+    for my $binbn ($binan .. $#bins) {
 	for my $i (@{$bins[$binbn]}) {
-	    for my $j (@inputs) {
-		$output[$binbn] += ${$j}[$i];
+	    for my $j (0 .. $#inputs) {
+		$output[$binbn] += ${$inputs[$j]}[ $i - $inputsln[$j] ];
 	    }
 	}
     }

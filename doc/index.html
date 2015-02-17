@@ -431,22 +431,23 @@
     <p>
       Rebin the interaction matrix in chromosomal coordinates
       <code>
-	./rebin.pl matrix rsttable binsize
+	./rebin.pl matrix rsttable binsize binmatrix
       </code>
-      Parameters: the script takes three parameters as input, "matrix"
-      is a dense matrix representing the interactions between
-      restriction fragments (typically the output of
+      Parameters: the script takes four parameters, "matrix"
+      is a upper diagonal matrix representing the interactions between
+      restriction fragments (like the output of
       the <a href="rstmatrix">./rstmatrix.pl</a> script); "rsttable"
-      is supposed to be the restriction fragment table of the
+      is the restriction fragment table of the
       reference genome generated using
       the <a href="findrst">./findrst.pl</a> script; "binsize" sets
       the size in base-pairs of the chromosomal coordinate bin. Bins
       are computed taking into account the presence of multiple
       chromosomes and their border on the reference sequence.
-      The output consists of a dense matrix containing the
+      The output consists of a upper diagonal matrix containing the
       interactions between
-      bins; the output file name is named after "matrix" with an
-      additional extension ".rebinned". Additionally, the list of
+      bins; the output is named as the parameter "binmatrix" and is
+      automatically gzipped if an ".gz"
+      extension is present. Additionally, the list of
       chromosomes and their start and end position in the rebinned
       matrix (expressed in bin numbers) is printed to standard output.
     </p>
@@ -467,7 +468,8 @@
 	./todense.pl matrix densematrix
       </code>
       Parameters: "matrix" is the input matrix file in upper diagonal
-      format, "densematrix" the output file.
+      format, "densematrix" the output file. If output have ".gz"
+      extension, it gets automatically compressed.
     </p>
     <a name="tosparse"><h3>2.9 tosparse.pl</h3></a>
     <p>
@@ -477,7 +479,8 @@
 	./tosparse.pl matrix sparsematrix
       </code>
       Parameters: "matrix" is the input matrix file in upper diagonal
-      format, "sparsematrix" the output file.
+      format, "sparsematrix" the output file. If output have ".gz"
+      extension, it gets automatically compressed.
     </p>
     <a name="tutorial"></a>
     <h2>3. Tutorial</h2>
