@@ -11,22 +11,16 @@ BEGIN {
     require "$Bin/share/mktemp_linux.pl";
 }
 
-# Takes as input the contact list with flags; outputs interaction matrices
+# outputs interaction matrix
 #
 
 if ($#ARGV != 2) {
-	print "usage: ./rstmatrix.pl classification rsttable nrstfilter"
-	    , "\n"
-	    , "  output will be named after classification with additional\n"
-	    , "  extensions .matrix.gz and .sparse.gz\n"
-	    , "  (open with \"gzip -d -c\")\n";
+	print "usage: ./rstmatrix.pl classification rsttable matrix\n";
 	exit;
 };
-my ($classificationfn, $rsttablefn, $nrst) = @ARGV;
+my ($classificationfn, $rsttablefn, $matrix) = @ARGV;
 
-die "Nrstfilter should be a number" if (!looks_like_number($nrst));
-
-my $TMPDIR="/data/temporary";
+our $TMPDIR;
 
 # open input files
 if ($classificationfn =~ /\.gz$/) {
@@ -36,7 +30,7 @@ if ($classificationfn =~ /\.gz$/) {
 }
 readrsttable($rsttablefn);
 
-my $alignedfn=mktemp_linux("$TMPDIR/tmp.XXXXXXXX.couples");
+my $alignedfn=mktemp_linux("tmp.XXXXXXXX.couples");
 open(ALIGN, "| sort --parallel=8 --temporary-directory=$TMPDIR " .
      "-g -k 1 -k 2 > $alignedfn");
 
@@ -62,11 +56,10 @@ while (<CLASS>) {
 close(CLASS);
 close(ALIGN);
 
-link($alignedfn, $alignedfn . ".dbg");
+#link($alignedfn, $alignedfn . ".dbg");
 
 open(ALIGN, "< $alignedfn");
 open(OUTPUT, "| gzip -c > $classificationfn.matrix.gz");
-open(SPARSE, "| gzip -c > $classificationfn.sparse.gz");
 
 our @rstarray;
 my @intervector = (0) x scalar(@rstarray);
@@ -80,42 +73,27 @@ while (<ALIGN>) {
 	    (($rightgrst < $oldrightgrst) &&
 	     ($leftgrst == $oldleftgrst)));
 
-    if (($leftgrst != $oldleftgrst) || ($rightgrst != $oldrightgrst)) {
-	if ($intervector[$oldrightgrst] != 0) {
-	    print SPARSE $oldleftgrst, "\t", $oldrightgrst, "\t"
-		, $intervector[$oldrightgrst], "\n";
-	}
-    }
-
     if ($leftgrst != $oldleftgrst) {
-	print OUTPUT join("\t", @intervector), "\n";
+	print OUTPUT join("\t",
+			  @intervector[$oldleftgrst..$#intervector]), "\n";
 	for my $i (0 .. $#intervector) { $intervector[$i] = 0; };
 	for ( $oldleftgrst++; $oldleftgrst < $leftgrst; $oldleftgrst++) {
-	    print OUTPUT join("\t", @intervector), "\n";
+	    print OUTPUT join("\t",
+			      @intervector[$oldleftgrst..$#intervector]), "\n";
 	}
     }
 
-    if (($rightgrst - $leftgrst < $nrst)
-	&& is(FL_INTRA_CHR, $flag)) {
-	$intervector[$rightgrst] += 2 if (plusplus($flag) || minmin($flag));
-    } else {
-	$intervector[$rightgrst]++;
-    }
+    $intervector[$rightgrst]++;
     $oldleftgrst = $leftgrst; $oldrightgrst = $rightgrst;
 }
 
-if ($intervector[$oldrightgrst] != 0) {
-    print SPARSE $oldleftgrst, "\t", $oldrightgrst, "\t"
-	, $intervector[$oldrightgrst], "\n";
-}
-print OUTPUT join("\t", @intervector), "\n";
+print OUTPUT join("\t", @intervector[$oldleftgrst..$#intervector]), "\n";
 for my $i (0 .. $#intervector) { $intervector[$i] = 0; };
 for ( $oldleftgrst++; $oldleftgrst <= $#intervector; $oldleftgrst++) {
-    print OUTPUT join("\t", @intervector), "\n";
+    print OUTPUT join("\t", @intervector[$oldleftgrst..$#intervector]), "\n";
 }
 
 close(ALIGN);
-close(SPARSE);
 close(OUTPUT);
 
 0;
