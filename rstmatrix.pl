@@ -59,7 +59,8 @@ close(ALIGN);
 #link($alignedfn, $alignedfn . ".dbg");
 
 open(ALIGN, "< $alignedfn");
-open(OUTPUT, "| gzip -c > $classificationfn.matrix.gz");
+my $gzipit =  ($matrix =~ /\.gz$/) ? "| gzip -c" : "";
+open(OUTPUT, "$gzipit > $matrix");
 
 our @rstarray;
 my @intervector = (0) x scalar(@rstarray);

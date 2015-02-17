@@ -72,10 +72,12 @@
         <li><a href="#map">map.pl</a></li>  
         <li><a href="#classify">classify.pl</a></li>
         <li><a href="#statistics">statistics.pl</a></li>	
-	<li><a href="#rstdistribution">rstdistrubution.pl</a></li>
 	<li><a href="#rstmatrix">rstmatrix.pl</a></li>
+	<li><a href="#rstdistribution">rstdistrubution.pl</a></li>
 	<li><a href="#rebin">rebin.pl</a></li>
 	<li><a href="#distdistribution">distdistribution.pl</a></li>
+	<li><a href="#todense">todense.pl</a></li>
+	<li><a href="#tosparse">tosparse.pl</a></li>
       </ol>  
     </p>
     <a name="findrst"><h3>2.1 findrst.pl</h3></a>
@@ -342,7 +344,7 @@
       <a href="#classify">./classify.pl</a> as the input parameter and
       "rsttable", the restriction fragment table generated using
       the <a href="findrst">./findrst.pl</a> script. Note: this is a
-      low level script, if you run the script without previous
+      low level script, if you run the script without previously
       selecting and filtering of the data the result will have nasty
       and unwanted biases; for this reason, before
       running this script you may want to select different
@@ -391,9 +393,10 @@
       reads ends which which align to
       the two corresponding restriction fragments. The matrix is
       symmetric so only the upper part is filled and the lower part is
-      omitted in the output file. The
-      tools <a href="todense.pl">./todense.pl</a>
-      and <a href="tosparse.pl">./tosparse.pl</a> can be used to
+      omitted in the output file, so that the diagonal corresponds to
+      the first row. The
+      tools <a href="#todense">./todense.pl</a>
+      and <a href="#tosparse">./tosparse.pl</a> can be used to
       export the matrix to standard formats. If the matrix file name
       ends with ".gz", the output is automatically gzipped for
       compression. 
@@ -455,6 +458,26 @@
 	./rstdistribution.pl rstmatrix rsttable centromtable stepsize (log|lin)
       </code>
       TO BE WRITTEN
+    </p>
+    <a name="todense"><h3>2.8 todense.pl</h3></a>
+    <p>
+      Export the matrix from upper diagonal format into standard
+      square dense matrix format
+      <code>
+	./todense.pl matrix densematrix
+      </code>
+      Parameters: "matrix" is the input matrix file in upper diagonal
+      format, "densematrix" the output file.
+    </p>
+    <a name="tosparse"><h3>2.9 tosparse.pl</h3></a>
+    <p>
+      Export the matrix from upper diagonal format into standard
+      sparse matrix format
+      <code>
+	./tosparse.pl matrix sparsematrix
+      </code>
+      Parameters: "matrix" is the input matrix file in upper diagonal
+      format, "sparsematrix" the output file.
     </p>
     <a name="tutorial"></a>
     <h2>3. Tutorial</h2>
