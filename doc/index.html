@@ -40,11 +40,39 @@
 	<li>Classify aligned read pairs</li>
 	<li>Make statistics on the classification</li>
 	<li>Make contact matrix</li>
-	<li>Plot the contact distributions</li>
+	<li>Obtain the contact distributions</li>
       </ul>
       If you need to do all the above things, than using this software
       will allow you to get your step done quick to better spend your
       time on further original analysis and data interpretation.
+    </p>
+    <h3>Phylosophy</h3>
+    <p>
+      The tools has been developed with some principles in mind, we
+      hope that these ideas will help the user to obtain his objective
+      in a pragmatic way. Primarly the tools are conceived to
+      to do very simple things, in order to obtain your result you are
+      obliged to combine and use different tools together. Of course
+      we know that some
+      users would like to have a one-script-do-it-all, but this is not
+      the case; tools which are conceived like that tend to be black boxes,
+      complicated and full of bugs, require a lot of configuration
+      options and parameters, their code is obscure and modifications
+      are impossibles; we follow the
+      <a href="http://www.faqs.org/docs/artu/ch01s06.html">unix
+      phylosophy</a> that consist in
+      programming "short, sharp tools" which can be easily maintained
+      and reused.
+
+      Secondarily, we use always text files as file format (or gzipped
+      text files) and avoid as much as possible to
+      load the whole data into memory. While due to this principle we
+      may lose some performances and the script may go slower than
+      optimal, we gain due to the fact that our scripts scale well
+      with increasing amount of data/length of reference genomes
+      (tipically linearly) and due to the fact that the user can understand 
+      the output of the scripts, view and filter it with standard
+      tools and interpret it as he likes.
     </p>
     <h3>Installation</h3>
     <p>
@@ -509,8 +537,9 @@
       
     </p>
     <footer>
-      <p>Dade - programmed by Vittore F. Scolari -
-	© Institut Pasteur 2015</p>
+      <p>Dade - programmed by Vittore F. Scolari,
+	Spatial regulation of genomes
+	© 2015 Institut Pasteur, Paris</p>
     </footer>
   </body>
 
