@@ -35,13 +35,11 @@ for my $rst (@rstarray) {
     
     # new chromosome?
     if ($chrnam ne $currchr) {
-	print $#bins, "\n" if $index > 0;
 	push @bins, [];
 	my $binpos = floor($binsize/2);
 	push @bintitle, "$chrnam~$binpos";
 	$currchr = $chrnam;
 	$binstart = 0;
-	print $currchr, "\t", $#bins, "\t";
     }
     # empty bins if no rst is there
     while ($binstart + $binsize < $rstpos) {
@@ -53,7 +51,6 @@ for my $rst (@rstarray) {
 
     push @{ $bins[$#bins] }, $index;
 }
-print  $#bins, "\n";
 
 # open input files
 if ($matrixfn =~ /\.gz$/) {

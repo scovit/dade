@@ -70,8 +70,10 @@
       load the whole data into memory. While due to this principle we
       may lose some performances and the script may go slower than
       optimal, we gain due to the fact that our scripts scale well
-      with increasing amount of data/length of reference genomes
-      (tipically linearly) and due to the fact that the user can understand 
+      to huge amount of data/length of reference genomes
+      (tipically the memory consumption scales linearly) and due to
+      the fact
+      that the user can understand 
       the output of the scripts, view and filter it with standard
       tools and interpret it as he likes.
     </p>
@@ -381,7 +383,7 @@
       the <a href="https://www.gnu.org/software/bash/manual/html_node/Redirections.html">
       &gt; operator</a>.
     </p>
-    <a name="rstmatrix"><h3>2.6 rstmatrix.pl</h3></a>
+    <a name="rstmatrix"><h3>2.5 rstmatrix.pl</h3></a>
     <p>
       Generate the matrix of interaction between the restriction
       fragments
@@ -494,10 +496,11 @@
       Parameters: the script takes four parameters, "matrix"
       is a upper diagonal matrix representing the interactions between
       restriction fragments (like the output of
-      the <a href="rstmatrix">./rstmatrix.pl</a> script); "rsttable"
+      the <a href="#rstmatrix">./rstmatrix.pl</a> or
+      <a href="#takediagblock">./takediagblock.pl</a> script); "rsttable"
       is the restriction fragment table of the
       reference genome generated using
-      the <a href="findrst">./findrst.pl</a> script; "binsize" sets
+      the <a href="#findrst">./findrst.pl</a> script; "binsize" sets
       the size in base-pairs of the chromosomal coordinate bin. Bins
       are computed taking into account the presence of multiple
       chromosomes and their border on the reference sequence.
@@ -509,12 +512,10 @@
       cohordinate. The output is named as
       the parameter "binmatrix" and is 
       automatically gzipped if an ".gz"
-      extension is present. Additionally, the list of
-      chromosomes and their start and end position in the rebinned
-      matrix (expressed in bin numbers) is printed to standard output.
+      extension is present.
     </p><p>
       Note: It is not possible to apply rebin.pl on an already binned
-      matrix, alwais restart from the restriction fragment matrix
+      matrix, always restart from the restriction fragment matrix
       while rebinning since it (still) contains the fragment informations.
     </p>
     <!-- <a name="distdistribution"><h3>2.8 distdistribution.pl</h3></a> -->
@@ -526,7 +527,7 @@
     <!--   </code> -->
     <!--   TO BE WRITTEN -->
     <!-- </p> -->
-    <a name="todense"><h3>2.8 todense.pl</h3></a>
+    <a name="todense"><h3>2.13 todense.pl</h3></a>
     <p>
       Export the matrix from upper diagonal format into standard
       square dense matrix format
@@ -537,7 +538,7 @@
       format, "densematrix" the output file. If output have ".gz"
       extension, it gets automatically compressed.
     </p>
-    <a name="tosparse"><h3>2.9 tosparse.pl</h3></a>
+    <a name="tosparse"><h3>2.14 tosparse.pl</h3></a>
     <p>
       Export the matrix from upper diagonal format into standard
       sparse matrix format
