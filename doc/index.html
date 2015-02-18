@@ -41,6 +41,7 @@
 	<li>Make statistics on the classification</li>
 	<li>Make contact matrix</li>
 	<li>Obtain the contact distributions</li>
+	<li>...</li>
       </ul>
       If you need to do all the above things, than using this software
       will allow you to get your step done quick to better spend your
@@ -97,16 +98,34 @@
       following tools are currently completed:
       <ol>  
         <li><a href="#findrst">findrst.pl</a> tabulate the restriction
-          fragments in a reference genome</li>  
-        <li><a href="#map">map.pl</a></li>  
-        <li><a href="#classify">classify.pl</a></li>
-        <li><a href="#statistics">statistics.pl</a></li>	
-	<li><a href="#rstmatrix">rstmatrix.pl</a></li>
-	<li><a href="#rstdistribution">rstdistrubution.pl</a></li>
-	<li><a href="#rebin">rebin.pl</a></li>
-	<li><a href="#distdistribution">distdistribution.pl</a></li>
-	<li><a href="#todense">todense.pl</a></li>
-	<li><a href="#tosparse">tosparse.pl</a></li>
+          fragments in a reference genome</li>
+        <li><a href="#map">map.pl</a> Iterative mapping</li>
+        <li><a href="#classify">classify.pl</a> Classification or
+          read pairs</li>
+        <li><a href="#statistics">statistics.pl</a> Basic statistics
+          of experiment</li>
+	<li><a href="#rstmatrix">rstmatrix.pl</a> Make interaction
+	  matrix between restriction fragments</li>
+	<li><a href="#takediagblock">takediagblock.pl</a> Take a
+	  square block on the diagonal of a matrix</li>
+	<!-- <li><a href="#rstdistribution">rstdistrubution.pl</a></li> -->
+	<li><a href="#rebin">rebin.pl</a> Rebin in genomic
+	  cohordinates a matrix</li>
+	<li><a href="#probdecon">probdecon.pl</a> Calculate
+	  contact probability for each row of a matrix</li>
+	<li><a href="#colmedia">colmedia.pl</a> Output a vector of
+	  the columns mean and variance of a matrix</li>
+	<li><a href="#colsum">colsum.pl</a> Output the sum of columns
+	  of a matrix</li>
+	<li><a href="#rowsum">rowsum.pl</a> Output the sum of rows of
+	  a matrix</li>
+	<li><a href="#transpose">transpose.pl</a> Transpose a
+	  matrix</li>
+	<!-- <li><a href="#distdistribution">distdistribution.pl</a></li> -->
+	<li><a href="#todense">todense.pl</a> Export matrix to
+	  standard dense matrix format</li>
+	<li><a href="#tosparse">tosparse.pl</a> Export matrix to
+	  standard sparse matrix format</li>
       </ol>  
     </p>
     <a name="findrst"><h3>2.1 findrst.pl</h3></a>
@@ -440,32 +459,32 @@
       ends with ".gz", the output is automatically gzipped for
       compression. 
     </p>
-    <a name="rstdistribution"><h3>2.5 rstdistribution.pl</h3></a>
-    <p>
-      Plot the number of aligned reads in function of the genomic
-      distance for the different classes ("+/+", "+/-", "-/+" and
-      "-/-") of reads ends:
-      <code>
-	usage: ./rstdistribution.pl classification nrst
-      </code>
-      Parameters: the script takes the output file of
-      <a href="#classify">./classify.pl</a> as the input parameter
-      "classification", while "nrst" is the maximum distance between
-      restriction fragment to consider in the graph; in doubt, put 
-      "nrst" equal to 20. The output is 4
-      histograms in 4 different files: the name of the files will be
-      the same as "classification" with an additional extension in the
-      format of .TYPE.hist
-      where TYPE can be pp ("+/+"), pm ("+/-"), mp ("-/+"), mm ("-/-")
-      in function of the read ends classification. Histograms can be
-      plotted with any plotting software (e.g.
-      <a href="http://plasma-gate.weizmann.ac.il/Grace/">Grace</a>,
-      <a href="http://www.r-project.org/">R</a> or
-      <a href="http://rickrolled.fr/">Excel</a>). In order to properly
-      proceed with the analysis, plot those plot together, and extract
-      the filtering restriction distance as the distance at which the
-      four curves converge together.
-    </p>
+    <!-- <a name="rstdistribution"><h3>2.5 rstdistribution.pl</h3></a> -->
+    <!-- <p> -->
+    <!--   Plot the number of aligned reads in function of the genomic -->
+    <!--   distance for the different classes ("+/+", "+/-", "-/+" and -->
+    <!--   "-/-") of reads ends: -->
+    <!--   <code> -->
+    <!-- 	usage: ./rstdistribution.pl classification nrst -->
+    <!--   </code> -->
+    <!--   Parameters: the script takes the output file of -->
+    <!--   <a href="#classify">./classify.pl</a> as the input parameter -->
+    <!--   "classification", while "nrst" is the maximum distance between -->
+    <!--   restriction fragment to consider in the graph; in doubt, put  -->
+    <!--   "nrst" equal to 20. The output is 4 -->
+    <!--   histograms in 4 different files: the name of the files will be -->
+    <!--   the same as "classification" with an additional extension in the -->
+    <!--   format of .TYPE.hist -->
+    <!--   where TYPE can be pp ("+/+"), pm ("+/-"), mp ("-/+"), mm ("-/-") -->
+    <!--   in function of the read ends classification. Histograms can be -->
+    <!--   plotted with any plotting software (e.g. -->
+    <!--   <a href="http://plasma-gate.weizmann.ac.il/Grace/">Grace</a>, -->
+    <!--   <a href="http://www.r-project.org/">R</a> or -->
+    <!--   <a href="http://rickrolled.fr/">Excel</a>). In order to properly -->
+    <!--   proceed with the analysis, plot those plot together, and extract -->
+    <!--   the filtering restriction distance as the distance at which the -->
+    <!--   four curves converge together. -->
+    <!-- </p> -->
     <a name="rebin"><h3>2.7 rebin.pl</h3></a>
     <p>
       Rebin the interaction matrix in chromosomal coordinates
@@ -484,21 +503,29 @@
       chromosomes and their border on the reference sequence.
       The output consists of a upper diagonal matrix containing the
       interactions between
-      bins; the output is named as the parameter "binmatrix" and is
+      bins; The first column in the output consists of a field in the
+      format <code class="inplace">CHR~POS</code> where "CHR" is the
+      chromosome name of the bin and "POS" is the mean genomic
+      cohordinate. The output is named as
+      the parameter "binmatrix" and is 
       automatically gzipped if an ".gz"
       extension is present. Additionally, the list of
       chromosomes and their start and end position in the rebinned
       matrix (expressed in bin numbers) is printed to standard output.
+    </p><p>
+      Note: It is not possible to apply rebin.pl on an already binned
+      matrix, alwais restart from the restriction fragment matrix
+      while rebinning since it (still) contains the fragment informations.
     </p>
-    <a name="distdistribution"><h3>2.8 distdistribution.pl</h3></a>
-    <p>
-      Make histograms of aligned read-ends in function of their
-      genomic distance
-      <code>
-	./rstdistribution.pl rstmatrix rsttable centromtable stepsize (log|lin)
-      </code>
-      TO BE WRITTEN
-    </p>
+    <!-- <a name="distdistribution"><h3>2.8 distdistribution.pl</h3></a> -->
+    <!-- <p> -->
+    <!--   Make histograms of aligned read-ends in function of their -->
+    <!--   genomic distance -->
+    <!--   <code> -->
+    <!-- 	./rstdistribution.pl rstmatrix rsttable centromtable stepsize (log|lin) -->
+    <!--   </code> -->
+    <!--   TO BE WRITTEN -->
+    <!-- </p> -->
     <a name="todense"><h3>2.8 todense.pl</h3></a>
     <p>
       Export the matrix from upper diagonal format into standard
