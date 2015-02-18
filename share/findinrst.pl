@@ -8,6 +8,7 @@ our %rsttable;
 our @rstarray;
 my $rstloaded = 0;
 our %chrlength;
+our @chrnames;
 sub readrsttable {
     my $fname = $_[0];
     open RSTTABLE, "<", $fname or die $!;
@@ -17,6 +18,7 @@ sub readrsttable {
 
 	unless (exists $rsttable{$chrnam}) {
 	    $rsttable{$chrnam} = [];
+	    push @chrnames, $chrnam;
 	    die "Index errors" if (($st != 0) || ($num != 0)); 
 	}
 

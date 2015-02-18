@@ -96,7 +96,8 @@
       This section describes all the tools comprised in Dade. The
       following tools are currently completed:
       <ol>  
-        <li><a href="#findrst">findrst.pl</a></li>  
+        <li><a href="#findrst">findrst.pl</a> tabulate the restriction
+          fragments in a reference genome</li>  
         <li><a href="#map">map.pl</a></li>  
         <li><a href="#classify">classify.pl</a></li>
         <li><a href="#statistics">statistics.pl</a></li>	
@@ -116,7 +117,8 @@
       Parameters: "name" is the name of the restriction enzyme used in
       the experiment, "chr1.fa chr2.fa ... chrN.fa" is a
       space-separated list of fasta sequences, one for each chromosome
-      of the reference genome.
+      of the reference genome. Note: the order of the chrosomes
+      matters and will be conserved in script results.
     </p><p>
       The list of restriction enzymes has been taken from
       the <a href="http://rebase.neb.com/rebase/rebase.html">REBASE</a>
@@ -414,12 +416,21 @@
     <p>
       The script outputs an upper triangular matrix with number of rows and
       columns equal to the number of restriction fragments in the
-      "rsttable" file. The row and column number of the matrix is
-      indexed using the INDEX field in 
+      "rsttable" file.
+
+      The row and column number of the matrix is
+      ordered according to the INDEX field in 
       "rsttable" file so that each row/column corresponds to a
-      specific restriction fragment. Each cell contains the number of
-      reads ends which which align to
-      the two corresponding restriction fragments. The matrix is
+      specific restriction fragment; fields are tab ("\t")
+      separated. The first column is the row name,
+      it contains informations about the corresponding restriction
+      fragment with "~" as field separator in the following format:
+      <code class="inplace">INDEX~CHR~INDEXCHR~START~END</code> (check
+      <a href="#findrst">./findrst.pl</a> for details about the fields).
+      In subsequent columns, each cell contains the number of
+      reads ends which align to
+      the two restriction fragments corresponding to the row/column
+      position. The matrix is 
       symmetric so only the upper part is filled and the lower part is
       omitted in the output file, so that the diagonal corresponds to
       the first row. The

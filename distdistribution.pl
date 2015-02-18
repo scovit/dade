@@ -53,8 +53,8 @@ for (my $i = 0; $i < $histosize; $i++) {
 }
 
 my @intervals;
-our %rsttable; our %centrotable;
-for my $chr (keys %rsttable) {
+our %rsttable; our %centrotable; our @chrnames;
+for my $chr (@chrnames) {
     my $str = ${${$rsttable{$chr}}[0]}[0];
     my $enr = ${${$rsttable{$chr}}[$#{$rsttable{$chr}}]}[0];
 
