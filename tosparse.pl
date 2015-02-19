@@ -11,15 +11,21 @@ if ($#ARGV != 1) {
 my ($matrixfn, $sparsematrix) = @ARGV;
 
 # open input files
-if ($matrixfn =~ /\.gz$/) {
+if ($matrixfn eq '-') {
+    *MATRIX = *STDIN;
+} elsif ($matrixfn =~ /\.gz$/) {
     open(MATRIX, "gzip -d -c $matrixfn |");
 } else {
     open(MATRIX, "< $matrixfn");
 }
 
 # output
-my $gzipit =  ($sparsematrix =~ /\.gz$/) ? "| gzip -c" : "";
-open(OUTPUT, "$gzipit > $sparsematrix");
+if ($sparsematrix eq '-') {
+    *OUTPUT = *STDOUT;
+} else {
+    my $gzipit =  ($sparsematrix =~ /\.gz$/) ? "| gzip -c" : "";
+    open(OUTPUT, "$gzipit > $sparsematrix");
+}
 
 while(<MATRIX>) {
     chomp();

@@ -281,7 +281,7 @@
       Phyton); the code should be self-explanatory. Example: using
       "share/flagdefinitions.pl" it is possible to 
       check if a couple of aligned read ends are belonging to the same
-      chromosome using the condition:
+      chromosome using boolean conditions:
       <code>
 	(aligned($FLAG) && is(FL_INTRA_CHR, $FLAG))
       </code>
@@ -375,7 +375,7 @@
       reads of this kind at small 
       distances (in restriction fragments) may be due noise. See 
       <a href="http://www.biomedcentral.com/1471-2164/13/436">this
-      important paper</a>
+      article</a>
       (<a href="http://www.biomedcentral.com/content/supplementary/1471-2164-13-436-s1.pdf">Figure
       S1</a>).
     </p><p>
@@ -578,7 +578,9 @@
       </code>
       Parameters: "matrix" is the input matrix file in upper diagonal
       format, "densematrix" the output file. If output have ".gz"
-      extension, it gets automatically compressed.
+      extension, it gets automatically compressed. If input or output
+      have filename "-" then redirection will happen to respectively
+      STDIN or STDOUT;
     </p>
     <a name="tosparse"><h3>2.14 tosparse.pl</h3></a>
     <p>
@@ -589,7 +591,9 @@
       </code>
       Parameters: "matrix" is the input matrix file in upper diagonal
       format, "sparsematrix" the output file. If output have ".gz"
-      extension, it gets automatically compressed.
+      extension, it gets automatically compressed. If input or output
+      have filename "-" then redirection will happen to respectively
+      STDIN or STDOUT;
     </p>
     <a name="tutorial"></a>
     <h2>3. Tutorial</h2>
@@ -610,12 +614,209 @@
       fragments. Thus, the experiments aim at two objectives: the first
       is to describe and analyze the differences in chromosome
       conformation along the cell cycle, the second is to highlight
-      the properties of the syntetic segment of chromosome 4. In turn
+      the properties of the syntetic segment of chromosome. In turn
       this second objective should serve as a starting point to
-      create new computational methods of 3C data normalization and
-      observable quantification.
+      create new computational methods of 3C data normalization for
+      biophysical quantification. In order to work on the task, we
+      initially sequenced two dataset: "AsyncYeast3.0C" which is the
+      sequencing of the asynchronous population and "G2mYeast3.0C"
+      which is the sequencing of the population freezed in G2M phase
+      using the Nocodazol drug at 15μg/ml.
     </p><p>
-      
+      The pipeline starts from two files for each dataset,
+      corresponding to the two different read-ends:
+      <code>
+	Dataset AsyncYeast3.0C:<br />
+	BC76_CTGT.dat.end1.pcrfree and<br />
+	BC76_CTGT.dat.end2.pcrfree<br /><br />
+	Dataset G2mYeast3.0C:<br />
+	BC176_CGAT.dat.end1.pcrfree and<br />
+	BC176_CGAT.dat.end2.pcrfree
+      </code>
+      we keep the couple of files in different directories.
+      <h3>Preparing the reference genome</h3>
+      The first important thing is to prepare the reference genome,
+      three steps are necessary to accomplish this passage:
+      <ol>
+	<li>Collect the chromosomes fasta files</li>
+	<li>Index the fasta files
+	using <a href="http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml">
+	bowtie2-build</a></li>
+	<li>Create the restriction fragment sites file
+	using <a href="#findrst">./findrst.pl</a></li>
+      </ol>
+      <b>1.</b> In our tutorial we downloaded the reference BY genome
+      from the
+      <a href="http://www.yeastgenome.org/">SGD database</a> in the
+      following files:
+      <code>
+	ref/chr1.fa ref/chr2.fa ref/chr3.fa ref/chr4.fa ref/chr5.fa
+	ref/chr6.fa ref/chr7.fa ref/chr8.fa ref/chr9.fa ref/chr10.fa
+	ref/chr11.fa ref/chr12.fa ref/chr13.fa ref/chr14.fa
+	ref/chr15.fa ref/chrM.fa
+      </code>
+      and replaced the chromosome 4 with the syntetic one:
+      <code>
+	AsyncYeast3.0C:<br />
+	cp ChrIVentier_BYmeiosyn_T6.ape.fa ref/chr4.fa<br /><br />
+	G2mYeast3.0C:<br />
+	cp BYmeiosyn_T5.ape.fa ref/chr4.fa<br />
+      </code>
+      note: ape files have been previously converted to fasta files;
+      check that they are complete.
+    </p><p>
+      <b>2.</b> Index the fasta file using bowtie2-build program,
+      listing chromosomes in order:
+      <code>
+	cd ref;<br />
+	bowtie2-build
+	chr1.fa,chr2.fa,chr3.fa,chr4.fa,chr5.fa,chr6.fa,chr7.fa,chr8.fa,chr9.fa,chr10.fa,chr11.fa,chr12.fa,chr13.fa,chr14.fa,chr15.fa,chr16.fa,chrM.fa
+	bwt2index;<br />
+	cd ..;
+      </code>
+      so that the index will be contained in
+      the <code class="inplace">ref/bwt2index</code> file.
+    </p><p>
+      <b>3.</b> Since we used the DpnII restriction enzime at the
+      bench, we will use <a href="findrst">./findrst.pl</a> script to
+      generate the a restriction fragment file
+      named <code class="inplace">ref/DpnIIrst.txt</code> with the
+      information about the cut sites using the following command:
+      <code>
+	cd ref;<br />
+	../findrst.pl DpnII chr1.fa chr2.fa chr3.fa chr4a.fa chr4b.fa
+	chr4c.fa chr5.fa chr6.fa chr7.fa chr8.fa chr9.fa chr10.fa
+	chr11.fa chr12.fa chr13.fa chr14.fa chr15.fa chr16.fa chrM.fa
+	> DpnIIrst.txt;<br />
+	cd ..;
+      </code>
+      <h3>Mapping and classify the reads</h3>
+      The reads need to be mapped to the reference genome in order to
+      continue the data analysis, this can be done with the iterative
+      mapping script <a href="#map">./map.pl</a> typing the following
+      commands:
+      <code>
+	AsyncYeast3.0C:<br />
+	./map.pl BC76_CTGT.dat.end1.pcrfree BC76_CTGT.dat.end2.pcrfree
+	ref/bwt2index ref/DpnIIrst.txt
+	BC76_CTGT.dat.end1.pcrfree.map.gz
+	BC76_CTGT.dat.end2.pcrfree.map.gz<br /><br />
+	G2mYeast3.0C:<br />
+	./map.pl BC176_CGAT.dat.end1.pcrfree BC176_CGAT.dat.end2.pcrfree
+	ref/bwt2index ref/DpnIIrst.txt
+	BC176_CGAT.dat.end1.pcrfree.map.gz
+	BC176_CGAT.dat.end2.pcrfree.map.gz
+      </code>
+      (note: those commands can take multiple hours for completion) now
+      the files with extension .map.gz contains the bowtie2
+      alignment informations extracted from the SAM file. It is
+      possible to list them with the
+      command <code class="inplace">gzip -c filename.gz</code> .
+      In order to
+      classify the read ends by type and make a single file with the
+      essential information about recorded genome contacts, we use the
+      <a href="#classify">./classify.pl</a> script:
+      <code>
+	AsyncYeast3.0C:<br />
+	./classify.pl
+	BC76_CTGT.dat.end1.pcrfree.map.gz
+	BC76_CTGT.dat.end2.pcrfree.map.gz BC76_CTGT.class;<br /><br />
+	G2mYeast3.0C:<br />
+	./classify.pl BC176_CGAT.dat.end1.pcrfree.map.gz
+	BC176_CGAT.dat.end2.pcrfree.map.gz
+	BC176_CGAT.class;
+      </code>
+      this way we obtain a file (BC76_CTGT.class.gz and
+      BC176_CGAT.class.gz) with all the read pairs, their aligment
+      position, their distances on the chromosome (if on the same
+      chromosome), flagged by type.
+
+      We can make a simple statistics on the dataset using the
+      command:
+      <code>
+	AsyncYeast3.0C:<br />
+	./statistics BC76_CTGT.class;<br /><br />
+	G2mYeast3.0C:<br />
+	./statisitcs BC176_CGAT.class;
+      </code>
+
+      In order to make a filter on the
+      uncut events and the loop uncut events at short distances, we
+      are interested to separate the interactions in term of plus (+) and
+      min (-) classes. Those classes corresponds to the direction of
+      alignment, a good description of their property can be found in
+      this <a href="http://www.biomedcentral.com/1471-2164/13/436">
+      article</a>, and we will soon discover how to easily produce the
+      <a href="http://www.biomedcentral.com/content/supplementary/1471-2164-13-436-s1.pdf">Figure
+      S1B</a> in this tutorial. We split the classified reads in 5
+      files:
+      <code>
+	AsyncYeast3.0C:<br />
+	BC76_CTGT.class.mm<br />
+	BC76_CTGT.class.mp<br />
+	BC76_CTGT.class.pm<br />
+	BC76_CTGT.class.pp<br />
+	BC76_CTGT.class.xc<br /><br />
+	G2mYeast3.0C:<br />
+	BC176_CGAT.class.mm<br />
+	BC176_CGAT.class.mp<br />
+	BC176_CGAT.class.pm<br />
+	BC176_CGAT.class.pp<br />
+	BC176_CGAT.class.xc<br /><br />
+      </code>
+      where the extensions "mm", "mp", "pm", "pp" and "xc" correspond
+      respectively to classes minmin, minplus, plusmin, plusplus and
+      inter-chromosome using the following commands: 
+      <code>
+	G2mYeast3.0C:<br />
+	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
+	(undef,$FLAG)
+	= split("\t"); print if (plusplus($FLAG));' BC176_CGAT.class >
+	BC176_CGAT.class.pp;<br /><br />
+	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
+	(undef,$FLAG)
+	= split("\t"); print if (plusmin($FLAG));' BC176_CGAT.class >
+	BC176_CGAT.class.pm;<br /><br />
+	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
+	(undef,$FLAG)
+	= split("\t"); print if (minplus($FLAG));' BC176_CGAT.class >
+	BC176_CGAT.class.mp;<br /><br />
+	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
+	(undef,$FLAG)
+	= split("\t"); print if (minmin($FLAG));' BC176_CGAT.class >
+	BC176_CGAT.class.mm;<br /><br />
+	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
+	(undef,$FLAG)
+	= split("\t"); print if (aligned($FLAG) && isnot(FL_INTRA_CHR,
+	$FLAG)); ' BC176_CGAT.class > 
+	BC176_CGAT.class.xc;
+      </code>
+      we do the same for the AsyncYeast3.0C dataset changing the names
+      accordingly.
+       <h3>Creating the interaction matrices</h3>
+       Once we have the classified reads, creating the interaction
+       matrices is a question of running the following code in both 
+       AsyncYeast3.0C and G2mYeast3.0C directories:
+       <code>	
+	for i in *.class.??; do ./rstmatrix.pl $i ref/DpnIIrst.txt
+	$i.mat.gz; done;
+       </code>
+       then just run <code class="inplace">ls *.mat.gz</code> to list
+       them. As you can see, now you have 5 matrices, but they are
+       still not ready for visualization: we have 5 of them instead of
+       1, we need to merge them, but not before some form of
+       filtering! And then, after the filtering, the matrix would
+       be too sparse to be efficiently renormalized. We will introduce
+       two kind of simple filtering in the next section, will rebin
+       the matrix and visualize it in the following section and
+       introduce an more insightful filtering algorithm the in the
+       section after.
+       <h3>Basic filtering algorithms</h3>
+       <h3>Rebinning of the Matrix</h3>
+       <h3>Experimentations on an advanced filtering algorithm</h3>
+       <h3>Plotting the genomic distance contact probability</h3>
+       <h3>Conclusions</h3>
+    </p><p>      
     </p>
     <footer>
       <p>Dade - programmed by Vittore F. Scolari,
