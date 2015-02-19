@@ -52,12 +52,13 @@
       The tools has been developed with some principles in mind, we
       hope that these ideas will help the user to obtain his objective
       in a pragmatic way. Primarly the tools are conceived to
-      to do very simple things, in order to obtain your result you are
-      obliged to combine and use different tools together. Of course
+      to do very simple things, and in order to obtain results the
+      user needs to combine and use different tools together in an
+      algorithmic fashion. Of course
       we know that some
       users would like to have a one-script-do-it-all, but this is not
-      the case; tools which are conceived like that tend to be black boxes,
-      complicated and full of bugs, require a lot of configuration
+      the case with Dade; tools which are conceived like that are often boxed
+      monoliths, complicated and full of bugs, require a lot of configuration
       options and parameters, their code is obscure and modifications
       are impossibles; we follow the
       <a href="http://www.faqs.org/docs/artu/ch01s06.html">unix
@@ -71,9 +72,8 @@
       may lose some performances and the script may go slower than
       optimal, we gain due to the fact that our scripts scale well
       to huge amount of data/length of reference genomes
-      (tipically the memory consumption scales linearly) and due to
-      the fact
-      that the user can understand 
+      (a part for a few exceptions, the memory consumption scales
+      linearly) and due to the fact that the user can understand 
       the output of the scripts, view and filter it with standard
       tools and interpret it as he likes.
     </p>
@@ -102,8 +102,8 @@
         <li><a href="#findrst">findrst.pl</a> tabulate the restriction
           fragments in a reference genome</li>
         <li><a href="#map">map.pl</a> Iterative mapping</li>
-        <li><a href="#classify">classify.pl</a> Classification or
-          read pairs</li>
+        <li><a href="#classify">classify.pl</a> Classification and
+          selection of read pairs</li>
         <li><a href="#statistics">statistics.pl</a> Basic statistics
           of experiment</li>
 	<li><a href="#rstmatrix">rstmatrix.pl</a> Make interaction
@@ -454,12 +454,54 @@
       position. The matrix is 
       symmetric so only the upper part is filled and the lower part is
       omitted in the output file, so that the diagonal corresponds to
-      the first row. The
-      tools <a href="#todense">./todense.pl</a>
-      and <a href="#tosparse">./tosparse.pl</a> can be used to
-      export the matrix to standard formats. If the matrix file name
+      the first row.
+      If the matrix file name
       ends with ".gz", the output is automatically gzipped for
-      compression. 
+      compression.
+      The tools <a href="#todense">./todense.pl</a>
+      and <a href="#tosparse">./tosparse.pl</a> can be used to
+      export the matrix to common formats (i.e. for loading in
+      visualization tools).
+    </p><p>
+      After creation, matrices can be easily manipulated using Perl
+      one-liners,
+      
+      for example, in order to filter out all the reads at
+      distance (in restriction fragments) less then 5, the following
+      code would work: 
+      <code>
+	perl -ne 'chomp; ($title, @cells) = split("\t");
+	<br />
+	for $cell (0..$#cells) { $cells[$cell]=0 if $cell &lt; 5; };
+	<br />
+	print $title,"\t", join("\t",@cells), "\n";'
+	&lt; matrix &gt; matrix.filtered 
+      </code>
+      to take the square of a matrix, the following:
+      <code>
+	perl -ne 'chomp; ($title, @cells) = split("\t");
+	<br />
+	for $i (0..$#cells) { $cells[$i]=$cells[$i]**2 };
+	<br />
+	print $title,"\t", join("\t",@cells), "\n";'
+	&lt; matrix &gt; matrix.squared
+      </code>
+      in order to make binary operations, instead, we need to load two
+      matrices at the same time, this can be done by a combination of
+      the paste command and the Perl splice function, for example, to
+      add two matrices, we could use the following code:
+      <code>
+	paste matrix1 matrix2 | perl -ne 'chomp;
+	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
+	$title1=shift(@cells1);$title2=shift(@cells2);
+	<br />
+	for $i (0..$#cells1) { $cells1[$i]=$cells1[$i]+$cells2[$i]; };
+	<br />
+	print $title1,"\t", join("\t",@cells1), "\n";'
+	&gt; sum.matrices
+      </code>
+      note: binary operations makes sense only on matrices of the same
+      dimensions.
     </p>
     <!-- <a name="rstdistribution"><h3>2.5 rstdistribution.pl</h3></a> -->
     <!-- <p> -->
