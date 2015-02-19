@@ -24,6 +24,7 @@ open(OUTPUT, "$gzipit > $sparsematrix");
 while(<MATRIX>) {
     chomp();
     my @fields = split("\t");
+    my $title = shift @fields;
     my $i = $. - 1;
     for my $j (0 .. $#fields) {
 	print OUTPUT $i, "\t", $i + $j, "\t", $fields[$j], "\n"
