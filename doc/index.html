@@ -1006,6 +1006,61 @@
       clean and ready to be plotted, before doing that we should rebin
       the matrices.
       <h3>Rebinning and selecting part of the Matrix</h3>
+      We have a matrix, we need to visualize it. In order to do that
+      three steps are required to taking into consideration: (1)
+      Rebinning the matrix, (2) Selecting a diagonal block, (3)
+      Exporting the matrix to a common format. This three
+      tasks can be done with
+      the <a href="#rebin">./rebin.pl</a>,
+      <a href="#takediagblock">./takediagblock.pl</a>,
+      <a href="#takediagblock">./tosparse.pl</a> and
+      <a href="#takediagblock">./todense.pl</a>
+      tools which will be Tutorically described in this section. Let's
+      do it together on the
+      <code class="inplace">BC176_CGAT.class.pp~mm~pm~mp~xc~filt.mat</code>
+      matrix!
+    </p><p>
+      <b>1.</b> In order to rebin the
+      matrix, <a href="#rebin">./rebin.pl</a> comes as an handy tool:
+      the script takes as input your matrix, the restriction fragment
+      table and the binsize. It divides the reference genome in bins
+      of equal size taking into account the chromosome boundaries and
+      output an interaction matrix between the computed bins. If we
+      want to make a matrix rebinned to 7 kilobases, it suffices that we
+      type:
+      <code>
+	./rebin.pl BC176_CGAT.class.pp~mm~pm~mp~xc~filt.mat
+	ref/DpnIIrst.txt 7000 BC176_CGAT.7k~rebinned
+      </code>
+      obtaining a rebinned matrix in
+      <code class="inplace">BC176_CGAT.7k~rebinned</code>. Attention:
+      1st: the script cannot be used on 
+      a rebinned matrix
+      (e.g. <code class="inplace">BC176_CGAT.7k~rebinned</code>),
+      always start with the original! 2nd: The row names will not
+      contain any more the restriction fragment information but the
+      bin information, check it yourself by typing:
+      <code class="inplace">less -S
+      BC176_CGAT.class.pp~mm~pm~mp~xc~filt.mat;</code> and
+      then <code class="inplace">less -S BC176_CGAT.7k~rebinned;</code>
+      in order to see the difference.
+    </p><p>
+      <b>2.</b>
+    </p><p>
+      <b>3.</b>The tools which you will use to visualize your matrices
+      (most probably Matlab, R or some Python scripts that you can ask
+      to <a href="email:axel.cournac@pasteur.fr">Axel</a>) will not
+      easily import matrices in the format used by Dade. Before
+      opening them with those tools you can export them with
+      the following commands:
+      <code>
+	./todense.pl BC176_CGAT.7k~rebinned BC176_CGAT.7k~rebinned.dat
+      </code>
+      to export to a dense matrix, or
+      <code>
+	./sparse.pl BC176_CGAT.7k~rebinned BC176_CGAT.7k~rebinned.dat
+      </code>
+      to export to a sparse matrix.
       <h3>Experimentations on an advanced filtering algorithm</h3>
       <h3>Plotting the genomic distance contact probability</h3>
       <h3>Conclusions</h3>    

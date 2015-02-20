@@ -20,7 +20,7 @@ if ($matrixfn eq '-') {
 }
 
 # output
-if ($sparsematrix eq '-') {
+if ($densematrix eq '-') {
     *OUTPUT = *STDOUT;
 } else {
     my $gzipit =  ($densematrix =~ /\.gz$/) ? "| gzip -c" : "";
