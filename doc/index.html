@@ -855,9 +855,11 @@
       result of the <a href="#statistics">./statistics.pl</a> script
       where you should have a good proportion of +/- kind of reads
       over the aligned. In fact both +/- and -/+ type of reads
-      contains junk.
+      contains junk. In this section we will present two methods for
+      filtering the junk.
     </p><p>
-      The first way to eliminate this junk is to eliminate all +/- and
+      <b>1.</b> The first way to eliminate this junk is to eliminate
+      all +/- and
       -/+ kind of reads and produce an analysis based solely on -/-
       and +/+. This is easily accomplished by merging the latter two
       classes and ignoring the formers:
@@ -890,10 +892,11 @@
       is clean filtered, but we lost almost half of valid read
       ends in the process.
     </p><p>
-      The junk is at small distance, so the next filtering algorithm
+      <b>2.</b> The junk regards read ends which are at small distance
+      in genomic cohordinates, so the next filtering algorithm
       would be to introduce a reasonable global cutoff for +/- and -/+
-      reads at small distances. This is simple to do!
-      First of all let's find a way to get a reasonable the cutoff
+      reads at small distances.
+      First of all let's find a way to get a reasonable cutoff
       size. We have interaction matrices for the different data types,
       let's now look at the number of interactions in function of
       restriction fragment distances in those classes, this can be
@@ -901,7 +904,7 @@
       using the <a href="#colsum">./colsum.pl</a> script and with the
       following cycle:
       <code>
-	for i in BC176_CGAT.class.??.mat ;
+	for i in BC176_CGAT.class.[pm][pm].mat ;
 	do ./colsum.pl $i &gt; $i.rstd;
 	done;
       </code>
@@ -916,15 +919,93 @@
 		   height="330px">
 	alt : <a href="images/test.pdf">test.pdf</a>
       </object></div>
-      While this method seems better than the previous, we are
-      introducing a global cutoff which ignore local biases. This not
-      only is an error because we are still trashing usefull data, it
-      is also an error because we may be introduce analysis artifact
-      which could produce spurious correlations in the later data
+      (note: note that we plotted only the first ~20 points and also,
+      the use a logaritmic scale on the ordinate). You can see in
+      this graph, that for small genomic distances (less then 5
+      restriction fragments) the +/- curve stands out on top of the
+      other curves. You can pick the cutoff like this, checking the
+      point where the curves converge together, in our case 5
+      restriction fragments.
+    </p><p>
+      In order to filter those restriction fragments from the +/- and
+      the -/+ matrices first we merge the two matrices:
+      <code>
+	paste BC176_CGAT.class.pm.mat BC176_CGAT.class.mp.mat |
+	perl -ne 'chomp;
+	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
+	$title1=shift(@cells1);$title2=shift(@cells2);
+	<br />
+	for $i (0..$#cells1) { $cells1[$i]=$cells1[$i]+$cells2[$i]; };
+	<br />
+	print $title1,"\t", join("\t",@cells1), "\n";'
+	&gt; BC176_CGAT.class.pm~mp.mat
+      </code>
+      then we use a one-liner to filter:
+      <code>
+	perl -ne 'chomp; ($title, @cells) = split("\t");
+	<br />
+	for $i (0..$#cells) { $cells[$i]=0 if $i < 5; };
+	<br />
+	print $title,"\t", join("\t",@cells), "\n";'
+	&lt; BC176_CGAT.class.pm~mp.mat &gt;
+	BC176_CGAT.class.pm~mp~filt.mat
+      </code>
+      for normalization purposes, we duplicate the +/+ and -/-
+      matrices (after merging) at genomic
+      distances less than the cutoff:
+      <code>
+	perl -ne 'chomp; ($title, @cells) = split("\t");
+	<br />
+	for $i (0..$#cells) { $cells[$i]=2*$cells[$i] if $i < 5; };
+	<br />
+	print $title,"\t", join("\t",@cells), "\n";'
+	&lt; BC176_CGAT.class.pp~mm.mat &gt;
+	BC176_CGAT.class.pp~mm~filt.mat
+      </code>
+      Then we merge the matrices together with the inter
+      chromosomal "<code class="inplace">xc</code>" one to get a
+      filtered matrix:
+      <code>
+	paste BC176_CGAT.class.pp~mm~filt.mat BC176_CGAT.class.pm~mp~filt.mat |
+	perl -ne 'chomp;
+	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
+	$title1=shift(@cells1);$title2=shift(@cells2);
+	<br />
+	for $i (0..$#cells1) { $cells1[$i]=$cells1[$i]+$cells2[$i]; };
+	<br />
+	print $title1,"\t", join("\t",@cells1), "\n";'
+	&gt; BC176_CGAT.class.pp~mm~pm~mp~filt.mat<br /><br />
+	paste BC176_CGAT.class.pp~mm~pm~mp~filt.mat BC176_CGAT.class.xc.mat |
+	perl -ne 'chomp;
+	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
+	$title1=shift(@cells1);$title2=shift(@cells2);
+	<br />
+	for $i (0..$#cells1) { $cells1[$i]=$cells1[$i]+$cells2[$i]; };
+	<br />
+	print $title1,"\t", join("\t",@cells1), "\n";'
+	&gt; BC176_CGAT.class.pp~mm~pm~mp~xc~filt.mat
+      </code>
+      Obtaining a filtered and complete matrix in the
+      file
+      <code class="inplace">BC176_CGAT.class.pp~mm~pm~mp~xc~filt.mat</code>. The
+      same method can be use on the AsyncYeast3.0C dataset.
+      While this latter method of filtering is more sophisticated than
+      the previous, we are 
+      introducing a global cutoff which ignore local biases. This
+      could lead to faults, in fact no only we are still trashing
+      useful data, but also we may be introducing analysis artifacts
+      which could produce tainted evidences in successive
       analysis steps. In a later section in this tutorial we will try
       to discuss with some data-at-hand this kind of problems and
       improve the filtering using more informations from the data.
-      <h3>Rebinning of the Matrix</h3>
+    </p><p>
+      By the way, for now, we could consider the matrices
+      <code class="inplace">BC176_CGAT.class.pp~mm~xc.mat</code>
+      and 
+      <code class="inplace">BC176_CGAT.class.pp~mm~pm~mp~xc~filt.mat</code>
+      clean and ready to be plotted, before doing that we should rebin
+      the matrices.
+      <h3>Rebinning and selecting part of the Matrix</h3>
       <h3>Experimentations on an advanced filtering algorithm</h3>
       <h3>Plotting the genomic distance contact probability</h3>
       <h3>Conclusions</h3>    
