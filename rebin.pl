@@ -26,8 +26,8 @@ readrsttable($rsttablefn);
 our @rstarray;
 my @bins;
 my @bintitle;
-my $binstart = 0;
-my $currchr = "";
+my $binstartp = 0;
+my $currchr = "-1";
 # my $rst = [ $index, $chrnam, $num, $st, $en ];
 for my $rst (@rstarray) {
     my ($index, $chrnam, $num, $st, $en ) = @$rst;
@@ -39,49 +39,54 @@ for my $rst (@rstarray) {
 	my $binpos = floor($binsize/2);
 	push @bintitle, "$chrnam~$binpos";
 	$currchr = $chrnam;
-	$binstart = 0;
+	$binstartp = 0;
     }
     # empty bins if no rst is there
-    while ($binstart + $binsize < $rstpos) {
+    while ($binstartp + $binsize < $rstpos) {
 	push @bins, [];
-	my $binpos = $binstart + floor($binsize / 2);
+	$binstartp += $binsize;
+	my $binpos = $binstartp + floor($binsize / 2);
 	push @bintitle, "$chrnam~$binpos";
-	$binstart += $binsize;
     }
 
     push @{ $bins[$#bins] }, $index;
 }
 
+my $MATRIX;
 # open input files
 if ($matrixfn =~ /\.gz$/) {
-    open(my $MATRIX, "gzip -d -c $matrixfn |");
+    open($MATRIX, "gzip -d -c $matrixfn |");
 } else {
-    open(my $MATRIX, "< $matrixfn");
+    open($MATRIX, "< $matrixfn");
 }
 
 # rebin
-my $gzipit =  ($binmatrix =~ /\.gz$/) ? "| gzip -c" : "";
-open(OUTPUT, "$gzipit > $binmatrix");
-$|++;
+# output
+if ($binmatrix eq '-') {
+    *OUTPUT = *STDOUT;
+} else {
+    my $gzipit =  ($binmatrix =~ /\.gz$/) ? "| gzip -c" : "";
+    open(OUTPUT, "$gzipit > $binmatrix");
+}
 
 # Read a line from the matrix, return content and fragment number
-sub readline {
+sub mreadline {
     my $file = $_[0];
     my $line = <$file>;
-    return undef, undef if ($line == undef);
+    return undef, undef unless (defined $line);
     chomp($line);
     my @input = split("\t", $line);
     my @frag = split("~", shift(@input));
     die "Wrong matrix format" if (!looks_like_number($frag[0]));
     return \@input, $frag[0];
-}
-my ($input, $inputln) = readline($MATRIX);
-die "File format error" if (($input == undef) || ($#$input < 0));
+};
+my ($input, $inputln) = mreadline($MATRIX);
+die "File format error" if (!(defined $input) || ($#$input < 0));
 my $lastln = $inputln + $#$input;
 
 # Get the first and last bin
 my $binstart = -1; my $binend = -1;
-for (my $i = 0; my $i <= $#bins; $i++) {
+for (my $i = 0; $i <= $#bins; $i++) {
     $binstart = $i if ($inputln ~~ @{$bins[$i]});
     $binend = $i if ($lastln ~~ @{$bins[$i]});
 }
@@ -93,7 +98,7 @@ for my $binan ($binstart..$binend) {
     my @inputsln;
     my @output = (0) x ($binend - $binstart);
 
-    print "\33[2K\rElaborating bin $binan out of $#bins";
+    print STDERR "\33[2K\rElaborating bin $binan out of $#bins";
 
     # Load a whole row bin into memory (note, the script eats an
     # amount of memory proportional to the bin size)
@@ -104,12 +109,12 @@ for my $binan ($binstart..$binend) {
 	die "Row is lost, matrix should be a full diagonal block"
 	    if (${$bins[$binan]}[$i] != $inputln);
 	die "Sudden end of file, maybe matrix was not cut square?"
-	    if (($input == undef) && ($binan != $binend));
+	    if (!(defined $input) && ($binan != $binend));
 
-	if ($input != undef) {
+	if (defined $input) {
 	    push @inputs, $input;
 	    push @inputsln, $inputln;
-	    my ($input, $inputln) = readline($MATRIX);
+	    ($input, $inputln) = mreadline($MATRIX);
 	}
     }
 
@@ -119,9 +124,9 @@ for my $binan ($binstart..$binend) {
 	    for my $j (0 .. $#inputs) {
 		my $coln = $i - $inputsln[$j];
 		die "Missing columns"
-		    if ((${$inputs[$j]}[ $coln ] == undef)
-			&& ($binbn != $binend))
-		if ( ${$inputs[$j]}[ $coln ] != undef ) {
+		    if (!(defined ${$inputs[$j]}[ $coln ])
+			&& ($binbn != $binend));
+		if ( defined ${$inputs[$j]}[ $coln ] ) {
 		    $output[$binbn] += ${$inputs[$j]}[ $coln ];
 		}
 	    }
@@ -129,11 +134,11 @@ for my $binan ($binstart..$binend) {
     }
     
     print OUTPUT $bintitle[$binan], "\t", join("\t", @output), "\n";
-    last if ($input == undef);
+    last if !(defined $input);
 }
 close(OUTPUT);
 close($MATRIX);
 
-print "\33[2K\rEND\n";
+print STDERR "\33[2K\rEND\n";
 
 0;
