@@ -90,9 +90,18 @@
       read alignment tool.
     </p><p>
       The code need a temporary directory on a fast harddrive with
-      enough free space, the default temporary directory is set to
-      "/data/temporary", in order to change the location, modify the
-      configuration option in the file "share/mktemp_linux.pl".  
+      enough free space (1GB should suffice), the default temporary
+      directory is set to "/data/temporary", in order to change the
+      location, modify the configuration option in the file
+      "share/mktemp_linux.pl". Also,
+      you will need a lot of disk space to carry the analysis, pay
+      attention to keep some hundreds gigabytes free in your data
+      analysis directory.
+    </p><p>
+      If you need to display or print this document, and do it nicely
+      as the author intended it to be, please use a recent version of
+      the <a href="https://www.mozilla.org/fr/firefox/new/">Firefox</a>
+      web browser.
     </p>
     <a name="tools"><h2>2. Tools</h2></a>
     <p>
@@ -164,7 +173,7 @@
       the <a href="https://www.gnu.org/software/bash/manual/html_node/Redirections.html">
 	&gt; operator</a>. Example:
       <code>
-	./findrst.pl DpnII chr1.fa chr2.fa chr3.fa > DpnIIrst.txt
+	./findrst.pl DpnII chr1.fa chr2.fa chr3.fa &gt; DpnIIrst.txt
       </code>
       will output the table in the file DpnIIrst.txt .
     </p>
@@ -295,7 +304,7 @@
 	 $RIGHTCHR,$RIGHTPOS,$RIGHTRST,$DIST,$RSTDIST) =
 	split("\t");<br />
 	print if (aligned($FLAG) && is(FL_INTRA_CHR, $FLAG)) ;
-	' classification > selection
+	' classification &gt; selection
       </code>
       after the execution of the script.
     </p><p>
@@ -340,8 +349,8 @@
 	($INDEX,$FLAG,$LEFTCHR,$LEFTPOS,$LEFTRST,
 	 $RIGHTCHR,$RIGHTPOS,$RIGHTRST,$DIST,$RSTDIST) =
 	split("\t");<br />
-	print if (plusmin($FLAG) && ($RSTDIST < 5)) ;
-	' classification > selection
+	print if (plusmin($FLAG) && ($RSTDIST &lt; 5)) ;
+	' classification &gt; selection
       </code>
       would select only aligned read ends of type +/- with distance in
       restriction fragments less than 5 and copy them in file selection.
@@ -569,6 +578,33 @@
     <!--   </code> -->
     <!--   TO BE WRITTEN -->
     <!-- </p> -->
+    <a name="colsum"><h3>2.7 colsum.pl</h3></a>
+    <p>
+      Output the sum of columns of a matrix
+      <code>
+	./colsum.pl [-a] matrix
+      </code>
+      Iterate through the matrix and make a sum of the columns, the
+      optional "-a" parameter specify the way the sum is done. If
+      "-a" is specified then the sum is done on the square matrix in the
+      "algebric sense", otherwise the sum is done in "upper diagonal"
+      sense. Exempli grata, for a restriction fragments interaction
+      matrix the difference
+      whould be that in the "algebraic" sense, for column number <i>n</i>,
+      we are summing over all the
+      interactions between the restriction fragment <i>n</i> and all the
+      fragments positioned at lower genomic position <i>n' &lt; n</i>
+      (useful for iterative normalization), while in the 
+      "upper diagonal" sense, for column number <i>n</i>, we are
+      summing over all the interactions
+      at genomic distance in restriction fragments equal
+      to <i>n</i> (useful for histogram making).
+      </p><p>
+      Output is printed to STDOUT, use
+      the <a href="https://www.gnu.org/software/bash/manual/html_node/Redirections.html">
+      &gt; operator</a> to redirect the output to a file.
+      usefull for generating histograms of 
+    </p>
     <a name="todense"><h3>2.13 todense.pl</h3></a>
     <p>
       Export the matrix from upper diagonal format into standard
@@ -687,7 +723,7 @@
 	../findrst.pl DpnII chr1.fa chr2.fa chr3.fa chr4a.fa chr4b.fa
 	chr4c.fa chr5.fa chr6.fa chr7.fa chr8.fa chr9.fa chr10.fa
 	chr11.fa chr12.fa chr13.fa chr14.fa chr15.fa chr16.fa chrM.fa
-	> DpnIIrst.txt;<br />
+	&gt; DpnIIrst.txt;<br />
 	cd ..;
       </code>
       <h3>Mapping and classify the reads</h3>
@@ -771,52 +807,127 @@
 	G2mYeast3.0C:<br />
 	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
 	(undef,$FLAG)
-	= split("\t"); print if (plusplus($FLAG));' BC176_CGAT.class >
+	= split("\t"); print if (plusplus($FLAG));' BC176_CGAT.class &gt;
 	BC176_CGAT.class.pp;<br /><br />
 	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
 	(undef,$FLAG)
-	= split("\t"); print if (plusmin($FLAG));' BC176_CGAT.class >
+	= split("\t"); print if (plusmin($FLAG));' BC176_CGAT.class &gt;
 	BC176_CGAT.class.pm;<br /><br />
 	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
 	(undef,$FLAG)
-	= split("\t"); print if (minplus($FLAG));' BC176_CGAT.class >
+	= split("\t"); print if (minplus($FLAG));' BC176_CGAT.class &gt;
 	BC176_CGAT.class.mp;<br /><br />
 	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
 	(undef,$FLAG)
-	= split("\t"); print if (minmin($FLAG));' BC176_CGAT.class >
+	= split("\t"); print if (minmin($FLAG));' BC176_CGAT.class &gt;
 	BC176_CGAT.class.mm;<br /><br />
 	perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
 	(undef,$FLAG)
 	= split("\t"); print if (aligned($FLAG) && isnot(FL_INTRA_CHR,
-	$FLAG)); ' BC176_CGAT.class > 
+	$FLAG)); ' BC176_CGAT.class &gt; 
 	BC176_CGAT.class.xc;
       </code>
       we do the same for the AsyncYeast3.0C dataset changing the names
       accordingly.
-       <h3>Creating the interaction matrices</h3>
-       Once we have the classified reads, creating the interaction
-       matrices is a question of running the following code in both 
-       AsyncYeast3.0C and G2mYeast3.0C directories:
-       <code>	
+      <h3>Creating the interaction matrices</h3>
+      Once we have the classified reads, creating the interaction
+      matrices is a question of running the following code in both 
+      AsyncYeast3.0C and G2mYeast3.0C directories:
+      <code>	
 	for i in *.class.??; do ./rstmatrix.pl $i ref/DpnIIrst.txt
-	$i.mat.gz; done;
-       </code>
-       then just run <code class="inplace">ls *.mat.gz</code> to list
-       them. As you can see, now you have 5 matrices, but they are
-       still not ready for visualization: we have 5 of them instead of
-       1, we need to merge them, but not before some form of
-       filtering! And then, after the filtering, the matrix would
-       be too sparse to be efficiently renormalized. We will introduce
-       two kind of simple filtering in the next section, will rebin
-       the matrix and visualize it in the following section and
-       introduce an more insightful filtering algorithm the in the
-       section after.
-       <h3>Basic filtering algorithms</h3>
-       <h3>Rebinning of the Matrix</h3>
-       <h3>Experimentations on an advanced filtering algorithm</h3>
-       <h3>Plotting the genomic distance contact probability</h3>
-       <h3>Conclusions</h3>
-    </p><p>      
+	$i.mat; done;
+      </code>
+      then just run
+      <code class="inplace">ls *.mat</code>
+      to list
+      them. As you can see, now you have 5 matrices, but they are
+      still not ready for visualization: we have 5 of them instead of
+      1, we need to merge them, but not before some form of
+      filtering! And then, after the filtering, the matrix would
+      still probably be too sparse and in need of rebinning. We will
+      introduce two kind of simple filtering in the next section,
+      will rebin the matrix and visualize it in the following section and
+      introduce an more insightful filtering algorithm in the
+      section after.
+      <h3>Basic filtering algorithms</h3>
+      HiC protocol leads to dataset with an high number of
+      uncut and uncut religated pair ends. This is evident from the
+      result of the <a href="#statistics">./statistics.pl</a> script
+      where you should have a good proportion of +/- kind of reads
+      over the aligned. In fact both +/- and -/+ type of reads
+      contains junk.
+    </p><p>
+      The first way to eliminate this junk is to eliminate all +/- and
+      -/+ kind of reads and produce an analysis based solely on -/-
+      and +/+. This is easily accomplished by merging the latter two
+      classes and ignoring the formers:
+      <code>
+	paste BC176_CGAT.class.pp.mat BC176_CGAT.class.mm.mat |
+	perl -ne 'chomp;
+	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
+	$title1=shift(@cells1);$title2=shift(@cells2);
+	<br />
+	for $i (0..$#cells1) { $cells1[$i]=$cells1[$i]+$cells2[$i]; };
+	<br />
+	print $title1,"\t", join("\t",@cells1), "\n";'
+	&gt; BC176_CGAT.class.pp~mm.mat
+      </code>
+      (do the same for AsyncYeast3.0C) and, why not, add also the
+      intra chromosomal interactions:
+      <code>
+	paste BC176_CGAT.class.pp~mm.mat BC176_CGAT.class.xc.mat |
+	perl -ne 'chomp;
+	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
+	$title1=shift(@cells1);$title2=shift(@cells2);
+	<br />
+	for $i (0..$#cells1) { $cells1[$i]=$cells1[$i]+$cells2[$i]; };
+	<br />
+	print $title1,"\t", join("\t",@cells1), "\n";'
+	&gt; BC176_CGAT.class.pp~mm~xc.mat
+      </code>      
+      the result
+      matrix <code class="inplace">BC176_CGAT.class.pp~mm~xc.mat</code>
+      is clean filtered, but we lost almost half of valid read
+      ends in the process.
+    </p><p>
+      The junk is at small distance, so the next filtering algorithm
+      would be to introduce a reasonable global cutoff for +/- and -/+
+      reads at small distances. This is simple to do!
+      First of all let's find a way to get a reasonable the cutoff
+      size. We have interaction matrices for the different data types,
+      let's now look at the number of interactions in function of
+      restriction fragment distances in those classes, this can be
+      accomplished by summing columns in the matrix. We can do this
+      using the <a href="#colsum">./colsum.pl</a> script and with the
+      following cycle:
+      <code>
+	for i in BC176_CGAT.class.??.mat ;
+	do ./colsum.pl $i &gt; $i.rstd;
+	done;
+      </code>
+      if we make a plot of the "*.rstd" files (e.g. with tools like
+      <a href="http://plasma-gate.weizmann.ac.il/Grace/">Grace</a>,
+      <a href="http://www.r-project.org/">R</a>,
+      <a href="http://rickrolled.fr/">Excel</a> or
+      <a href="https://fr.libreoffice.org/">LibreOffice</a>) we
+      obtain the following:
+      <div><object data="images/rstd.pdf" type="application/pdf"
+		   width="100%"
+		   height="330px">
+	alt : <a href="images/test.pdf">test.pdf</a>
+      </object></div>
+      While this method seems better than the previous, we are
+      introducing a global cutoff which ignore local biases. This not
+      only is an error because we are still trashing usefull data, it
+      is also an error because we may be introduce analysis artifact
+      which could produce spurious correlations in the later data
+      analysis steps. In a later section in this tutorial we will try
+      to discuss with some data-at-hand this kind of problems and
+      improve the filtering using more informations from the data.
+      <h3>Rebinning of the Matrix</h3>
+      <h3>Experimentations on an advanced filtering algorithm</h3>
+      <h3>Plotting the genomic distance contact probability</h3>
+      <h3>Conclusions</h3>    
     </p>
     <footer>
       <p>Dade - programmed by Vittore F. Scolari,

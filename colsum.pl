@@ -4,11 +4,16 @@ use warnings;
 
 # Takes as input matrix, output as dense matrix
 
-if ($#ARGV != 0) {
-	print "usage: ./colsum.pl matrix\n";
-	exit;
-};
-my ($matrixfn) = @ARGV;
+my $isalg = 0;
+if ($#ARGV > 1 || ($#ARGV != 0 && ($ARGV[0] // '') ne "-a")) {
+    print "usage: ./colsum.pl [-a] matrix\n\n"
+	,"   -a algebric column index (vs upper diagonal format)\n";
+    exit;
+} elsif ($#ARGV == 1) {
+    $isalg = 1;
+    shift @ARGV;
+}
+my $matrixfn = shift @ARGV;
 
 # open input files
 if ($matrixfn eq '-') {
@@ -27,6 +32,10 @@ while(<MATRIX>) {
     chomp;
     my @input = split("\t");
     my $title = shift(@input);
+    if ($isalg) {
+	my @tmparray = (0) x $i;
+	@input = (@tmparray, @input);
+    }
 
     for my $j (0..$#input) {
 	$output[$j] = 0 unless exists $output[$j];
