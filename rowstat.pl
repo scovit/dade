@@ -33,7 +33,7 @@ while(<MATRIX>) {
     for my $i (0..$#input) {
 	$sum += $input[$i];
 	$mean += $i * $input[$i];
-	$variance += $i * $input[$i] * $input[$i];
+	$variance += $i * $i * $input[$i];
     }
     unless ($sum == 0) {
 	$mean = $mean / $sum; $variance = $variance / $sum;
