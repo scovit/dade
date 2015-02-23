@@ -35,11 +35,12 @@ while(<MATRIX>) {
 	$mean += $i * $input[$i];
 	$variance += $i * $input[$i] * $input[$i];
     }
-    $mean = $mean / $sum; $variance = $variance / $sum;
-    $variance -= $mean * $mean;
+    unless ($sum == 0) {
+	$mean = $mean / $sum; $variance = $variance / $sum;
+	$variance -= $mean * $mean;
+    }
     
     print join("\t", $title, $len, $sum, $mean, $variance), "\n";
-
 }
 close(MATRIX);
 
