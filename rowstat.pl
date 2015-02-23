@@ -2,8 +2,6 @@
 use strict;
 use warnings;
 
-use Statistics::Descriptive;
-
 # Takes as input matrix, output a vector
 # Basically a oneliner, but since we have colsum ....
 
@@ -23,20 +21,25 @@ if ($matrixfn eq '-') {
 }
 
 # output, stdout
-$stat = Statistics::Descriptive::Full->new();
 
 while(<MATRIX>) {
     chomp;
     my @input = split("\t");
     my $title = shift(@input);
+    my (undef,undef,undef,$st,$en) = split("~", $title);
+    my $len = $en - $st;
 
-    $stat->add_data(@input);
-    print join("\t", $title, $len, $stat->sum(), $stat->mean()
-	       , $stat->variance(), $stat->variance()
-	       , $stat->quantile(0), $stat->quantile(1), $stat->quantile(2)
-	       , $stat->quantile(3), $stat->quantile(4)), "\n";
+    my ($sum, $mean, $variance) = (0, 0, 0);
+    for my $i (0..$#input) {
+	$sum += $input[$i];
+	$mean += $i * $input[$i];
+	$variance += $i * $input[$i] * $input[$i];
+    }
+    $mean = $mean / $sum; $variance = $variance / $sum;
+    $variance -= $mean * $mean;
+    
+    print join("\t", $title, $len, $sum, $mean, $variance), "\n";
 
-    $stat->clear();
 }
 close(MATRIX);
 
