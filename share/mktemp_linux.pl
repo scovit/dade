@@ -1,6 +1,12 @@
 
 our $TMPDIR="/data/temporary";
 
+die "$TMPDIR does not exists or is not a directory"
+    unless (-d $TMPDIR);
+die "$TMPDIR shuld be writeable, redeable and accessible"
+    . " (run: chmod 0777 $TMPDIR)"
+    unless ((-r $TMPDIR) && (-w $TMPDIR) && (-x $TMPDIR));
+
 my @deletion_list;
 sub mktemp_linux
 {
