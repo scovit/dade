@@ -27,6 +27,9 @@ if ($densematrix eq '-') {
     open(OUTPUT, "$gzipit > $densematrix");
 }
 
+# read header
+my $header = <MATRIX>;
+
 while(<MATRIX>) {
     my $i = $. - 1;
     my @tmparray = (0) x $i;

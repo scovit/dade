@@ -452,12 +452,14 @@
       ordered according to the INDEX field in 
       "rsttable" file so that each row/column corresponds to a
       specific restriction fragment; fields are tab ("\t")
-      separated. The first column is the row name,
-      it contains informations about the corresponding restriction
-      fragment with "~" as field separator in the following format:
-      <code class="inplace">INDEX~CHR~INDEXCHR~START~END</code> (check
+      separated. The first row and the first column is reserved for
+      the record name,
+      for each record, the script sets the name to a string containing
+      informations about the corresponding restriction
+      fragment, separated with "~" characther in the following format:
+      <code class="inplace">"INDEX~CHR~INDEXCHR~START~END"</code> (check
       <a href="#findrst">./findrst.pl</a> for details about the fields).
-      In subsequent columns, each cell contains the number of
+      In subsequent rows/columns, each cell contains the number of
       reads ends which align to
       the two restriction fragments corresponding to the row/column
       position. The matrix is 
@@ -479,7 +481,8 @@
       distance (in restriction fragments) less then 5, the following
       code would work: 
       <code>
-	perl -ne 'chomp; ($title, @cells) = split("\t");
+	perl -ne 'BEGIN {$header=&lt;&gt;; print $header;} chomp; ($title,
+	@cells) = split("\t");
 	<br />
 	for $cell (0..$#cells) { $cells[$cell]=0 if $cell &lt; 5; };
 	<br />
@@ -488,7 +491,8 @@
       </code>
       to take the square of a matrix, the following:
       <code>
-	perl -ne 'chomp; ($title, @cells) = split("\t");
+	perl -ne 'BEGIN {$header=&lt;&gt;; print $header;} chomp; ($title,
+	@cells) = split("\t");
 	<br />
 	for $i (0..$#cells) { $cells[$i]=$cells[$i]**2 };
 	<br />
@@ -500,13 +504,16 @@
       the paste command and the Perl splice function, for example, to
       add two matrices, we could use the following code:
       <code>
-	paste matrix1 matrix2 | perl -ne 'chomp;
+	paste matrix1 matrix2 | perl -ne 'BEGIN
+	{$h=&lt;&gt;; $h=substr($h,length($h)/2); print $h;}
+	<br />
+	chomp;
 	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
 	$title1=shift(@cells1);$title2=shift(@cells2);
 	<br />
 	for $i (0..$#cells1) { $cells1[$i]=$cells1[$i]+$cells2[$i]; };
 	<br />
-	print $title1,"\t", join("\t",@cells1), "\n";'
+	print $title2,"\t", join("\t",@cells1), "\n";'
 	&gt; sum.matrices
       </code>
       note: binary operations makes sense only on matrices of the same
@@ -557,7 +564,8 @@
       chromosomes and their border on the reference sequence.
       The output consists of a upper diagonal matrix containing the
       interactions between
-      bins; The first column in the output consists of a field in the
+      bins; The record names; in the output, are substituted with a
+      field in the
       format <code class="inplace">CHR~POS</code> where "CHR" is the
       chromosome name of the bin and "POS" is the mean genomic
       cohordinate. The output is named as
@@ -866,7 +874,9 @@
       classes and ignoring the formers:
       <code>
 	paste BC176_CGAT.class.pp.mat BC176_CGAT.class.mm.mat |
-	perl -ne 'chomp;
+	perl -ne '
+	<br />BEGIN {$h=&lt;&gt;; $h=substr($h,length($h)/2); print $h;}
+	<br />chomp;
 	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
 	$title1=shift(@cells1);$title2=shift(@cells2);
 	<br />
@@ -879,7 +889,9 @@
       intra chromosomal interactions:
       <code>
 	paste BC176_CGAT.class.pp~mm.mat BC176_CGAT.class.xc.mat |
-	perl -ne 'chomp;
+	perl -ne '
+	<br />BEGIN {$h=&lt;&gt;; $h=substr($h,length($h)/2); print $h;}
+	<br />chomp;
 	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
 	$title1=shift(@cells1);$title2=shift(@cells2);
 	<br />
@@ -918,7 +930,7 @@
       <div><object data="images/rstd.pdf" type="application/pdf"
 		   width="100%"
 		   height="330px">
-	alt : <a href="images/test.pdf">test.pdf</a>
+	  alt : <a href="images/test.pdf">test.pdf</a>
       </object></div>
       (note: note that we plotted only the first ~20 points and also,
       the use a logaritmic scale on the ordinate). You can see in
@@ -932,7 +944,9 @@
       the -/+ matrices first we merge the two matrices:
       <code>
 	paste BC176_CGAT.class.pm.mat BC176_CGAT.class.mp.mat |
-	perl -ne 'chomp;
+	perl -ne '
+	<br >BEGIN {$h=&lt;&gt;; $h=substr($h,length($h)/2); print $h;}
+	<br />chomp;
 	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
 	$title1=shift(@cells1);$title2=shift(@cells2);
 	<br />
@@ -943,7 +957,8 @@
       </code>
       then we use a one-liner to filter:
       <code>
-	perl -ne 'chomp; ($title, @cells) = split("\t");
+	perl -ne 'BEGIN {$header=&lt;&gt;; print $header;} chomp; ($title,
+	@cells) = split("\t");
 	<br />
 	for $i (0..$#cells) { $cells[$i]=0 if $i < 5; };
 	<br />
@@ -955,7 +970,8 @@
       matrices (after merging) at genomic
       distances less than the cutoff:
       <code>
-	perl -ne 'chomp; ($title, @cells) = split("\t");
+	perl -ne 'BEGIN {$header=&lt;&gt;; print $header;} chomp; ($title,
+	@cells) = split("\t");
 	<br />
 	for $i (0..$#cells) { $cells[$i]=2*$cells[$i] if $i < 5; };
 	<br />
@@ -968,7 +984,9 @@
       filtered matrix:
       <code>
 	paste BC176_CGAT.class.pp~mm~filt.mat BC176_CGAT.class.pm~mp~filt.mat |
-	perl -ne 'chomp;
+	perl -ne '
+	<br />BEGIN {$h=&lt;&gt;; $h=substr($h,length($h)/2); print $h;}
+	<br />chomp;
 	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
 	$title1=shift(@cells1);$title2=shift(@cells2);
 	<br />
@@ -977,7 +995,9 @@
 	print $title1,"\t", join("\t",@cells1), "\n";'
 	&gt; BC176_CGAT.class.pp~mm~pm~mp~filt.mat<br /><br />
 	paste BC176_CGAT.class.pp~mm~pm~mp~filt.mat BC176_CGAT.class.xc.mat |
-	perl -ne 'chomp;
+	perl -ne '
+	<br />BEGIN {$h=&lt;&gt;; $h=substr($h,length($h)/2); print $h;}
+	<br />chomp;
 	@cells1=split("\t");@cells2=splice(@cells1,scalar(@cells1)/2);
 	$title1=shift(@cells1);$title2=shift(@cells2);
 	<br />
@@ -1049,8 +1069,7 @@
       <b>2.</b>
     </p><p>
       <b>3.</b>The tools which you will use to visualize your matrices
-      (most probably Matlab, R or some Python scripts that you can ask
-      to <a href="email:axel.cournac@pasteur.fr">Axel</a>) will not
+      (most probably Matlab, R or Python scripts) will not
       easily import matrices in the format used by Dade. Before
       opening them with those tools you can export them with
       the following commands:
@@ -1061,7 +1080,25 @@
       <code>
 	./sparse.pl BC176_CGAT.7k~rebinned BC176_CGAT.7k~rebinned.dat
       </code>
-      to export to a sparse matrix.
+      to export to a sparse matrix. Alternatively, you can load upper
+      diagonal matrices directly in R by defining the following
+      function: 
+      <pre>
+read.updiag &lt;- function (file) {
+    a &lt;- read.table(file, header = TRUE, row.names=1,fill=1);
+    cnames &lt;- colnames(a);
+    a &lt;- t(apply(cbind(1:(dim(a)[1]), a)
+               , 1
+               , function(v) {
+                   c(rep(0,v[1]-1), v[2:(length(v)-v[1]+1)])
+               })
+           );
+    colnames(a) &lt;- cnames;
+    a
+}
+      </pre>
+      and subsequently using the function as 
+      <code class="inplace">matrix <- read.updiag("matrixfilename");</code> .
       <h3>Experimentations on an advanced filtering algorithm</h3>
       <h3>Plotting the genomic distance contact probability</h3>
       <h3>Conclusions</h3>    

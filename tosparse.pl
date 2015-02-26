@@ -27,6 +27,9 @@ if ($sparsematrix eq '-') {
     open(OUTPUT, "$gzipit > $sparsematrix");
 }
 
+# read header
+my $header = <MATRIX>;
+
 while(<MATRIX>) {
     chomp();
     my @fields = split("\t");

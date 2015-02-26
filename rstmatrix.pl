@@ -63,6 +63,12 @@ my $gzipit =  ($matrix =~ /\.gz$/) ? "| gzip -c" : "";
 open(OUTPUT, "$gzipit > $matrix");
 
 our @rstarray;
+my @recnames;
+for my $i (@rstarray) {
+    push @recnames, "\"" . join("~", @$i) . "\"";
+}
+print OUTPUT "\"RST\"", "\t", join("\t", @recnames), "\n";
+
 my @intervector = (0) x scalar(@rstarray);
 my $oldleftgrst = 0; my $oldrightgrst = 0;
 while (<ALIGN>) {
@@ -75,12 +81,12 @@ while (<ALIGN>) {
 	     ($leftgrst == $oldleftgrst)));
 
     if ($leftgrst != $oldleftgrst) {
-	print OUTPUT join("~", @{$rstarray[$oldleftgrst]}), "\t"
+	print OUTPUT $recnames[$oldleftgrst], "\t"
 	    , join("\t",
 		   @intervector[$oldleftgrst..$#intervector]), "\n";
 	for my $i (0 .. $#intervector) { $intervector[$i] = 0; };
 	for ( $oldleftgrst++; $oldleftgrst < $leftgrst; $oldleftgrst++) {
-	    print OUTPUT join("~", @{$rstarray[$oldleftgrst]}), "\t"
+	    print OUTPUT $recnames[$oldleftgrst], "\t"
 		, join("\t",
 		       @intervector[$oldleftgrst..$#intervector]), "\n";
 	}
@@ -90,11 +96,11 @@ while (<ALIGN>) {
     $oldleftgrst = $leftgrst; $oldrightgrst = $rightgrst;
 }
 
-print OUTPUT join("~", @{$rstarray[$oldleftgrst]}), "\t"
+print OUTPUT $recnames[$oldleftgrst], "\t"
     , join("\t", @intervector[$oldleftgrst..$#intervector]), "\n";
 for my $i (0 .. $#intervector) { $intervector[$i] = 0; };
 for ( $oldleftgrst++; $oldleftgrst <= $#intervector; $oldleftgrst++) {
-    print OUTPUT join("~", @{$rstarray[$oldleftgrst]}), "\t"
+    print OUTPUT $recnames[$oldleftgrst], "\t"
 	, join("\t", @intervector[$oldleftgrst..$#intervector]), "\n";
 }
 

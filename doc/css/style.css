@@ -34,8 +34,23 @@ code {
     overflow: auto;
 }
 
+pre {
+    padding-left: 12px;
+    display: block;
+    overflow: auto;
+}
+ 
 code.inplace {
     padding: 0px;
     display: inline;
 }
 
+.toolbar {
+    display: none;
+}
+
+@media print {
+    object {
+	width: 100%;
+    }
+}

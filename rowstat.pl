@@ -21,7 +21,7 @@ if ($matrixfn eq '-') {
 }
 
 # output, stdout
-
+my $header = <MATRIX>;
 while(<MATRIX>) {
     chomp;
     my @input = split("\t");

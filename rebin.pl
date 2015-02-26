@@ -37,7 +37,7 @@ for my $rst (@rstarray) {
     if ($chrnam ne $currchr) {
 	push @bins, [];
 	my $binpos = floor($binsize/2);
-	push @bintitle, "$chrnam~$binpos";
+	push @bintitle, "\"$chrnam~$binpos\"";
 	$currchr = $chrnam;
 	$binstartp = 0;
     }
@@ -69,6 +69,9 @@ if ($binmatrix eq '-') {
     open(OUTPUT, "$gzipit > $binmatrix");
 }
 
+# Read the header
+my $header = <$MATRIX>;
+
 # Read a line from the matrix, return content and fragment number
 sub mreadline {
     my $file = $_[0];
@@ -93,10 +96,14 @@ for (my $i = 0; $i <= $#bins; $i++) {
 die "Didn't find start and end bin, weird" if (($binstart < 0) ||
 					       ($binend < 0));
 
+# Print the header
+print OUTPUT "\"BIN\"", "\t"
+    , join("\t", @bintitle[$binstart..$binend]), "\n";
+
 for my $binan ($binstart..$binend) {
     my @inputs;
     my @inputsln;
-    my @output = (0) x ($binend - $binstart);
+    my @output = (0) x ($binend - $binan + 1);
 
     print STDERR "\33[2K\rElaborating bin $binan out of $#bins";
 
@@ -127,7 +134,7 @@ for my $binan ($binstart..$binend) {
 		    if (!(defined ${$inputs[$j]}[ $coln ])
 			&& ($binbn != $binend));
 		if ( defined ${$inputs[$j]}[ $coln ] ) {
-		    $output[$binbn] += ${$inputs[$j]}[ $coln ];
+		    $output[$binbn - $binan] += ${$inputs[$j]}[ $coln ];
 		}
 	    }
 	}

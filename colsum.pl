@@ -26,7 +26,10 @@ if ($matrixfn eq '-') {
 
 # output, stdout
 my @output;
-my @outputtit;
+my $header = <MATRIX>;
+chomp($header);
+my @outputtit = split("\t", $header);
+shift @outputtit;
 
 while(<MATRIX>) {
     my $i = $. - 1;
@@ -36,7 +39,6 @@ while(<MATRIX>) {
     if ($isalg) {
 	my @tmparray = (0) x $i;
 	@input = (@tmparray, @input);
-	push @outputtit, $title;
     }
 
     for my $j (0..$#input) {
