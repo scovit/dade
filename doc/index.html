@@ -1068,8 +1068,12 @@
     </p><p>
       <b>2.</b>
     </p><p>
-      <b>3.</b>The tools which you will use to visualize your matrices
-      (most probably Matlab, R or Python scripts) will not
+      <b>3.</b> Some tools which you could use to visualize your
+      matrices (like
+      <a href="http://www.exelisvis.com/ProductsServices/IDL.aspx">IDL</a>,
+      <a href="http://pdl.perl.org/">PDL</a>,
+      <a href="http://fr.mathworks.com/">Matlab</a>,
+      or <a href="http://scipy.org/">SciPy</a> scripts) will not
       easily import matrices in the format used by Dade. Before
       opening them with those tools you can export them with
       the following commands:
@@ -1081,8 +1085,9 @@
 	./sparse.pl BC176_CGAT.7k~rebinned BC176_CGAT.7k~rebinned.dat
       </code>
       to export to a sparse matrix. Alternatively, you can load upper
-      diagonal matrices directly in R by defining the following
-      function: 
+      diagonal matrices directly
+      in <a href="http://www.r-project.org/">R</a> by defining the
+      following function: 
       <pre>
 read.updiag &lt;- function (file) {
     a &lt;- read.table(file, header = TRUE, row.names=1,fill=1);
@@ -1095,8 +1100,7 @@ read.updiag &lt;- function (file) {
            );
     colnames(a) &lt;- cnames;
     a
-}
-      </pre>
+}</pre>
       and subsequently using the function as 
       <code class="inplace">matrix <- read.updiag("matrixfilename");</code> .
       <h3>Experimentations on an advanced filtering algorithm</h3>

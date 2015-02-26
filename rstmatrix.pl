@@ -67,8 +67,9 @@ my @recnames;
 for my $i (@rstarray) {
     push @recnames, "\"" . join("~", @$i) . "\"";
 }
+# header
 print OUTPUT "\"RST\"", "\t", join("\t", @recnames), "\n";
-
+my $printed = 0;
 my @intervector = (0) x scalar(@rstarray);
 my $oldleftgrst = 0; my $oldrightgrst = 0;
 while (<ALIGN>) {
@@ -81,11 +82,13 @@ while (<ALIGN>) {
 	     ($leftgrst == $oldleftgrst)));
 
     if ($leftgrst != $oldleftgrst) {
+	$printed++;
 	print OUTPUT $recnames[$oldleftgrst], "\t"
 	    , join("\t",
 		   @intervector[$oldleftgrst..$#intervector]), "\n";
 	for my $i (0 .. $#intervector) { $intervector[$i] = 0; };
 	for ( $oldleftgrst++; $oldleftgrst < $leftgrst; $oldleftgrst++) {
+	    $printed++;
 	    print OUTPUT $recnames[$oldleftgrst], "\t"
 		, join("\t",
 		       @intervector[$oldleftgrst..$#intervector]), "\n";
@@ -95,15 +98,18 @@ while (<ALIGN>) {
     $intervector[$rightgrst]++;
     $oldleftgrst = $leftgrst; $oldrightgrst = $rightgrst;
 }
-
+$printed++;
 print OUTPUT $recnames[$oldleftgrst], "\t"
     , join("\t", @intervector[$oldleftgrst..$#intervector]), "\n";
 for my $i (0 .. $#intervector) { $intervector[$i] = 0; };
 for ( $oldleftgrst++; $oldleftgrst <= $#intervector; $oldleftgrst++) {
+    $printed++;
     print OUTPUT $recnames[$oldleftgrst], "\t"
 	, join("\t", @intervector[$oldleftgrst..$#intervector]), "\n";
 }
 
+die "Weird things happening, printed $printed out of $#intervector"
+    unless ($printed == $#intervector);
 close(ALIGN);
 close(OUTPUT);
 
