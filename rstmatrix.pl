@@ -69,7 +69,8 @@ for my $i (@rstarray) {
 }
 # header
 print OUTPUT "\"RST\"", "\t", join("\t", @recnames), "\n";
-my $printed = 0;
+my $printed=0;
+my $toprint = scalar(@rstarray);
 my @intervector = (0) x scalar(@rstarray);
 my $oldleftgrst = 0; my $oldrightgrst = 0;
 while (<ALIGN>) {
@@ -93,6 +94,8 @@ while (<ALIGN>) {
 		, join("\t",
 		       @intervector[$oldleftgrst..$#intervector]), "\n";
 	}
+        print STDERR "\33[2K\rElaborating rst $printed out of $toprint"
+	    unless ($printed % 500);
     }
 
     $intervector[$rightgrst]++;
@@ -108,9 +111,9 @@ for ( $oldleftgrst++; $oldleftgrst <= $#intervector; $oldleftgrst++) {
 	, join("\t", @intervector[$oldleftgrst..$#intervector]), "\n";
 }
 
-die "Weird things happening, printed $printed out of $#intervector"
-    unless ($printed == $#intervector);
+die "Weird things happening, printed $printed out of $toprint"
+    unless ($printed == $toprint);
 close(ALIGN);
 close(OUTPUT);
-
+print STDERR "\33[2K\rEND\n";
 0;
