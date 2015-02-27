@@ -9,8 +9,9 @@ if ($#ARGV != 1) {
     exit;
 }
 my $matrixfn = pop @ARGV;
+my $regexstring = pop(@ARGV);
 # here precompile the regex
-my $regex = qr/pop(@ARGV)/;
+my $regex = qr/$regexstring/;
 
 # open input files (files will be readed two times)
 if ($matrixfn eq '-') {
@@ -24,25 +25,30 @@ if ($matrixfn eq '-') {
 my $header = <MATRIX>;
 chomp($header);
 my @titles = split("\t", $header);
-my $mattit = shift @titles; 
+my $mattit = shift @titles;
+$mattit =~ s/(^.|.$)//g; 
+$mattit .= "DB";
 
 # output, stdout
 my @output;
 my ($ms, $me) = (0, 0);
-for $i (0..$#titles) {
+for my $i (0..$#titles) {
     my $currtit = $titles[$i];
     $currtit =~ s/(^.|.$)//g;
-    if ($titles[$i] ~= $regex) {
+#    if ($currtit =~ m/$regex/) {
+    if ($currtit =~ m/$regex/) {
 	$ms = 1;
 	die "Selection is not contiguous" if $me;
 	push @output, $i;
-    } elsif $ms {
+    } elsif ($ms) {
 	$me = 1;
     }
 }
 
+die "No match" if ($#output == -1);
+
 # print header
-print $mattit, "DB", "\t", join("\t", @titles[@output]), "\n";
+print "\"$mattit\"", "\t", join("\t", @titles[@output]), "\n";
 
 my $j = 0;
 while(<MATRIX>) {
@@ -52,7 +58,7 @@ while(<MATRIX>) {
 	chomp;
 	my @input = split("\t");
 	my $title = shift(@input);
-	print join("\t", $title, @input[0..$#output]);
+	print join("\t", $title, @input[0..$#output]), "\n";
 	shift @output;
     }
     $j++;
