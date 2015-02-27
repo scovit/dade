@@ -29,15 +29,15 @@ if ($densematrix eq '-') {
 
 # read header
 my $header = <MATRIX>;
-
+my $i = 0;
 while(<MATRIX>) {
-    my $i = $. - 1;
     my @tmparray = (0) x $i;
     chomp;
     my @input = split("\t");
     my $title = shift(@input);
 
     print OUTPUT join("\t", (@tmparray, @input)), "\n";
+    $i++;
 }
 close(OUTPUT);
 close(MATRIX);
