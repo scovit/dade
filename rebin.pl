@@ -78,6 +78,7 @@ sub mreadline {
     my $line = <$file>;
     return undef, undef unless (defined $line);
     chomp($line);
+    $line =~ s/(^.|.$)//g;
     my @input = split("\t", $line);
     my @frag = split("~", shift(@input));
     die "Wrong matrix format" if (!looks_like_number($frag[0]));

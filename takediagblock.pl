@@ -24,12 +24,14 @@ if ($matrixfn eq '-') {
 my $header = <MATRIX>;
 chomp($header);
 my @titles = split("\t", $header);
-shift @titles; 
+my $mattit = shift @titles; 
 
 # output, stdout
 my @output;
 my ($ms, $me) = (0, 0);
 for $i (0..$#titles) {
+    my $currtit = $titles[$i];
+    $currtit =~ s/(^.|.$)//g;
     if ($titles[$i] ~= $regex) {
 	$ms = 1;
 	die "Selection is not contiguous" if $me;
@@ -39,11 +41,13 @@ for $i (0..$#titles) {
     }
 }
 
-seek MATRIX, 0, 0;
+# print header
+print $mattit, "DB", "\t", join("\t", @titles[@output]), "\n";
+
 my $j = 0;
 while(<MATRIX>) {
     last if ($#output == -1);
-    
+
     if ($j == $output[0]) {
 	chomp;
 	my @input = split("\t");
