@@ -33,6 +33,7 @@ sub appendmap {
 
 		# if it's last iteration, just print it.
 		if ($lengthvar == $rlength) {
+		    $FLAG |= 4096 if ($_ =~ /XS:i:[0-9-]/);
 		    print $mapfile $index, "\t", $NAME, "\t", $FLAG, "\t", $CHR
 			, "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\t"
 			, findinrst($POS, $CHR), "\n";
