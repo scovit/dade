@@ -5,13 +5,13 @@ use warnings;
 # Takes a block
 
 if ($#ARGV != 1) {
-    print STDERR "usage: ./takediagblock.pl regex matrix\n";
+    print STDERR "usage: ./takediagblock.pl block matrix\n";
     exit;
 }
 my $matrixfn = pop @ARGV;
-my $regexstring = pop(@ARGV);
-# here precompile the regex
-my $regex = qr/$regexstring/;
+my $blockstring = pop(@ARGV);
+# here compile the block
+my $compiled = eval 'sub { return ('. $blockstring .'); }';
 
 # open input files (files will be readed two times)
 if ($matrixfn eq '-') {
@@ -35,8 +35,7 @@ my ($ms, $me) = (0, 0);
 for my $i (0..$#titles) {
     my $currtit = $titles[$i];
     $currtit =~ s/(^.|.$)//g;
-#    if ($currtit =~ m/$regex/) {
-    if ($currtit =~ m/$regex/) {
+    if ($compiled->($currtit)) {
 	$ms = 1;
 	die "Selection is not contiguous" if $me;
 	push @output, $i;
