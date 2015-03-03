@@ -110,7 +110,7 @@ for my $binan ($binstart..$binend) {
 
     # Load a whole row bin into memory (note, the script eats an
     # amount of memory proportional to the bin size)
-    for (my $i = 0; $i <= $#{$bins[$binan]}; $i++) {
+    for my $i (0 .. $#{$bins[$binan]}) {
 	# Do some checks
 	while (($binan == $binstart) &&
 	       (${$bins[$binan]}[$i] != $inputln)) { $i++; };
@@ -131,7 +131,8 @@ for my $binan ($binstart..$binend) {
 	for my $i (@{$bins[$binbn]}) {
 	    for my $j (0 .. $#inputs) {
 		my $coln = $i - $inputsln[$j];
-		die "Missing columns"
+                die "Missing columns, $binan, $binbn ($binstart, $binend)"
+                    . " $i, $j"
 		    if (!(defined ${$inputs[$j]}[ $coln ])
 			&& ($binbn != $binend));
 		if ( defined ${$inputs[$j]}[ $coln ] ) {
