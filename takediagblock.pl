@@ -1,6 +1,4 @@
 #!/usr/bin/perl
-use strict;
-use warnings;
 
 # Takes a block
 
@@ -11,7 +9,7 @@ if ($#ARGV != 1) {
 my $matrixfn = pop @ARGV;
 my $blockstring = pop(@ARGV);
 # here compile the block
-my $compiled = eval 'sub { my $_ = shift @_; return ('. $blockstring .'); }';
+my $compiled = eval 'sub { my $_ = shift; @_ = split("~"); '. $blockstring .' }';
 
 # open input files (files will be readed two times)
 if ($matrixfn eq '-') {
