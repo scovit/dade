@@ -31,8 +31,8 @@ chomp($header);
 my @outputtit = split("\t", $header);
 shift @outputtit;
 
+my $i = 0;
 while(<MATRIX>) {
-    my $i = $. - 1;
     chomp;
     my @input = split("\t");
     my $title = shift(@input);
@@ -45,17 +45,18 @@ while(<MATRIX>) {
 	$output[$j] = 0 unless exists $output[$j];
 	$output[$j] += $input[$j];
     }
+    $i++;
 }
 close(MATRIX);
 
 if ($isalg) {
     die "Weird matrix format" unless ($#outputtit == $#output);
-    for my $i (0..$#output) {
-	print $outputtit[$i], "\t", $output[$i], "\n";
+    for my $j (0..$#output) {
+	print $outputtit[$j], "\t", $output[$j], "\n";
     }    
 } else {
-    for my $i (0..$#output) {
-	print $i, "\t", $output[$i], "\n";
+    for my $j (0..$#output) {
+	print $j, "\t", $output[$j], "\n";
     }
 }
 

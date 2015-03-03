@@ -112,30 +112,31 @@ for my $binan ($binstart..$binend) {
     # amount of memory proportional to the bin size)
     for my $i (0 .. $#{$bins[$binan]}) {
 	# Do some checks
-	while (($binan == $binstart) &&
-	       (${$bins[$binan]}[$i] != $inputln)) { $i++; };
-	die "Row is lost, matrix should be a full diagonal block"
-	    if (${$bins[$binan]}[$i] != $inputln);
-	die "Sudden end of file, maybe matrix was not cut square?"
-	    if (!(defined $input) && ($binan != $binend));
-
 	if (defined $input) {
+	    while (($binan == $binstart) &&
+		   (${$bins[$binan]}[$i] != $inputln)) { $i++; };
+	    die "Row is lost, matrix should be a full diagonal block"
+		if (${$bins[$binan]}[$i] != $inputln);
+
 	    push @inputs, $input;
 	    push @inputsln, $inputln;
 	    ($input, $inputln) = mreadline($MATRIX);
+	} elsif ($binan != $binend) {
+	    die "Sudden end of file, maybe matrix was not cut square?"
 	}
     }
 
     # column index
     for my $binbn ($binan .. $binend) {
-	for my $i (@{$bins[$binbn]}) {
-	    for my $j (0 .. $#inputs) {
+	for my $j (0 .. $#inputs) {
+	    for my $i (@{$bins[$binbn]}) {
+		next if ($binbn == $binan && $inputsln[$j] > $i);
 		my $coln = $i - $inputsln[$j];
-                die "Missing columns, $binan, $binbn ($binstart, $binend)"
-                    . " $i, $j"
-		    if (!(defined ${$inputs[$j]}[ $coln ])
-			&& ($binbn != $binend));
-		if ( defined ${$inputs[$j]}[ $coln ] ) {
+#		print join("\t", $binan, $binbn, $inputsln[$j], $i, $coln), "\n";
+		if (!(defined ${$inputs[$j]}[ $coln ])
+		   && ($binbn != $binend)) {
+		    die "Missing columns, $binan, $binbn ($binstart, $binend)";
+		} elsif ( defined ${$inputs[$j]}[ $coln ] ) {
 		    $output[$binbn - $binan] += ${$inputs[$j]}[ $coln ];
 		}
 	    }
@@ -143,7 +144,7 @@ for my $binan ($binstart..$binend) {
     }
     
     print OUTPUT $bintitle[$binan], "\t", join("\t", @output), "\n";
-    last if !(defined $input);
+    last unless defined $input;
 }
 close(OUTPUT);
 close($MATRIX);

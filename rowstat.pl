@@ -26,6 +26,7 @@ while(<MATRIX>) {
     chomp;
     my @input = split("\t");
     my $title = shift(@input);
+    $title =~ s/(^.|.$)//g;
     my (undef,undef,undef,$st,$en) = split("~", $title);
     my $len = $en - $st;
 
@@ -40,7 +41,7 @@ while(<MATRIX>) {
 	$variance -= $mean * $mean;
     }
     
-    print join("\t", $title, $len, $sum, $mean, $variance), "\n";
+    print join("\t", "\"$title\"", $len, $sum, $mean, $variance), "\n";
 }
 close(MATRIX);
 
