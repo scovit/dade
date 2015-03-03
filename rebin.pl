@@ -46,7 +46,7 @@ for my $rst (@rstarray) {
 	push @bins, [];
 	$binstartp += $binsize;
 	my $binpos = $binstartp + floor($binsize / 2);
-	push @bintitle, "$chrnam~$binpos";
+	push @bintitle, "\"$chrnam~$binpos\"";
     }
 
     push @{ $bins[$#bins] }, $index;
