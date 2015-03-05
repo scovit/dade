@@ -119,7 +119,6 @@
 	  matrix between restriction fragments</li>
 	<li><a href="#takediagblock">takediagblock.pl</a> Take a
 	  square block on the diagonal of a matrix</li>
-	<!-- <li><a href="#rstdistribution">rstdistrubution.pl</a></li> -->
 	<li><a href="#rebin">rebin.pl</a> Rebin in genomic
 	  cohordinates a matrix</li>
 	<li><a href="#probdecon">probdecon.pl</a> Calculate
@@ -210,7 +209,9 @@
 	<li>INDEX: unique global numeric value</li>
 	<li>NAME: name of aligned pair</li>
 	<li>FLAG: <a href="http://samtools.github.io/hts-specs/SAMv1.pdf">
-	    SAM format</a> bitwise flag</li>
+	    SAM format</a> bitwise flag</li>, only one nonstandard
+	    flag is added to output, the bit which correspond to 4086
+	    is set in case the XS:i flag is reported by the bowtie2 program.
 	<li>CHR: chromosome identifier string (* if not aligned)</li>
 	<li>POS: 1-based leftmost mapping position (* if not aligned)</li> 
 	<li>MAPQ: Mapping quality</li>
@@ -545,6 +546,23 @@
     <!--   the filtering restriction distance as the distance at which the -->
     <!--   four curves converge together. -->
     <!-- </p> -->
+    <a name="rstmatrix"><h3>2.6 takediagblock.pl</h3></a>
+    <p>
+      Take a square diagonal block of the matrix
+      <code>
+	./takediagblock.pl regex matrix
+      </code>
+      Parameters: regex will be matched agains the matrix columns/rows
+      names in order to select the block matrix; The condition that
+      the block is contiguous on the diagonal will be checked. Matrix
+      is the filename of the matrix to be dissected. The script
+      produces the output to STDOUT, in order to save the output to a
+      file, use
+      the <a href="https://www.gnu.org/software/bash/manual/html_node/Redirections.html">
+      &gt; operator</a>.
+    </p><p>
+      
+    </p>
     <a name="rebin"><h3>2.7 rebin.pl</h3></a>
     <p>
       Rebin the interaction matrix in chromosomal coordinates
@@ -587,7 +605,7 @@
     <!--   </code> -->
     <!--   TO BE WRITTEN -->
     <!-- </p> -->
-    <a name="colsum"><h3>2.7 colsum.pl</h3></a>
+    <a name="colsum"><h3>2.8 colsum.pl</h3></a>
     <p>
       Output the sum of columns of a matrix
       <code>
