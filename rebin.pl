@@ -54,21 +54,6 @@ for my $rst (@rstarray) {
 
 my $MATRIX;
 # open input files
-if ($matrixfn =~ /\.gz$/) {
-    open($MATRIX, "gzip -d -c $matrixfn |");
-} else {
-    open($MATRIX, "< $matrixfn");
-}
-
-# rebin
-# output
-if ($binmatrix eq '-') {
-    *OUTPUT = *STDOUT;
-} else {
-    my $gzipit =  ($binmatrix =~ /\.gz$/) ? "| gzip -c" : "";
-    open(OUTPUT, "$gzipit > $binmatrix");
-}
-
 # Read the header
 my $header = <$MATRIX>;
 
@@ -78,9 +63,10 @@ sub mreadline {
     my $line = <$file>;
     return undef, undef unless (defined $line);
     chomp($line);
-    $line =~ s/(^.|.$)//g;
     my @input = split("\t", $line);
-    my @frag = split("~", shift(@input));
+    my $head = shift(@input);
+    $head =~ s/(^.|.$)//g;
+    @frag = split("~", $head);
     die "Wrong matrix format" if (!looks_like_number($frag[0]));
     return \@input, $frag[0];
 };
