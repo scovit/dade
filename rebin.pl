@@ -54,6 +54,21 @@ for my $rst (@rstarray) {
 
 my $MATRIX;
 # open input files
+if ($matrixfn eq '-') {
+    $MATRIX = *STDIN;
+} elsif ($matrixfn =~ /\.gz$/) {
+    open($MATRIX, "gzip -d -c $matrixfn |");
+} else {
+    open($MATRIX, "< $matrixfn");
+}
+# rebin
+# output
+if ($binmatrix eq '-') {
+    *OUTPUT = *STDOUT;
+} else {
+    my $gzipit =  ($binmatrix =~ /\.gz$/) ? "| gzip -c" : "";
+    open(OUTPUT, "$gzipit > $binmatrix");
+}
 # Read the header
 my $header = <$MATRIX>;
 
