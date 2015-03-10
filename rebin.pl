@@ -66,7 +66,7 @@ sub mreadline {
     my @input = split("\t", $line);
     my $head = shift(@input);
     $head =~ s/(^.|.$)//g;
-    @frag = split("~", $head);
+    my @frag = split("~", $head);
     die "Wrong matrix format" if (!looks_like_number($frag[0]));
     return \@input, $frag[0];
 };
