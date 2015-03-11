@@ -35,6 +35,34 @@ sub readrsttable {
     $rstloaded = 1;
 }
 
+sub readrsttable_from_header {
+    my $header = $_[0];
+    my @rsttable = split("\t", $header);
+    shift @rsttable;
+    for (@rsttable) {
+	s/(^.|.$)//g;
+	my ($index, $chrnam, $num, $st, $en) = split("~");
+
+	unless (exists $rsttable{$chrnam}) {
+	    $rsttable{$chrnam} = [];
+	    push @chrnames, $chrnam;
+	    die "Index errors"
+		if ($#rstarray >= 0 && $st != 0 || $num != 0); 
+	}
+
+	die "Header format error"
+	    if ($#rstarray >= 0 && ($index != $rstarray[$#rstarray]->[0] + 1));
+	die "Wierd rsttable" 
+	    if ($st >= $en); 
+	
+	my $rstinfo = [ $index, $chrnam, $num, $st, $en ];
+	push @{ $rsttable{$chrnam} }, $rstinfo;
+	push @rstarray, $rstinfo;
+	$chrlength{$chrnam} = $en;
+    }
+    $rstloaded = 1;
+}
+
 our %centrotable;
 my $centroloaded = 0;
 sub readcentrotable {
