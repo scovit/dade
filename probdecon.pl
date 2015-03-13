@@ -68,7 +68,7 @@ my $maxind = ($islog
 	   ? floor(log($dist) / log($steps))
 	      : floor($dist / $steps)) - 1;
 
-print OUTPUT "\"PDC\"", join("\t", map { binscale($_); } (0 .. $maxind)), "\n";
+print OUTPUT join("\t", "\"PDC\"", map { binscale($_); } (0 .. $maxind)), "\n";
 
 while(<MATRIX>) {
     chomp;
@@ -80,34 +80,33 @@ while(<MATRIX>) {
     my $i = $frag[0] - $rstarray[0]->[0];
     die "Wierd things happening"
 	if (($i < 0) || ($i > $#rstarray));
+    last if ($i == $#rstarray);
+
     $ipos = floor(($rstarray[$i]->[3] + $rstarray[$i]->[4])/2);
-    
+    $dist = $enpos - $ipos;
+    $maxind = ($islog
+               ? floor(log($dist) / log($steps))
+               : floor($dist / $steps));
+
     # Make single restriction fragment histogram
-    my @tmphisto;
+    my @tmphisto = (0) x ($maxind+1);
     for my $j ($i+1 .. $#rstarray) {
 	my $jpos = floor(($rstarray[$j]->[3] + $rstarray[$j]->[4])/2);
 	my $hits = $records[$j-$i];
-	my $dist = $jpos - $ipos;
+	my $ijdist = $jpos - $ipos;
 	    
 	my $bin = ($islog
-		   ? floor(log($dist) / log($steps))
-		   : floor($dist / $steps));
+		   ? floor(log($ijdist) / log($steps))
+		   : floor($ijdist / $steps));
 	    
 	$tmphisto[$bin]+=$hits;
     }
 
-    # normalize by binsize                 
-    for my $k (0 .. $#tmphisto) {
-	$tmphisto[$k] = (0+$tmphisto[$k])
-	    / binsize($k);
-    }
+    $maxind--;
 
-    $dist = $enpos - $ipos;
-    $maxind = ($islog
-		  ? floor(log($dist) / log($steps))
-		  : floor($dist / $steps)) - 1;
+    my @reshisto = map { $tmphisto[$_] / binsize($_) } (0 .. $maxind);
 
-    print OUTPUT "\"$head\"", join("\t", $tmphisto[0 .. $maxind]), "\n";
+    print OUTPUT join("\t", "\"$head\"", @reshisto), "\n";
 }
 close(MATRIX);
 
