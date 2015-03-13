@@ -5,12 +5,13 @@ library(lattice)
 library(latticeExtra)
 
 args <- commandArgs(trailingOnly = TRUE);
-if (length(args) != 2) {
-    write("Usage: ./drawmatrix.R matrix pdffile", stderr());
+if (length(args) != 3) {
+    write("Usage: ./drawmatrix.R matrix1 matrix2 pdffile", stderr());
     quit(status=-1);
 }
-fname=args[1];
-fpdf=args[2];
+fname1=args[1];
+fname2=args[2];
+fpdf=args[3];
 
 pdf(file=fpdf, width= 8.3, height = 8.3)
 pushViewport(viewport(layout = grid.layout(nrow = 1, ncol = 1)))
@@ -28,13 +29,18 @@ read.updiag <- function (file) {
     a
 }
 
-m <- read.updiag(fname)
-#labe <- sapply(strsplit(rownames(m), '~'), function (x) {paste(x[4])})
-labe <- sapply(strsplit(rownames(m), '~'), function (x) {paste(x[1])})
+m1 <- read.updiag(fname1)
+m2 <- read.updiag(fname2)
+
+#labe <- sapply(strsplit(rownames(m1), '~'), function (x) {paste(x[4])})
+labe <- sapply(strsplit(rownames(m1), '~'), function (x) {paste(x[1])})
 nele <- length(labe)
-m <- (m + t(as.matrix(m)) + 1);
-m <- m/sum(m);
-m <- log(m)
+m1 <- (m1 + t(as.matrix(m1)) + 1)
+m1 <- m1/sum(m1)
+m2 <- (m2 + t(as.matrix(m2)) + 1)
+m2 <- m2/sum(m2)
+
+m <- log(m2/m1);
 pushViewport(viewport(layout.pos.col = 1, layout.pos.row = 1))
 print(levelplot(m, xlab = NULL, ylab = NULL,
                 par.settings=list(layout.heights=list(top.padding=-3,
