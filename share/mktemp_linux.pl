@@ -1,5 +1,5 @@
 
-our $TMPDIR="/data/temporary";
+our $TMPDIR="/home/romain/.local/tmp";
 
 die "$TMPDIR does not exists or is not a directory"
     unless (-d $TMPDIR);

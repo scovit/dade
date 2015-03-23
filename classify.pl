@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 use strict;
 use warnings;
 
@@ -31,10 +31,11 @@ if ($rightmapfn =~ /\.gz$/) {
     open(RIGHTMAP, "< $rightmapfn");
 }
 # open output file
-if  ($classificationfn =~ /\.gz$/) {
-    open(CLASSIFIC, "| gzip > $classificationfn");
+if ($classificationfn eq '-') {
+    *CLASSIFIC = *STDOUT;
 } else {
-    open(CLASSIFIC, "> $classificationfn");
+    my $gzipit =  ($classificationfn =~ /\.gz$/) ? "| gzip -c" : "";
+    open(CLASSIFIC, "$gzipit > $classificationfn");
 }
 
 print "Starting classification\n";
