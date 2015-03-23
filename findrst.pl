@@ -81,7 +81,7 @@ for (my $i = 0; $i <  $numfiles; $i++) {
     for (@splicelist) {
 	splice @content, $_, 1;
     }
-    my $contentstr = join("", @content);
+    my $contentstr = uc(join("", @content));
     my $chrlength = length($contentstr);
 
     my @matches;
