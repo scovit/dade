@@ -46,8 +46,8 @@ sub readrsttable_from_header {
 	unless (exists $rsttable{$chrnam}) {
 	    $rsttable{$chrnam} = [];
 	    push @chrnames, $chrnam;
-	    die "Index errors"
-		if ($#rstarray >= 0 && $st != 0 || $num != 0); 
+	    die "Index errors, loaded records: $#rstarray"
+		if ($#rstarray >= 0 && ($st != 0 || $num != 0)); 
 	}
 
 	die "Header format error"

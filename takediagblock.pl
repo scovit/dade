@@ -4,7 +4,7 @@
 
 if ($#ARGV != 1) {
     print STDERR "usage: ./takediagblock.pl block matrix\n";
-    exit;
+    exit -1;
 }
 my $matrixfn = pop @ARGV;
 my $blockstring = pop(@ARGV);
