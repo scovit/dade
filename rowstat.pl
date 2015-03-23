@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 use strict;
 use warnings;
 
@@ -22,6 +22,7 @@ if ($matrixfn eq '-') {
 
 # output, stdout
 my $header = <MATRIX>;
+print "\"ROWSTAT\"\n";
 while(<MATRIX>) {
     chomp;
     my @input = split("\t");
