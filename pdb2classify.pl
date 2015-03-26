@@ -225,11 +225,9 @@ my %psfbins;
 # read the input and output a classify file
 my $m = 0;
 my @x; my @y; my @z;
-my $num;
+my $num = 0;
 sub contact_found {
     my ($i, $j) = @_;
-
-    $num = 0;
 
     return if (@{$binrst[$i]} == 0) || (@{$binrst[$j]} == 0); 
 
