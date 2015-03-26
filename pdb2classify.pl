@@ -239,8 +239,8 @@ sub contact_found {
     my $flag = FL_LEFT_ALIGN | FL_RIGHT_ALIGN;
     $flag |= FL_INTRA_CHR if ($leftchr eq $rightchr);
 
-    my $leftrst = $irst->{index};
-    my $rightrst = $jrst->{index};
+    my $leftrst = $irst->{n};
+    my $rightrst = $jrst->{n};
     my $leftpos = $irst->{st} + int(rand($irst->{en} - $irst->{st}));
     my $rightpos =  $jrst->{st} + int(rand($jrst->{en} - $jrst->{st}));
 
