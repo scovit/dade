@@ -26,7 +26,14 @@ sub readrsttable {
 	die "Wierd rsttable" 
 	    if ($st >= $en); 
 	
-	my $rstinfo = [ $index, $chrnam, $num, $st, $en ];
+	my $rstinfo = {
+	    index => $index, 
+	    chr => $chrnam,
+	    n => $num,
+	    st => $st,
+	    en => $en
+	};
+
 	push @{ $rsttable{$chrnam} }, $rstinfo;
 	push @rstarray, $rstinfo;
 	$chrlength{$chrnam} = $en;
@@ -51,11 +58,19 @@ sub readrsttable_from_header {
 	}
 
 	die "Header format error"
-	    if ($#rstarray >= 0 && ($index != $rstarray[$#rstarray]->[0] + 1));
+	    if ($#rstarray >= 0 &&
+		($index != $rstarray[$#rstarray]->{index} + 1));
 	die "Wierd rsttable" 
 	    if ($st >= $en); 
 	
-	my $rstinfo = [ $index, $chrnam, $num, $st, $en ];
+	my $rstinfo = {
+	    index => $index, 
+	    chr => $chrnam,
+	    n => $num,
+	    st => $st,
+	    en => $en
+	};
+
 	push @{ $rsttable{$chrnam} }, $rstinfo;
 	push @rstarray, $rstinfo;
 	$chrlength{$chrnam} = $en;
@@ -80,12 +95,12 @@ sub findinrst {
     while (1) {
         my $index = int(($top + $bottom)/2);
 
-        if ($ele >= ${$aref}[$index][3] && $ele < ${$aref}[$index][4]) {
+        if ($ele >= $aref->[$index]{st} && $ele < $aref->[$index]{en}) {
             return $index;
             last;
-        } elsif ($ele < ${$aref}[$index][3]) {
+        } elsif ($ele < $aref->[$index]{st}) {
             $top = $index - 1;
-        } elsif ($ele >= ${$aref}[$index][4]) {
+        } elsif ($ele >= $aref->[$index]{en}) {
             $bottom = $index + 1;
         }
     }

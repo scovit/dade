@@ -30,11 +30,10 @@ my $binstartp = 0;
 my $currchr = "-1";
 # my $rst = [ $index, $chrnam, $num, $st, $en ];
 for my $rst (@rstarray) {
-    my ($index, $chrnam, $num, $st, $en ) = @$rst;
-    my $rstpos = floor(($st + $en)/2);
+    my $rstpos = floor(($rst->{st} + $rst{en})/2);
     
     # new chromosome?
-    if ($chrnam ne $currchr) {
+    if ($rst->{chr} ne $currchr) {
 	push @bins, [];
 	my $binpos = floor($binsize/2);
 	push @bintitle, "\"$chrnam~$binpos\"";
@@ -49,7 +48,7 @@ for my $rst (@rstarray) {
 	push @bintitle, "\"$chrnam~$binpos\"";
     }
 
-    push @{ $bins[$#bins] }, $index;
+    push @{ $bins[$#bins] }, $rst->{index};
 }
 
 my $MATRIX;

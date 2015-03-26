@@ -60,9 +60,9 @@ my $header = <MATRIX>;
 readrsttable_from_header($header);
 our @rstarray;
 
-my $ipos = floor(($rstarray[0]->[3] + $rstarray[0]->[4])/2);
-my $enpos = floor(($rstarray[$#rstarray]->[3]
-		   + $rstarray[$#rstarray]->[4])/2);
+my $ipos = floor(($rstarray[0]->{st} + $rstarray[0]->{en})/2);
+my $enpos = floor(($rstarray[$#rstarray]->{st}
+		   + $rstarray[$#rstarray]->{en})/2);
 my $dist = $enpos - $ipos;
 my $maxind = ($islog
 	   ? floor(log($dist) / log($steps))
@@ -77,12 +77,12 @@ while(<MATRIX>) {
     $head =~ s/(^.|.$)//g;
     my @frag = split("~", $head);
     
-    my $i = $frag[0] - $rstarray[0]->[0];
+    my $i = $frag[0] - $rstarray[0]->{index};
     die "Wierd things happening"
 	if (($i < 0) || ($i > $#rstarray));
     last if ($i == $#rstarray);
 
-    $ipos = floor(($rstarray[$i]->[3] + $rstarray[$i]->[4])/2);
+    $ipos = floor(($rstarray[$i]->{st} + $rstarray[$i]->{en})/2);
     $dist = $enpos - $ipos;
     $maxind = ($islog
                ? floor(log($dist) / log($steps))
@@ -91,7 +91,7 @@ while(<MATRIX>) {
     # Make single restriction fragment histogram
     my @tmphisto = (0) x ($maxind+1);
     for my $j ($i+1 .. $#rstarray) {
-	my $jpos = floor(($rstarray[$j]->[3] + $rstarray[$j]->[4])/2);
+	my $jpos = floor(($rstarray[$j]->{st} + $rstarray[$j]->{en})/2);
 	my $hits = $records[$j-$i];
 	my $ijdist = $jpos - $ipos;
 	    

@@ -44,8 +44,8 @@ while (<CLASS>) {
     if (aligned($flag)) {
 	die "Chromosome not found" unless
 	    ((exists $rsttable{$leftchr}) && (exists $rsttable{$rightchr})); 
-	my $leftgrst = ${ $rsttable{$leftchr} }[$leftrst][0];
-	my $rightgrst = ${ $rsttable{$rightchr} }[$rightrst][0];
+	my $leftgrst = $rsttable{$leftchr}->[$leftrst]{index};
+	my $rightgrst = $rsttable{$rightchr}->[$rightrst]{index};
 	if ($leftgrst < $rightgrst) {
 	    print ALIGN $leftgrst, "\t", $rightgrst, "\t", $flag, "\n";
 	} else {
@@ -65,7 +65,9 @@ open(OUTPUT, "$gzipit > $matrix");
 our @rstarray;
 my @recnames;
 for my $i (@rstarray) {
-    push @recnames, "\"" . join("~", @$i) . "\"";
+    push @recnames, "\"" 
+	. join("~", $i->{index}, $i->{chr}, $i->{n}, $i->{st}, $i->{en})
+	. "\"";
 }
 # header
 print OUTPUT "\"RST\"", "\t", join("\t", @recnames), "\n";
