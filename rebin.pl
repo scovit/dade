@@ -26,29 +26,30 @@ readrsttable($rsttablefn);
 our @rstarray;
 my @bins;
 my @bintitle;
-my $binstartp = 0;
-my $currchr = "-1";
-# my $rst = [ $index, $chrnam, $num, $st, $en ];
-for my $rst (@rstarray) {
-    my $rstpos = floor(($rst->{st} + $rst{en})/2);
-    
-    # new chromosome?
-    if ($rst->{chr} ne $currchr) {
-	push @bins, [];
-	my $binpos = floor($binsize/2);
-	push @bintitle, "\"$chrnam~$binpos\"";
-	$currchr = $chrnam;
-	$binstartp = 0;
-    }
-    # empty bins if no rst is there
-    while ($binstartp + $binsize < $rstpos) {
-	push @bins, [];
-	$binstartp += $binsize;
-	my $binpos = $binstartp + floor($binsize / 2);
-	push @bintitle, "\"$chrnam~$binpos\"";
-    }
+{
+    my $binstartp = 0;
+    my $currchr = "-1";
+    for my $rst (@rstarray) {
+	my $rstpos = floor(($rst->{st} + $rst{en})/2);
 
-    push @{ $bins[$#bins] }, $rst->{index};
+	# new chromosome?
+	if ($rst->{chr} ne $currchr) {
+	    push @bins, [];
+	    my $binpos = floor($binsize/2);
+	    push @bintitle, "\"$chrnam~$binpos\"";
+	    $currchr = $chrnam;
+	    $binstartp = 0;
+	}
+	# empty bins if no rst is there
+	while ($binstartp + $binsize < $rstpos) {
+	    push @bins, [];
+	    $binstartp += $binsize;
+	    my $binpos = $binstartp + floor($binsize / 2);
+	    push @bintitle, "\"$chrnam~$binpos\"";
+	}
+
+	push @{ $bins[$#bins] }, $rst->{index};
+    }
 }
 
 my $MATRIX;
