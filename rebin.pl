@@ -4,6 +4,7 @@ use warnings;
 
 use Scalar::Util qw(looks_like_number);
 use POSIX qw/floor/;
+use List::Util qw(any);
 
 BEGIN {
     use FindBin '$Bin';
@@ -93,8 +94,8 @@ my $lastln = $inputln + $#$input;
 # Get the first and last bin
 my $binstart = -1; my $binend = -1;
 for (my $i = 0; $i <= $#bins; $i++) {
-    $binstart = $i if ($inputln ~~ @{$bins[$i]});
-    $binend = $i if ($lastln ~~ @{$bins[$i]});
+    $binstart = $i if (any { $_ == $inputln } @{$bins[$i]});
+    $binend = $i if (any { $_ == $lastln } @{$bins[$i]});
 }
 die "Didn't find start and end bin, weird" if (($binstart < 0) ||
 					       ($binend < 0));
