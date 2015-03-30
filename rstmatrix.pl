@@ -23,11 +23,14 @@ my ($classificationfn, $rsttablefn, $matrix) = @ARGV;
 our $TMPDIR;
 
 # open input files
-if ($classificationfn =~ /\.gz$/) {
+if ($classificationfn eq '-') {
+    *CLASS = *STDIN;
+} elsif ($classificationfn =~ /\.gz$/) {
     open(CLASS, "gzip -d -c $classificationfn |");
 } else {
     open(CLASS, "< $classificationfn");
 }
+
 readrsttable($rsttablefn);
 
 my $alignedfn=mktemp_linux("tmp.XXXXXXXX.couples");
@@ -36,6 +39,7 @@ open(ALIGN, "| sort --parallel=8 --temporary-directory=$TMPDIR " .
 
 # Filter and sort
 our %rsttable;
+print $rsttable{"chr6"}->[843]{n}, "\n";
 while (<CLASS>) {
     my @campi = split("\t");
     my (undef, $flag, $leftchr, undef, $leftrst, $rightchr,
@@ -43,7 +47,11 @@ while (<CLASS>) {
 
     if (aligned($flag)) {
 	die "Chromosome not found" unless
-	    ((exists $rsttable{$leftchr}) && (exists $rsttable{$rightchr})); 
+	    ((exists $rsttable{$leftchr}) && (exists $rsttable{$rightchr}));
+	die "Restriction fragment not found (left), $leftchr, $leftrst" unless
+            exists $rsttable{$leftchr}->[$leftrst];
+        die "Restriction fragment not found (right), $rightchr, $rightrst" unless
+            exists $rsttable{$rightchr}->[$rightrst]; 
 	my $leftgrst = $rsttable{$leftchr}->[$leftrst]{index};
 	my $rightgrst = $rsttable{$rightchr}->[$rightrst]{index};
 	if ($leftgrst < $rightgrst) {
@@ -59,8 +67,13 @@ close(ALIGN);
 #link($alignedfn, $alignedfn . ".dbg");
 
 open(ALIGN, "< $alignedfn");
-my $gzipit =  ($matrix =~ /\.gz$/) ? "| gzip -c" : "";
-open(OUTPUT, "$gzipit > $matrix");
+# output
+if ($matrix eq '-') {
+    *OUTPUT = *STDOUT;
+} else {
+    my $gzipit =  ($matrix =~ /\.gz$/) ? "| gzip -c" : "";
+    open(OUTPUT, "$gzipit > $matrix");
+}
 
 our @rstarray;
 my @recnames;
