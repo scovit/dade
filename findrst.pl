@@ -97,11 +97,11 @@ for (my $i = 0; $i <  $numfiles; $i++) {
 	    next;
 	}
 	print join("\t", $index, $chrnames[$i],
-		   $j-$discarded, $old, $matches[$j], "\n");
+		   $j - $discarded, $old, $matches[$j], "\n");
 	$old = $matches[$j];
 	$index++;
     }
     print join("\t", $index, $chrnames[$i],
-	       $#matches+1, $old, $chrlength, "\n");
+	       @matches - $discarded, $old, $chrlength, "\n");
     $index++;
 }
