@@ -11,6 +11,8 @@ our %chrlength;
 our @chrnames;
 sub readrsttable {
     my $fname = $_[0];
+    my $oldnum;
+
     open RSTTABLE, "<", $fname or die $!;
     while (<RSTTABLE>) {
 	chomp;
@@ -19,12 +21,15 @@ sub readrsttable {
 	unless (exists $rsttable{$chrnam}) {
 	    $rsttable{$chrnam} = [];
 	    push @chrnames, $chrnam;
-	    die "Index errors" if (($st != 0) || ($num != 0)); 
+	    die "Index errors" if (($st != 0) || ($num != 0));
+	    $oldnum = -1;
 	}
 
 	die "File format error in $fname" if ($index != scalar(@rstarray));
-	die "Wierd rsttable" 
-	    if ($st >= $en); 
+	die "Wierd rsttable, seems not ordered"
+	    if ($st >= $en);
+        die "Wierd rsttable, some parts seems missing"
+            if ($num != ++$oldnum);
 	
 	my $rstinfo = {
 	    index => $index, 
@@ -44,6 +49,7 @@ sub readrsttable {
 
 sub readrsttable_from_header {
     my $header = $_[0];
+    my $oldnum;
     my @rsttable = split("\t", $header);
     shift @rsttable;
     for (@rsttable) {
@@ -54,14 +60,17 @@ sub readrsttable_from_header {
 	    $rsttable{$chrnam} = [];
 	    push @chrnames, $chrnam;
 	    die "Index errors, loaded records: $#rstarray"
-		if ($#rstarray >= 0 && ($st != 0 || $num != 0)); 
+		if ($#rstarray >= 0 && ($st != 0 || $num != 0));
+	    $oldnum = $num - 1;
 	}
 
 	die "Header format error"
 	    if ($#rstarray >= 0 &&
 		($index != $rstarray[$#rstarray]->{index} + 1));
-	die "Wierd rsttable" 
-	    if ($st >= $en); 
+	die "Wierd rsttable, seems not ordered"
+	    if ($st >= $en);
+        die "Wierd rsttable, some parts seems missing"
+            if ($num != ++$oldnum); 
 	
 	my $rstinfo = {
 	    index => $index, 

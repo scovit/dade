@@ -39,7 +39,6 @@ open(ALIGN, "| sort --parallel=8 --temporary-directory=$TMPDIR " .
 
 # Filter and sort
 our %rsttable;
-print $rsttable{"chr6"}->[843]{n}, "\n";
 while (<CLASS>) {
     my @campi = split("\t");
     my (undef, $flag, $leftchr, undef, $leftrst, $rightchr,
