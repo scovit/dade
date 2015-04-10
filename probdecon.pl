@@ -4,9 +4,10 @@ use warnings;
 
 BEGIN {
     use FindBin '$Bin';
+    use Data::Dumper;
     use Scalar::Util qw(looks_like_number);
     use POSIX qw(floor);
-    require "$Bin/share/findinrst.pl";
+    require "$Bin/share/Metaheader.pm";
 }
 
 # Takes as input matrix, output a matrix of vectors
@@ -57,32 +58,37 @@ if ($pdcmatrix eq '-') {
 
 # Read the header
 my $header = <MATRIX>;
-readrsttable_from_header($header);
-our @rstarray;
+chomp($header);
+my $metah = Metaheader->new($header);
+my @rowarray = @{ $metah->{rowinfo} };
 
-my $ipos = floor(($rstarray[0]->{st} + $rstarray[0]->{en})/2);
-my $enpos = floor(($rstarray[$#rstarray]->{st}
-		   + $rstarray[$#rstarray]->{en})/2);
+sub getpos {
+    my $i=shift;
+    return ($rowarray[$i]->{pos}
+	    // floor(($rowarray[$i]->{st} + $rowarray[$i]->{en})/2)
+	    // die "No positional information found in header");
+}
+
+my $ipos = getpos(0);
+my $enpos = getpos($#rowarray);
+
 my $dist = $enpos - $ipos;
 my $maxind = ($islog
-	   ? floor(log($dist) / log($steps))
+	      ? floor(log($dist) / log($steps))
 	      : floor($dist / $steps)) - 1;
 
 print OUTPUT join("\t", "\"PDC\"", map { binscale($_); } (0 .. $maxind)), "\n";
 
+my $i = 0;
 while(<MATRIX>) {
     chomp;
     my @records = split("\t");
     my $head = shift @records;
-    $head =~ s/(^.|.$)//g;
-    my @frag = split("~", $head);
-    
-    my $i = $frag[0] - $rstarray[0]->{index};
-    die "Wierd things happening"
-	if (($i < 0) || ($i > $#rstarray));
-    last if ($i == $#rstarray);
+    my $frag = $metah->metarecord($head);
 
-    $ipos = floor(($rstarray[$i]->{st} + $rstarray[$i]->{en})/2);
+    last if ($i == $#rowarray);
+
+    $ipos = getpos($i);
     $dist = $enpos - $ipos;
     $maxind = ($islog
                ? floor(log($dist) / log($steps))
@@ -90,8 +96,8 @@ while(<MATRIX>) {
 
     # Make single restriction fragment histogram
     my @tmphisto = (0) x ($maxind+1);
-    for my $j ($i+1 .. $#rstarray) {
-	my $jpos = floor(($rstarray[$j]->{st} + $rstarray[$j]->{en})/2);
+    for my $j ($i+1 .. $#rowarray) {
+	my $jpos = getpos($j);
 	my $hits = $records[$j-$i];
 	my $ijdist = $jpos - $ipos;
 	    
@@ -106,7 +112,8 @@ while(<MATRIX>) {
 
     my @reshisto = map { $tmphisto[$_] / binsize($_) } (0 .. $maxind);
 
-    print OUTPUT join("\t", "\"$head\"", @reshisto), "\n";
+    print OUTPUT join("\t", "$head", @reshisto), "\n";
+    $i++;
 }
 close(MATRIX);
 
