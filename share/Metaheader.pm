@@ -96,6 +96,33 @@ sub new {
     return bless $self, $classname;
 }
 
+sub selectvector {
+    my $self = shift
+    my $blockstring = shift;
+
+    my $compiled = eval 
+       'sub {
+          local $_ = shift;
+          local @_ = split("~");
+          local %_ = %{ $metah->metarecord($_) };
+          '. $blockstring .'
+        }';
+    die $@ unless($compiled);
+
+    my @output;
+    my ($ms, $me) = (0, 0);
+    for my $i (0..$#{ $self->{strings} }) {
+	if ($compiled->($self->{strings}->[$i])) {
+	    $ms = 1;
+	    die "Selection is not contiguous" if $me;
+	    push @output, $i;
+	} elsif ($ms) {
+	    $me = 1;
+	}
+    }
+    return @output;
+}
+
 sub findinheader {
     my $self = shift;
     die "Should load object first" if $self->{loaded} == 0;

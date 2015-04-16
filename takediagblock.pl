@@ -19,27 +19,7 @@ chomp($header);
 my $metah = Metaheader->new($header);
 my @rowarray = @{ $metah->{rowinfo} };
 
-# here compile the block
-my $compiled = eval 
-    'sub {
-       local $_ = shift; local @_ = split("~");
-       local %_ = %{ $metah->metarecord($_) };
-       '. $blockstring .'
-     }';
-die $@ unless($compiled);
-
-# output, stdout
-my @output;
-my ($ms, $me) = (0, 0);
-for my $i (0..$#{ $metah->{strings} }) {
-    if ($compiled->($metah->{strings}->[$i])) {
-	$ms = 1;
-	die "Selection is not contiguous" if $me;
-	push @output, $i;
-    } elsif ($ms) {
-	$me = 1;
-    }
-}
+my @output = $metah->selectvector($blockstring);
 die "No match" if ($#output == -1);
 
 # print header
