@@ -103,8 +103,9 @@ sub selectvector {
     my $compiled = eval 
        'sub {
           local $_ = shift;
-          local @_ = split("~");
-          local %_ = %{ $metah->metarecord($_) };
+          local %_ = %{ $self->metarecord($_) };
+          my ($dummy) = $_ =~ /^"(.+)"$|^(.+)$/;
+          local @_ = split("~", $dummy); undef $dummy;
           '. $blockstring .'
         }';
     die $@ unless($compiled);
