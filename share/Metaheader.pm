@@ -4,6 +4,7 @@ package Metaheader;
 # Read in from the metaheader (the restriction table)
 
 my %default_metaheader = (
+    metastring => "",
     strings => [],
     rowinfo => [],   # @metaarray
     loaded => 0,     # $metaloaded

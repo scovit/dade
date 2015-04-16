@@ -2,38 +2,37 @@
 
 # Takes a block
 
-if ($#ARGV != 1) {
-    print STDERR "usage: ./takediagblock.pl block matrix\n";
+BEGIN {
+    use FindBin '$Bin';
+    require "$Bin/share/Metaheader.pm";
+}
+
+if ($#ARGV != 0) {
+    print STDERR "usage: ./takediagblock.pl block < input > output\n";
     exit -1;
 }
-my $matrixfn = pop @ARGV;
 my $blockstring = pop(@ARGV);
-# here compile the block
-my $compiled = eval 'sub { my $_ = shift; @_ = split("~"); '. $blockstring .' }';
 
-# open input files (files will be readed two times)
-if ($matrixfn eq '-') {
-    *MATRIX = *STDIN;
-} elsif ($matrixfn =~ /\.gz$/) {
-    open(MATRIX, "gzip -d -c $matrixfn |");
-} else {
-    open(MATRIX, "< $matrixfn");
-}
-
-my $header = <MATRIX>;
+# Read the header
+my $header = <>;
 chomp($header);
-my @titles = split("\t", $header);
-my $mattit = shift @titles;
-$mattit =~ s/(^.|.$)//g; 
-$mattit .= "DB";
+my $metah = Metaheader->new($header);
+my @rowarray = @{ $metah->{rowinfo} };
+
+# here compile the block
+my $compiled = eval 
+    'sub {
+       local $_ = shift; local @_ = split("~");
+       local %_ = %{ $metah->metarecord($_) };
+       '. $blockstring .'
+     }';
+die $@ unless($compiled);
 
 # output, stdout
 my @output;
 my ($ms, $me) = (0, 0);
-for my $i (0..$#titles) {
-    my $currtit = $titles[$i];
-    $currtit =~ s/(^.|.$)//g;
-    if ($compiled->($currtit)) {
+for my $i (0..$#{ $metah->{strings} }) {
+    if ($compiled->($metah->{strings}->[$i])) {
 	$ms = 1;
 	die "Selection is not contiguous" if $me;
 	push @output, $i;
@@ -41,14 +40,14 @@ for my $i (0..$#titles) {
 	$me = 1;
     }
 }
-
 die "No match" if ($#output == -1);
 
 # print header
-print "\"$mattit\"", "\t", join("\t", @titles[@output]), "\n";
+print join("\t", $metah->{metastring},
+	         $metah->{strings}->[@output]), "\n";
 
 my $j = 0;
-while(<MATRIX>) {
+while(<>) {
     last if ($#output == -1);
 
     if ($j == $output[0]) {
@@ -60,6 +59,5 @@ while(<MATRIX>) {
     }
     $j++;
 }
-close(MATRIX);
 
 0;
