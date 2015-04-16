@@ -47,6 +47,7 @@ for my $i (0..$#{ $metah->{strings} }) {
 	$me = 1;
     }
 }
+die "No match" if ($#output == -1);
 
 my $j = 0;
 while (<>) {
