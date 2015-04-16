@@ -4,6 +4,7 @@ package Metaheader;
 # Read in from the metaheader (the restriction table)
 
 my %default_metaheader = (
+    strings => [],
     rowinfo => [],   # @metaarray
     loaded => 0,     # $metaloaded
     interpret => [],
@@ -22,6 +23,11 @@ my %shortcuts = (
 
 my $sub_interpretmeta = sub {
     my $meta = shift;
+
+    if ( $meta =~ /^\s*die\s*$/ ) {
+	die "Metahader tells me that the file is not a matrix";
+    };
+
     my $tmpret = eval($meta);
 
     die "Uninterpretable meta-header "
@@ -71,6 +77,8 @@ sub new {
     my %m = %default_metaheader;
     my $self = \%m;
 
+    $self->{strings} = \@hcolumns;
+    $self->{metastring} = $metastring;
     $self->{interpret} = $shortcuts{$meta} // $sub_interpretmeta->($meta);
 
     for my $col (@hcolumns) {
