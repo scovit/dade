@@ -35,7 +35,7 @@ die "Blocks are overlapping" if
 
 if ($unofirst) {
     # print header
-    print join("\t", $metah->{metastring},
+    print join("\t", "\"die\"",
 	       $metah->{strings}->[@output2]), "\n";
 
     my $j = 0;
@@ -60,7 +60,7 @@ if ($unofirst) {
 } else { 
     # not $unofirst
     # print header
-    print join("\t", $metah->{metastring},
+    print join("\t", "\"die\"",
 	       $metah->{strings}->[@output2]), "\n";
 
     # Warning: this script, as it is, may use huges amount of RAM
