@@ -97,7 +97,7 @@ sub new {
 }
 
 sub selectvector {
-    my $self = shift
+    my $self = shift;
     my $blockstring = shift;
 
     my $compiled = eval 
