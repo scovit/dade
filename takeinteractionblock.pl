@@ -61,7 +61,7 @@ if ($unofirst) {
 
 	$j++;
     }
-
+    die;
 } else { 
     # not $unofirst
     # print header
@@ -71,7 +71,7 @@ if ($unofirst) {
     # Warning: this script, as it is, may use huges amount of RAM
     # @l arrays may be tied to temporary files
 
-    my @l = map {Tie::Array::Packed::Integer->make()} @output;
+    my @l = map {Tie::Array::Packed::IntegerNative->make()} @output2;
 
     my $j = 0;
     while (<>) {
