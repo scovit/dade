@@ -2,44 +2,20 @@
 use strict;
 use warnings;
 
+BEGIN {
+    use FindBin '$Bin';
+}
+
 # Takes as input matrix, output as dense matrix
 
-if ($#ARGV != 1) {
-	print "usage: ./todense.pl matrix densematrix\n";
+if ($#ARGV != -1) {
+	print "usage: ./todense.pl < matrix > densematrix\n";
 	exit;
 };
-my ($matrixfn, $densematrix) = @ARGV;
 
-# open input files
-if ($matrixfn eq '-') {
-    *MATRIX = *STDIN;
-} elsif ($matrixfn =~ /\.gz$/) {
-    open(MATRIX, "gzip -d -c $matrixfn |");
-} else {
-    open(MATRIX, "< $matrixfn");
+{
+    local @ARGV = ("'1'");
+    do "$Bin/takediagblock.pl";
 }
-
-# output
-if ($densematrix eq '-') {
-    *OUTPUT = *STDOUT;
-} else {
-    my $gzipit =  ($densematrix =~ /\.gz$/) ? "| gzip -c" : "";
-    open(OUTPUT, "$gzipit > $densematrix");
-}
-
-# read header
-my $header = <MATRIX>;
-my $i = 0;
-while(<MATRIX>) {
-    my @tmparray = (0) x $i;
-    chomp;
-    my @input = split("\t");
-    my $title = shift(@input);
-
-    print OUTPUT join("\t", (@tmparray, @input)), "\n";
-    $i++;
-}
-close(OUTPUT);
-close(MATRIX);
 
 0;

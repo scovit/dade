@@ -3,10 +3,11 @@ use strict;
 use warnings;
 
 # Warning: this script, as it is, may use huges amount of RAM
-# @l arrays may be tied to temporary files
+# @l arrays may be tied to temporary files instead of packed strings
 
 BEGIN {
     use FindBin '$Bin';
+    use Tie::Array::Packed;
     require "$Bin/share/Metaheader.pm";
 }
 
@@ -26,7 +27,9 @@ print join("\t", "\"die\"", @{ $metah->{strings} }),"\n";
 
 my @output = $metah->selectvector($blockstring);
 die "No match" if ($#output == -1);
-my @l = map {[]} @output;
+
+my @l = map {Tie::Array::Packed::IntegerNative->make()} @output;
+#my @l = map {[]} @output;
 
 my $j = 0;
 while (<>) {
@@ -45,8 +48,10 @@ while (<>) {
     }
 
     for my $i (0..$#output) {
-	push @{$l[$i]}, $r[$output[$i]];
+	push @{$l[$i]}, $r[$output[$i]-$j];
     }
 
     $j++;
 }
+
+0;
