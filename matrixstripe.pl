@@ -12,7 +12,7 @@ BEGIN {
 }
 
 if ($#ARGV != 0) {
-    print STDERR "usage: ./matrixstrip.pl block < input > output\n";
+    print STDERR "usage: ./matrixstripe.pl block < input > output\n";
     exit -1;
 }
 my $blockstring = pop @ARGV;
