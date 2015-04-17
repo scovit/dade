@@ -33,7 +33,8 @@ if ($classificationfn eq '-') {
 
 readrsttable($rsttablefn);
 
-my $alignedfn=mktemp_linux("tmp.XXXXXXXX.couples");
+my $alignedfn=mktemp_linux("tmp.XXXXXXXX.couples") or
+	die "Could not create temporary file";
 open(ALIGN, "| sort --parallel=8 --temporary-directory=$TMPDIR " .
      "-g -k 1 -k 2 > $alignedfn");
 

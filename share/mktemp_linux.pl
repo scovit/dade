@@ -14,6 +14,7 @@ sub mktemp_linux
 	unless (-d $TMPDIR);
     my $fname=`mktemp $TMPDIR/$_[0]`;
     $fname =~ s/^\s+|\s+$//g ;
+    return 0 if $fname eq "";
     push(@deletion_list, $fname);
     return $fname;
 }
@@ -21,7 +22,7 @@ sub mktemp_linux
 my $ORIG_PID = $$;
 END {
     return unless $$ == $ORIG_PID;
-    print "Cleaning up!\n";
+    print STDERR "Cleaning up!\n";
     foreach (@deletion_list) {
 	unlink($_) or warn "Could not unlink $origreads: $!";
     }
