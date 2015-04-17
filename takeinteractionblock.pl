@@ -2,8 +2,12 @@
 use strict;
 use warnings;
 
+# Warning: this script, as it is, may use huges amount of RAM
+# @l arrays may be tied to temporary files instead of packed strings
+
 BEGIN {
     use FindBin '$Bin';
+    use Tie::Array::Packed;
     require "$Bin/share/Metaheader.pm";
 }
 
@@ -67,7 +71,7 @@ if ($unofirst) {
     # Warning: this script, as it is, may use huges amount of RAM
     # @l arrays may be tied to temporary files
 
-    my @l = map {[]} @output1;
+    my @l = map {Tie::Array::Packed::Integer->make()} @output;
 
     my $j = 0;
     while (<>) {
