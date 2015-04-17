@@ -24,7 +24,7 @@ die "No match" if ($#output == -1);
 
 # print header
 print join("\t", $metah->{metastring},
-	         $metah->{strings}->[@output]), "\n";
+	         @{ $metah->{strings} }[@output]), "\n";
 
 my $j = 0;
 while(<>) {

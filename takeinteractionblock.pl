@@ -8,7 +8,8 @@ BEGIN {
 }
 
 if ($#ARGV != 1) {
-    print STDERR "usage: ./matrixstrip.pl block1 block2 < input > output\n";
+    print STDERR "usage: ./takeinteractionblock.pl block1 block2 "
+	, "< input > output\n";
     exit -1;
 }
 my $blockstring1 = shift @ARGV;
@@ -26,7 +27,7 @@ die "No match for block 1" if ($#output1 == -1);
 die "No match for block 2" if ($#output2 == -1);
 
 # check who is first
-my $unofirst = $output1[0] > $output2[0] ? 1 : 0;
+my $unofirst = $output1[0] < $output2[0] ? 1 : 0;
 # check for overlap
 die "Blocks are overlapping" if 
     ( $unofirst ?
@@ -36,7 +37,7 @@ die "Blocks are overlapping" if
 if ($unofirst) {
     # print header
     print join("\t", "\"die\"",
-	       $metah->{strings}->[@output2]), "\n";
+	       @{ $metah->{strings} }[@output2]), "\n";
 
     my $j = 0;
     while (<>) {
@@ -61,7 +62,7 @@ if ($unofirst) {
     # not $unofirst
     # print header
     print join("\t", "\"die\"",
-	       $metah->{strings}->[@output2]), "\n";
+	       @{ $metah->{strings} }[@output2]), "\n";
 
     # Warning: this script, as it is, may use huges amount of RAM
     # @l arrays may be tied to temporary files
@@ -96,3 +97,5 @@ if ($unofirst) {
     }
 
 }
+
+0;
