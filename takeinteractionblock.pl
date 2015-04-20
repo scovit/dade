@@ -61,7 +61,6 @@ if ($unofirst) {
 
 	$j++;
     }
-    die;
 } else { 
     # not $unofirst
     # print header

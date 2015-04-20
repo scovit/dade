@@ -57,22 +57,31 @@ if ($pid3 == 0) {
     exit 0;
 }
 
-my $dead1 = 0; my $dead2 = 0; my $dead3 = 0;
+my $dead1 = 0; my $dead2 = 0; my $dead3 = 0; my $todie = 0;
 {
     local $SIG{PIPE} = sub {
 	# check who is dead
 	my $exitcode = 0;
 	if (!$dead1 && waitpid($pid1, WNOHANG)) {
 	    $dead1 = 1;
-	    die "Child 1 died unexpectedly: $?" if $?;
+	    if ($?) {
+		warn "Child 1 died unexpectedly: exit($?), dieing.." if $?;
+		$todie = 1;
+	    }
 	}
 	if ((!$dead2) && waitpid($pid2, WNOHANG)) {
 	    $dead2 = 1;
-	    die "Child 2 died unexpectedly: $?" if $?;
+	    if ($?) {
+		warn "Child 2 died unexpectedly: exit($?), dieing.." if $?;
+		$todie = 1;
+	    }
 	}
 	if ((!$dead3) && waitpid($pid3, WNOHANG)) {
 	    $dead3 = 1;
-	    die "Child 3 died unexpectedly: $?" if $?;
+	    if ($?) {
+		warn "Child 3 died unexpectedly: exit($?), dieing.." if $?;
+		$todie = 1;
+	    }
 	}
     };
     while (<>) {
@@ -83,7 +92,8 @@ my $dead1 = 0; my $dead2 = 0; my $dead3 = 0;
     }
 }
 
-waitpid($pid1, 0); waitpid($pid1, 1); waitpid($pid1, 2);
+waitpid($pid1, 0); waitpid($pid2, 0); waitpid($pid3, 0);
+die if $todie;
 
 print STDERR "Assembling\n";
 
