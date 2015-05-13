@@ -355,6 +355,26 @@
       </code>
       would select only aligned read ends of type +/- with distance in
       restriction fragments less than 5 and copy them in file selection.
+    </p><p>
+      Additionally, the file
+      <code class="inplace">share/flagdefinitions.pl</code> contains an
+      handy function, <code class="inplace">parse_class</code>, which
+      takes as a single argument a string (by default 
+      <code class="inplace">$_</code>), and
+      parse a line of the output file 
+      of <code class="inplace">classify.pl</code> in a perl hash
+      object; as a simple example the following code prints the DIST
+      field of each line only for aligned reads belonging to
+      chromosome "chr12":
+      <code>
+        perl -ne 'BEGIN { require "share/flagdefinitions.pl"; }
+        %record = parse_class;<br />
+        if (aligned($record{FLAG}) &&
+        $record{LEFTCHR} = 12 && $record{RIGHTCHR) = 12)<br />
+        { print $record{DIST},"\n"; };' classification &gt; chr12_distances
+      </code>
+      as an alternative to the use of lists and the
+      <code class="inplace">split("\t")</code> function.
     </p>
     <a name="statistics"><h3>2.4 statistics.pl</h3></a>
     <p>

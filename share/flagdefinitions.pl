@@ -8,6 +8,20 @@ use constant {
     FL_INTRA_CHR => 32,
 };
 
+sub parse_class (_) {
+    /^(?<INDEX> [^\t]* ) \t
+      (?<FLAG> [^\t]* ) \t
+      (?<LEFTCHR> [^\t]* ) \t
+      (?<LEFTPOS> [^\t]* ) \t
+      (?<LEFTRST> [^\t]* ) \t
+      (?<RIGHTCHR> [^\t]* ) \t
+      (?<RIGHTPOS> [^\t]* ) \t
+      (?<RIGHTRST> [^\t]* ) \t
+      (?<DIST> [^\t]* ) \t
+      (?<RSTDIST> [^\n]* ) $/x;
+    return %+;
+}
+
 sub isnot { return ($_[0] & ($_[0] ^ $_[1])); }
 sub is { return ($_[0] & $_[1]); }
 
