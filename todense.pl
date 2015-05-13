@@ -15,7 +15,7 @@ if ($#ARGV != -1) {
 
 {
     local @ARGV = ("'1'");
-    do "$Bin/takediagblock.pl";
+    do "$Bin/matrixstripe.pl";
 }
 
 0;
