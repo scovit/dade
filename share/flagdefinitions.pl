@@ -9,7 +9,8 @@ use constant {
 };
 
 sub parse_class (_) {
-    /^(?<INDEX> [^\t]* ) \t
+    die "Classification parse error" unless
+    m/^(?<INDEX> [^\t]* ) \t
       (?<FLAG> [^\t]* ) \t
       (?<LEFTCHR> [^\t]* ) \t
       (?<LEFTPOS> [^\t]* ) \t
