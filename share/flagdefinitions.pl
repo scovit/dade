@@ -9,18 +9,22 @@ use constant {
 };
 
 sub parse_class (_) {
-    die "Classification parse error" unless
-    m/^(?<INDEX> [^\t]* ) \t
-      (?<FLAG> [^\t]* ) \t
-      (?<LEFTCHR> [^\t]* ) \t
-      (?<LEFTPOS> [^\t]* ) \t
-      (?<LEFTRST> [^\t]* ) \t
-      (?<RIGHTCHR> [^\t]* ) \t
-      (?<RIGHTPOS> [^\t]* ) \t
-      (?<RIGHTRST> [^\t]* ) \t
-      (?<DIST> [^\t]* ) \t
-      (?<RSTDIST> [^\n]* ) $/x;
-    return %+;
+    # die "Classification parse error" unless
+    # m/^(?<INDEX> [^\t]* ) \t
+    #   (?<FLAG> [^\t]* ) \t
+    #   (?<LEFTCHR> [^\t]* ) \t
+    #   (?<LEFTPOS> [^\t]* ) \t
+    #   (?<LEFTRST> [^\t]* ) \t
+    #   (?<RIGHTCHR> [^\t]* ) \t
+    #   (?<RIGHTPOS> [^\t]* ) \t
+    #   (?<RIGHTRST> [^\t]* ) \t
+    #   (?<DIST> [^\t]* ) \t
+    #   (?<RSTDIST> [^\n]* ) $/x;
+    # return %+;
+    chomp;
+    my %q;
+    @q{qw(INDEX FLAG LEFTCHR LEFTPOS LEFTRST RIGHTCHR RIGHTPOS RIGHTRST DIST RSTDIST)}= split("\t");
+    return %q;
 }
 
 sub isnot { return ($_[0] & ($_[0] ^ $_[1])); }
