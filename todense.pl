@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 use strict;
 use warnings;
 
@@ -15,7 +15,8 @@ if ($#ARGV != -1) {
 
 {
     local @ARGV = ("'1'");
-    do "$Bin/matrixstripe.pl";
+    die "Error found in matrixstripe.pl" if do "$Bin/matrixstripe.pl";
+    die $@ if $@;
 }
 
 0;
