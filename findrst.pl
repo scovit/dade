@@ -27,7 +27,8 @@ for (@chrnames) {
 # Get restriction factor code
 open REBASE, "< $Bin/share/bionetc.txt";
 my @rebaselines = grep(/^$name /, <REBASE>);
-die "Restriction factor search error, not found" if ($#rebaselines != 0);
+die "Restriction factor search error, not found" if ($#rebaselines < 0);
+die "More than one restriction factor found in search" if ($#rebaselines > 0);
 my $rebaseline = shift @rebaselines;
 close REBASE;
 (my $rstcode = $rebaseline) =~ s{.* }{}; chomp($rstcode);
