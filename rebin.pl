@@ -13,11 +13,11 @@ BEGIN {
 
 # Takes as input the rstmatrix, rebin into genomic distance
 
-if ($#ARGV != 3) {
-	print "usage: ./rebin.pl matrix rsttable binsize(bp) binmatrix\n";
+if ($#ARGV != 1) {
+	print STDERR "usage: ./rebin.pl rsttable binsize(bp) < matrix > binmatrix\n";
 	exit;
 };
-my ($matrixfn, $rsttablefn, $binsize, $binmatrix) = @ARGV;
+my ($rsttablefn, $binsize) = @ARGV;
 
 die "Binsize should be a number" if (!looks_like_number($binsize));
 
@@ -54,25 +54,8 @@ my @bintitle;
     }
 }
 
-my $MATRIX;
-# open input files
-if ($matrixfn eq '-') {
-    $MATRIX = *STDIN;
-} elsif ($matrixfn =~ /\.gz$/) {
-    open($MATRIX, "gzip -d -c $matrixfn |");
-} else {
-    open($MATRIX, "< $matrixfn");
-}
-# rebin
-# output
-if ($binmatrix eq '-') {
-    *OUTPUT = *STDOUT;
-} else {
-    my $gzipit =  ($binmatrix =~ /\.gz$/) ? "| gzip -c" : "";
-    open(OUTPUT, "$gzipit > $binmatrix");
-}
 # Read the header
-my $header = <$MATRIX>;
+my $header = <>;
 
 # Read a line from the matrix, return content and fragment number
 sub mreadline {
@@ -87,7 +70,7 @@ sub mreadline {
     die "Wrong matrix format" if (!looks_like_number($frag[0]));
     return \@input, $frag[0];
 };
-my ($input, $inputln) = mreadline($MATRIX);
+my ($input, $inputln) = mreadline(STDIN);
 die "File format error" if (!(defined $input) || ($#$input < 0));
 my $lastln = $inputln + $#$input;
 
@@ -101,7 +84,7 @@ die "Didn't find start and end bin, weird" if (($binstart < 0) ||
 					       ($binend < 0));
 
 # Print the header
-print OUTPUT "\"BIN\"", "\t"
+print STDOUT "\"BIN\"", "\t"
     , join("\t", @bintitle[$binstart..$binend]), "\n";
 
 for my $binan ($binstart..$binend) {
@@ -123,7 +106,7 @@ for my $binan ($binstart..$binend) {
 
 	    push @inputs, $input;
 	    push @inputsln, $inputln;
-	    ($input, $inputln) = mreadline($MATRIX);
+	    ($input, $inputln) = mreadline(STDIN);
 	} elsif ($binan != $binend) {
 	    die "Sudden end of file, maybe matrix was not cut square?"
 	}
@@ -135,7 +118,7 @@ for my $binan ($binstart..$binend) {
 	    for my $i (@{$bins[$binbn]}) {
 		next if ($binbn == $binan && $inputsln[$j] > $i);
 		my $coln = $i - $inputsln[$j];
-#		print join("\t", $binan, $binbn, $inputsln[$j], $i, $coln), "\n";
+#		print STDERR join("\t", $binan, $binbn, $inputsln[$j], $i, $coln), "\n";
 		if (!(defined ${$inputs[$j]}[ $coln ])
 		   && ($binbn != $binend)) {
 		    die "Missing columns, $binan, $binbn ($binstart, $binend)";
@@ -146,11 +129,9 @@ for my $binan ($binstart..$binend) {
 	}
     }
     
-    print OUTPUT $bintitle[$binan], "\t", join("\t", @output), "\n";
+    print STDOUT $bintitle[$binan], "\t", join("\t", @output), "\n";
     last unless defined $input;
 }
-close(OUTPUT);
-close($MATRIX);
 
 print STDERR "\33[2K\rEND\n";
 

@@ -4,19 +4,9 @@ use warnings;
 
 # Takes as input matrix, output a vector
 
-if ($#ARGV != 0) {
-    print STDERR "usage: ./colmean.pl matrix\n";
+if ($#ARGV != -1) {
+    print STDERR "usage: ./colmean.pl < matrix > output\n";
     exit -1;
-}
-my $matrixfn = shift @ARGV;
-
-# open input files
-if ($matrixfn eq '-') {
-    *MATRIX = *STDIN;
-} elsif ($matrixfn =~ /\.gz$/) {
-    open(MATRIX, "gzip -d -c $matrixfn |");
-} else {
-    open(MATRIX, "< $matrixfn");
 }
 
 # output, stdout
@@ -24,12 +14,12 @@ my @mean;
 my @var;
 my @stddev;
 my @n;
-my $header = <MATRIX>;
+my $header = <>;
 chomp($header);
 my @outputtit = split("\t", $header);
 shift @outputtit;
 
-while(<MATRIX>) {
+while(<>) {
     chomp;
     my @input = split("\t");
     my $title = shift(@input);
@@ -40,7 +30,6 @@ while(<MATRIX>) {
 	$n[$j] = ($n[$j] // 0) + 1;
     }
 }
-close(MATRIX);
 
 for my $j (0..$#n) {
     $mean[$j] /= $n[$j];

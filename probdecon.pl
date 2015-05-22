@@ -5,6 +5,7 @@ use warnings;
 BEGIN {
     use FindBin '$Bin';
     use Data::Dumper;
+    use Getopt::Long;
     use Scalar::Util qw(looks_like_number);
     use POSIX qw(floor);
     require "$Bin/share/Metaheader.pm";
@@ -13,26 +14,19 @@ BEGIN {
 # Takes as input matrix, output a matrix of vectors
 # Makes sense after takediagonalblock on single chromosomes
 
-if ($#ARGV != 3) {
-    print STDERR "usage: ./probdecon.pl rstmatrix stepsize (log|lin) pdcmat\n";
+my $islog = 0;
+GetOptions("log" => \$islog)    # flag
+  or die("Error in command line arguments\n");
+
+if ($#ARGV != 0) {
+    print STDERR "usage: ./probdecon.pl stepsize [--log] < rstmatrix"
+	. " > pdcmat\n";
     exit;
 }
-my ($matrixfn, $steps, $type, $pdcmatrix) = @ARGV;
+my $steps = shift @ARGV;
 
 die "Stepsize should be a number" if (!looks_like_number($steps));
-die "Stepsize is expected to be greater than 1" if ($steps <= 1);
-die "(log|lin) should be either \"log\", or \"lin\""
-    unless $type =~ /^log$|^lin$/;
-my $islog = ($type eq "log" ? 1 : 0);
-
-# open input files
-if ($matrixfn eq '-') {
-    *MATRIX = *STDIN;
-} elsif ($matrixfn =~ /\.gz$/) {
-    open(MATRIX, "gzip -d -c $matrixfn |");
-} else {
-    open(MATRIX, "< $matrixfn");
-}
+die "Stepsize is expected to be greater than 1" if ($steps <= 1 && $islog);
 
 # histograms
 sub binscale {
@@ -48,16 +42,8 @@ sub binsize {
      : $steps );    
 }
 
-# output
-if ($pdcmatrix eq '-') {
-    *OUTPUT = *STDOUT;
-} else {
-    my $gzipit =  ($pdcmatrix =~ /\.gz$/) ? "| gzip -c" : "";
-    open(OUTPUT, "$gzipit > $pdcmatrix");
-}
-
 # Read the header
-my $header = <MATRIX>;
+my $header = <>;
 chomp($header);
 my $metah = Metaheader->new($header);
 my @rowarray = @{ $metah->{rowinfo} };
@@ -77,10 +63,10 @@ my $maxind = ($islog
 	      ? floor(log($dist) / log($steps))
 	      : floor($dist / $steps)) - 1;
 
-print OUTPUT join("\t", "\"PDC\"", map { binscale($_); } (0 .. $maxind)), "\n";
+print join("\t", "\"PDC\"", map { binscale($_); } (0 .. $maxind)), "\n";
 
 my $i = 0;
-while(<MATRIX>) {
+while(<>) {
     chomp;
     my @records = split("\t");
     my $head = shift @records;
@@ -112,9 +98,8 @@ while(<MATRIX>) {
 
     my @reshisto = map { $tmphisto[$_] / binsize($_) } (0 .. $maxind);
 
-    print OUTPUT join("\t", "$head", @reshisto), "\n";
+    print join("\t", "$head", @reshisto), "\n";
     $i++;
 }
-close(MATRIX);
 
 0;
