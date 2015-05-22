@@ -213,12 +213,14 @@
 	    flag is added to output, the bit which correspond to 4086
 	    is set in case the XS:i flag is reported by the bowtie2 program.
 	<li>CHR: chromosome identifier string (* if not aligned)</li>
-	<li>POS: 1-based leftmost mapping position (* if not aligned)</li> 
+	<li>POS: 1-based mapping position (* if not aligned), leftmost for 
+	    normally aligned reads and rightmost for reverse
+	    complemented aligned reads</li>  
 	<li>MAPQ: Mapping quality</li>
 	<li>RSIZE: Size of the trimmed read at alignment (iterative
-	  mapping)</li>
+	    mapping)</li>
 	<li>RST: restriction fragment, identified its by INDEXCHR index in
-	  "rsttable" input file (* if not aligned)</li>
+	    "rsttable" input file (* if not aligned)</li>
       </ul>
       Append the extension .gz to output files in order to get them
       compressed.
@@ -374,7 +376,12 @@
         { print $record{DIST},"\n"; };' classification &gt; chr12_distances
       </code>
       as an alternative to the use of lists and the
-      <code class="inplace">split("\t")</code> function.
+      <code class="inplace">split("\t")</code> function. Conversely,
+      the
+      function <code class="inplace">say_class(FILE,%classhash)</code>
+      prints one line with the content
+      of <code class="inplace">%classhash</code>
+      to <code class="inplace">FILE</code>.
     </p>
     <a name="statistics"><h3>2.4 statistics.pl</h3></a>
     <p>
