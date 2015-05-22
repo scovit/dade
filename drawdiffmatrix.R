@@ -1,23 +1,37 @@
 #!/usr/bin/env Rscript
-library(grid)
-library(RColorBrewer)
-library(lattice)
-library(latticeExtra)
-#	library(pbapply)
+
+#  Prog to make Fisher test along two matrices
+#  apply qvalues
+#  add parralelisation
+
+library('grid');
+library('RColorBrewer');
+library('lattice');
+library('latticeExtra');
+library('qvalue');
+library('parallel');
+#       library('fields');
+#	library('pbapply');
 
 args <- commandArgs(trailingOnly = TRUE);
 if (length(args) != 3) {
     write("Usage: ./drawmatrix.R matrix1 matrix2 pdffile", stderr());
     quit(status=-1);
 }
-fname1=args[1];
-fname2=args[2];
-fpdf=args[3];
+fname1 <- args[1];
+fname2 <- args[2];
+fpdf   <- args[3];
+ncpus  <- 16;
 
-pdf(file=fpdf, width= 8.3, height = 8.3)
-pushViewport(viewport(layout = grid.layout(nrow = 1, ncol = 1)))
+# Thresholds
+significant <- 0.0005;
+maxqval <- 0.000001;
+
+# Load Matrices
 
 write("Loading matrices", stderr())
+
+# To load in .mat format
 
 read.updiag <- function (file) {
     a <- read.table(file, header = TRUE, row.names=1,fill=1);
@@ -35,36 +49,68 @@ read.updiag <- function (file) {
 m1 <- read.updiag(fname1)
 m2 <- read.updiag(fname2)
 
-#labe <- sapply(strsplit(rownames(m1), '~'), function (x) {paste(x[4])})
+# To load in simple tabular format
+
+# m1 <- read.table(fname1)
+# m2 <- read.table(fname2)
+
+# Parse the labels in the table
+
 labe <- sapply(strsplit(rownames(m1), '~'), function (x) {paste(x[1])})
 nele <- length(labe)
 
-## m1 <- (m1 + t(as.matrix(m1)) + 1)
-## m1 <- m1/sum(m1)
-## m2 <- (m2 + t(as.matrix(m2)) + 1)
-## m2 <- m2/sum(m2)
-
-## m <- log(m2/m1);
+# Convert to simple matrix format
 
 m1 <- m1 + t(as.matrix(m1))
 m2 <- m2 + t(as.matrix(m2))
+# m1 <- as.matrix(m1);
+# m2 <- as.matrix(m2);
+
+# Calculate row sums
+
 sum1 <- matrix(rowSums(m1),nrow=nrow(m1),ncol=ncol(m1));
 sum2 <- matrix(rowSums(m2),nrow=nrow(m2),ncol=ncol(m2));
+
+# Calculate fisher text inputs
+
 v <- cbind(as.vector(m1), as.vector(m2),
            as.vector(sum1-m1), as.vector(sum2-m2));
+v <- as.data.frame(v);
+
+# Calculate the fisher test in parallel environment
 
 write("Calculationg fisher tests", stderr())
-#pboptions('txt');
+
+# Set up the parallel environment
+clus <- makeCluster(ncpus)
+
+# Calculate it
+Sys.time()
 pvals <- matrix(
-           apply(v,1,
-                   function(x) fisher.test(matrix(x,nr=2))$p.value),
-           nrow=nrow(m1)
-         );
+   parRapply(clus,v,function(x) fisher.test(matrix(x,nrow=2))$p.value),
+   nrow=nrow(m1)
+);
+Sys.time()
 
-pvals[(-log(pvals)) > 300] = 0;
+# Conversion of pvalues into qvalues
 
+pvals[pvals>1] = 1;
+
+qobj <- qvalue(pvals);
+qval <- qobj$qvalues;
+#qval <- apply(pvals, 1, function(x) qvalue(x)$qvalues);
+
+# Thresholds application
+qval[qval >= significant] = 1;
+qval[qval < maxqval] = maxqval;
+
+# Print the output
+
+pdf(file=fpdf, width= 8.3, height = 8.3)
+pushViewport(viewport(layout = grid.layout(nrow = 1, ncol = 1)))
 pushViewport(viewport(layout.pos.col = 1, layout.pos.row = 1))
-print(levelplot(-log(pvals), xlab = NULL, ylab = NULL,
+
+print(levelplot(-log10(qval), xlab = NULL, ylab = NULL,
                 par.settings=list(layout.heights=list(top.padding=-3,
                                       bottom.padding=-1)),
                 col.regions = colorRampPalette(c("black",
