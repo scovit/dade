@@ -52,8 +52,12 @@ for (my $num = 0; ; $num++) {
     my $flag = 0;
     $flag |= FL_LEFT_INVERSE if ($leftflag & 16);
     $flag |= FL_RIGHT_INVERSE if ($rightflag & 16);
-    $flag |= FL_LEFT_ALIGN if ((!($leftflag & 4)) && ($leftqual >= 30));
-    $flag |= FL_RIGHT_ALIGN if ((!($rightflag & 4)) && ($rightqual >= 30));
+    $flag |= FL_LEFT_ALIGN if ((!($leftflag & 4))
+			       && (!($leftflag & 4096))
+			       && ($leftqual >= 30));
+    $flag |= FL_RIGHT_ALIGN if ((!($rightflag & 4))
+				&& (!($rightflag & 4096))
+				&& ($rightqual >= 30));
     $flag |= FL_INTRA_CHR if (($leftchr eq $rightchr) && ($leftchr ne "*") && ($rightchr ne "*"));
 
     my $distance; my $rstdist;
