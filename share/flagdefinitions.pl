@@ -21,10 +21,23 @@ sub parse_class (_) {
     #   (?<DIST> [^\t]* ) \t
     #   (?<RSTDIST> [^\n]* ) $/x;
     # return %+;
-    chomp;
+
+    my $arg = $_;
+    chomp $arg;
+    my @arr = split("\t", $arg);
+    die "Class file format error" unless ($#arr == 9);
+
     my %q;
-    @q{qw(INDEX FLAG LEFTCHR LEFTPOS LEFTRST RIGHTCHR RIGHTPOS RIGHTRST DIST RSTDIST)}= split("\t");
+    @q{qw(INDEX FLAG LEFTCHR LEFTPOS LEFTRST RIGHTCHR RIGHTPOS RIGHTRST DIST RSTDIST)}= @arr;
+
     return %q;
+}
+
+sub say_class(*\%) {
+    my ($file, $href) = @_;
+    my %hash = %$href;
+
+    print $file join("\t", @hash{qw(INDEX FLAG LEFTCHR LEFTPOS LEFTRST RIGHTCHR RIGHTPOS RIGHTRST DIST RSTDIST)}), "\n";
 }
 
 sub isnot { return ($_[0] & ($_[0] ^ $_[1])); }
