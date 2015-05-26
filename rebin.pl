@@ -8,39 +8,50 @@ use List::Util qw(any);
 
 BEGIN {
     use FindBin '$Bin';
-    require "$Bin/share/findinrst.pl";
+    require "$Bin/share/Metaheader.pm";
 }
 
 # Takes as input the rstmatrix, rebin into genomic distance
 
-if ($#ARGV != 1) {
-	print STDERR "usage: ./rebin.pl rsttable binsize(bp) < matrix > binmatrix\n";
+if ($#ARGV != 0) {
+	print STDERR "usage: ./rebin.pl binsize(bp) < matrix > binmatrix\n";
 	exit;
 };
-my ($rsttablefn, $binsize) = @ARGV;
+my $binsize = shift @ARGV;
 
 die "Binsize should be a number" if (!looks_like_number($binsize));
 
-readrsttable($rsttablefn);
+# Read the header
+my $header = <>;
+chomp($header);
+my $metah = Metaheader->new($header);
+my @rsts = @{ $metah->{rowinfo} };
+warn "Metaheader lacks chromosome information... will rebin a single one"
+    unless exists $rsts[0]->{chr};
+die "Metaheader lacks position information... Sad, I cannot rebin"
+    unless (exists $rsts[0]->{pos} ||
+	    (exists $rsts[0]->{st} &&
+	     exists $rsts[0]->{en}));
 
 # Make the bin table
-our @rstarray;
 my @bins;
 my @bintitle;
 {
-    my $binstartp = 0;
+    my $binstartp;
     my $currchr = "-1";
-    for my $rst (@rstarray) {
-	my $rstpos = floor(($rst->{st} + $rst->{en})/2);
-	my $chrnam = $rst->{chr};
+    for my $i (0..$#rsts) {
+	my $rstpos = $rsts[$i]->{pos} //
+	    floor(($rsts[$i]->{st} + $rsts[$i]->{en}))/2;
 
-	# new chromosome?
+	my $chrnam = $rsts[$i]->{chr} // "";
+
+	# chromosome frontier?
 	if ($chrnam ne $currchr) {
 	    push @bins, [];
-	    my $binpos = floor($binsize/2);
+	    $binstartp = floor($rstpos / $binsize) * $binsize;
+	    my $binpos = $binstartp + floor($binsize/2);
 	    push @bintitle, "\"$chrnam~$binpos\"";
 	    $currchr = $chrnam;
-	    $binstartp = 0;
 	}
 	# empty bins if no rst is there
 	while ($binstartp + $binsize < $rstpos) {
@@ -50,87 +61,47 @@ my @bintitle;
 	    push @bintitle, "\"$chrnam~$binpos\"";
 	}
 
-	push @{ $bins[$#bins] }, $rst->{index};
+	push @{ $bins[$#bins] }, $i;
     }
 }
 
-# Read the header
-my $header = <>;
-
-# Read a line from the matrix, return content and fragment number
-sub mreadline {
-    my $file = $_[0];
-    my $line = <$file>;
-    return undef, undef unless (defined $line);
-    chomp($line);
-    my @input = split("\t", $line);
-    my $head = shift(@input);
-    $head =~ s/(^.|.$)//g;
-    my @frag = split("~", $head);
-    die "Wrong matrix format" if (!looks_like_number($frag[0]));
-    return \@input, $frag[0];
-};
-my ($input, $inputln) = mreadline(STDIN);
-die "File format error" if (!(defined $input) || ($#$input < 0));
-my $lastln = $inputln + $#$input;
-
-# Get the first and last bin
-my $binstart = -1; my $binend = -1;
-for (my $i = 0; $i <= $#bins; $i++) {
-    $binstart = $i if (any { $_ == $inputln } @{$bins[$i]});
-    $binend = $i if (any { $_ == $lastln } @{$bins[$i]});
-}
-die "Didn't find start and end bin, weird" if (($binstart < 0) ||
-					       ($binend < 0));
-
 # Print the header
-print STDOUT "\"BIN\"", "\t"
-    , join("\t", @bintitle[$binstart..$binend]), "\n";
+print join("\t", "\"BIN\"", @bintitle), "\n";
 
-for my $binan ($binstart..$binend) {
+# Cycle over bins (output rows)
+for my $binan (0 .. $#bins) {
     my @inputs;
-    my @inputsln;
-    my @output = (0) x ($binend - $binan + 1);
+    my @output = (0) x ($#bins - $binan + 1);
 
     print STDERR "\33[2K\rElaborating bin $binan out of $#bins";
 
-    # Load a whole row bin into memory (note, the script eats an
+    # Load the whole rows of bin into memory (note, the script eats an
     # amount of memory proportional to the bin size)
     for my $i (0 .. $#{$bins[$binan]}) {
-	# Do some checks
-	if (defined $input) {
-	    while (($binan == $binstart) &&
-		   (${$bins[$binan]}[$i] != $inputln)) { $i++; };
-	    die "Row is lost, matrix should be a full diagonal block"
-		if (${$bins[$binan]}[$i] != $inputln);
+	my $line = <>;
+	defined $line or die "Input format error";
+	chomp $line;
 
-	    push @inputs, $input;
-	    push @inputsln, $inputln;
-	    ($input, $inputln) = mreadline(STDIN);
-	} elsif ($binan != $binend) {
-	    die "Sudden end of file, maybe matrix was not cut square?"
-	}
+	my @input = split("\t", $line); shift(@input);
+	push @inputs, \@input;
     }
 
-    # column index
-    for my $binbn ($binan .. $binend) {
-	for my $j (0 .. $#inputs) {
-	    for my $i (@{$bins[$binbn]}) {
-		next if ($binbn == $binan && $inputsln[$j] > $i);
-		my $coln = $i - $inputsln[$j];
-#		print STDERR join("\t", $binan, $binbn, $inputsln[$j], $i, $coln), "\n";
-		if (!(defined ${$inputs[$j]}[ $coln ])
-		   && ($binbn != $binend)) {
-		    die "Missing columns, $binan, $binbn ($binstart, $binend)";
-		} elsif ( defined ${$inputs[$j]}[ $coln ] ) {
-		    $output[$binbn - $binan] += ${$inputs[$j]}[ $coln ];
-		}
+    # Cycle over bins (column index)
+    for my $binbn ($binan .. $#bins) {
+
+	for my $i (0 .. $#{$bins[$binan]}) {
+	    for my $j (0 .. $#{$bins[$binbn]}) {
+		next if (($binbn == $binan) && ($j < $i));
+		my $coln = $bins[$binbn]->[$j] - $bins[$binan]->[$i];
+
+		$output[$binbn - $binan] += $inputs[$i]->[$coln] //
+		    die "Missing columns in input";
 	    }
 	}
+
     }
     
-    print STDOUT $bintitle[$binan], "\t", join("\t", @output), "\n";
-    last unless defined $input;
+    print join("\t", $bintitle[$binan], @output), "\n";
 }
 
 print STDERR "\33[2K\rEND\n";
