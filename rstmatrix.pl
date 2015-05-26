@@ -14,23 +14,15 @@ BEGIN {
 # outputs interaction matrix
 #
 
-if ($#ARGV != 2) {
-	print "usage: ./rstmatrix.pl classification rsttable matrix\n";
+if ($#ARGV != 0) {
+	print "usage: ./rstmatrix.pl rsttable < classification > matrix\n";
 	exit;
 };
-my ($classificationfn, $rsttablefn, $matrix) = @ARGV;
+my $rsttablefn = shift @ARGV;
 
 our $TMPDIR;
 
 # open input files
-if ($classificationfn eq '-') {
-    *CLASS = *STDIN;
-} elsif ($classificationfn =~ /\.gz$/) {
-    open(CLASS, "gzip -d -c $classificationfn |");
-} else {
-    open(CLASS, "< $classificationfn");
-}
-
 readrsttable($rsttablefn);
 
 my $alignedfn=mktemp_linux("tmp.XXXXXXXX.couples") or
@@ -40,7 +32,7 @@ open(ALIGN, "| sort --parallel=8 --temporary-directory=$TMPDIR " .
 
 # Filter and sort
 our %rsttable;
-while (<CLASS>) {
+while (<>) {
     my @campi = split("\t");
     my (undef, $flag, $leftchr, undef, $leftrst, $rightchr,
 	undef, $rightrst, undef, undef) = @campi;
@@ -48,10 +40,11 @@ while (<CLASS>) {
     if (aligned($flag)) {
 	die "Chromosome not found" unless
 	    ((exists $rsttable{$leftchr}) && (exists $rsttable{$rightchr}));
-	die "Restriction fragment not found (left), $leftchr, $leftrst" unless
-            exists $rsttable{$leftchr}->[$leftrst];
-        die "Restriction fragment not found (right), $rightchr, $rightrst" unless
-            exists $rsttable{$rightchr}->[$rightrst]; 
+	die "Restriction fragment not found (left), $leftchr, $leftrst"
+	    unless exists $rsttable{$leftchr}->[$leftrst];
+        die "Restriction fragment not found (right), $rightchr, $rightrst"
+	    unless exists $rsttable{$rightchr}->[$rightrst]; 
+
 	my $leftgrst = $rsttable{$leftchr}->[$leftrst]{index};
 	my $rightgrst = $rsttable{$rightchr}->[$rightrst]{index};
 	if ($leftgrst < $rightgrst) {
@@ -61,19 +54,11 @@ while (<CLASS>) {
 	}
     }
 }
-close(CLASS);
 close(ALIGN);
 
 #link($alignedfn, $alignedfn . ".dbg");
 
 open(ALIGN, "< $alignedfn");
-# output
-if ($matrix eq '-') {
-    *OUTPUT = *STDOUT;
-} else {
-    my $gzipit =  ($matrix =~ /\.gz$/) ? "| gzip -c" : "";
-    open(OUTPUT, "$gzipit > $matrix");
-}
 
 our @rstarray;
 my @recnames;
@@ -83,7 +68,7 @@ for my $i (@rstarray) {
 	. "\"";
 }
 # header
-print OUTPUT "\"RST\"", "\t", join("\t", @recnames), "\n";
+print join("\t", "\"RST\"", @recnames), "\n";
 my $printed=0;
 my $toprint = scalar(@rstarray);
 my @intervector = (0) x scalar(@rstarray);
@@ -99,14 +84,12 @@ while (<ALIGN>) {
 
     if ($leftgrst != $oldleftgrst) {
 	$printed++;
-	print OUTPUT $recnames[$oldleftgrst], "\t"
-	    , join("\t",
+	print join("\t", $recnames[$oldleftgrst],
 		   @intervector[$oldleftgrst..$#intervector]), "\n";
 	for my $i (0 .. $#intervector) { $intervector[$i] = 0; };
 	for ( $oldleftgrst++; $oldleftgrst < $leftgrst; $oldleftgrst++) {
 	    $printed++;
-	    print OUTPUT $recnames[$oldleftgrst], "\t"
-		, join("\t",
+	    print join("\t", $recnames[$oldleftgrst],
 		       @intervector[$oldleftgrst..$#intervector]), "\n";
 	}
         print STDERR "\33[2K\rElaborating rst $printed out of $toprint"
@@ -117,18 +100,17 @@ while (<ALIGN>) {
     $oldleftgrst = $leftgrst; $oldrightgrst = $rightgrst;
 }
 $printed++;
-print OUTPUT $recnames[$oldleftgrst], "\t"
-    , join("\t", @intervector[$oldleftgrst..$#intervector]), "\n";
+print join("\t", $recnames[$oldleftgrst],
+	   @intervector[$oldleftgrst..$#intervector]), "\n";
 for my $i (0 .. $#intervector) { $intervector[$i] = 0; };
 for ( $oldleftgrst++; $oldleftgrst <= $#intervector; $oldleftgrst++) {
     $printed++;
-    print OUTPUT $recnames[$oldleftgrst], "\t"
-	, join("\t", @intervector[$oldleftgrst..$#intervector]), "\n";
+    print join("\t", $recnames[$oldleftgrst],
+	       @intervector[$oldleftgrst..$#intervector]), "\n";
 }
 
 die "Weird things happening, printed $printed out of $toprint"
     unless ($printed == $toprint);
 close(ALIGN);
-close(OUTPUT);
 print STDERR "\33[2K\rEND\n";
 0;
