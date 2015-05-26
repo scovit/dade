@@ -10,24 +10,14 @@ BEGIN {
 # Takes as input the contact list with flags; outputs statistics
 #
 
-if ($#ARGV != 0) {
-	print "usage: ./statistics.pl classification\n"
-	    , "  output will be printed to console, use the \">\" operator\n"
-	    , "  for redirecting to a file\n" ;
+if ($#ARGV != -1) {
+	print STDERR "usage: ./statistics.pl < classification > stats\n";
 	exit;
 };
-my ($classificationfn) = @ARGV;
-
-# open input files
-if ($classificationfn =~ /\.gz$/) {
-    open(CLASS, "gzip -d -c $classificationfn |");
-} else {
-    open(CLASS, "< $classificationfn");
-}
 
 my $tot = 0; my $al = 0; my $sin = 0; my $un = 0; my $schr = 0;
 my $dangling = 0;
-while (<CLASS>) {
+while (<>) {
     my @campi = split("\t");
     my $flag = $campi[1];
     $tot++;
@@ -37,7 +27,6 @@ while (<CLASS>) {
     $schr++ if (is(FL_INTRA_CHR, $flag) && aligned($flag));
     $dangling++ if plusmin($flag);
 }
-close(CLASS);
 
 print sprintf("%d Total, ", $tot)
     , sprintf("%d (%.1f%%) Single, ", $sin, $sin/$tot*100)

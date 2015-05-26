@@ -5,34 +5,24 @@ use warnings;
 # Takes as input matrix, output a vector
 
 my $isalg = 0;
-if ($#ARGV > 1 || ($#ARGV != 0 && ($ARGV[0] // '') ne "-a")) {
-    print STDERR "usage: ./colsum.pl [-a] matrix\n\n"
-	,"   -a algebric column index (vs upper diagonal format)\n";
-    exit;
-} elsif ($#ARGV == 1) {
-    $isalg = 1;
-    shift @ARGV;
-}
-my $matrixfn = shift @ARGV;
+GetOptions("alg" => \$isalg)    # flag
+  or die("Error in command line arguments\n");
 
-# open input files
-if ($matrixfn eq '-') {
-    *MATRIX = *STDIN;
-} elsif ($matrixfn =~ /\.gz$/) {
-    open(MATRIX, "gzip -d -c $matrixfn |");
-} else {
-    open(MATRIX, "< $matrixfn");
+
+if ($#ARGV != -1) {
+    print STDERR "usage: ./colsum.pl [--alg] < matrix > sums\n\n";
+    exit -1;
 }
 
 # output, stdout
 my @output;
-my $header = <MATRIX>;
+my $header = <>;
 chomp($header);
 my @outputtit = split("\t", $header);
 shift @outputtit;
 
 my $i = 0;
-while(<MATRIX>) {
+while(<>) {
     chomp;
     my @input = split("\t");
     my $title = shift(@input);
@@ -47,7 +37,6 @@ while(<MATRIX>) {
     }
     $i++;
 }
-close(MATRIX);
 
 if ($isalg) {
     die "Weird matrix format" unless ($#outputtit == $#output);
