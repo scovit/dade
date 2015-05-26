@@ -16,11 +16,16 @@ my %default_metaheader = (
 );
 
 my %shortcuts = (
-     "RST" => [ [ "index", "chr", "n", "st", "en" ],
-		qr/"(\d+)~(\w+)~(\d+)~(\d+)~(\d+)"/ ],
-     "PDC" => [ [ "pos" ], qr/(\d+)/ ],
-     "BIN" => [ [ "chr", "chrpos" ], qr/"(\w+)~(\d+)"/ ]
-);
+    "RST" => qr/\"
+          (?<index> \d+ ) \~ 
+          (?<chr> \w* ) \~
+          (?<n> \d+ ) \~
+          (?<st> \d+ ) \~
+          (?<en> \d+ )
+              \"/x,
+    "PDC" => qr/(?<pos> \d+ )/x,
+    "BIN" => qr/\"(?<chr> \w+ ) \~ (?<chrpos> \d+ ) \"/x
+    );
 
 my $sub_interpretmeta = sub {
     my $meta = shift;
@@ -32,10 +37,8 @@ my $sub_interpretmeta = sub {
     my $tmpret = eval($meta);
 
     die "Uninterpretable meta-header "
-        . "(should be an array of an array and a regex)"
-	unless (ref($tmpret) eq "ARRAY"
-		&& scalar @{ $tmpret } == 2
-		&& ref($tmpret->[0]) eq "ARRAY");
+        . "(should be a regex or a shortcut)"
+	unless (ref($tmpret) eq "Regexp");
     return $tmpret;
 };
 
@@ -60,9 +63,11 @@ sub metarecord {
     my $self = shift;
     my $content = shift;
 
-    my %metainfo;
-    @metainfo{@{ $self->{interpret}->[0] }} =
-	$content =~ $self->{interpret}->[1];
+    die "Could not parse Metaheader" unless
+	$content =~ $self->{interpret};
+
+    my %metainfo = %+;
+
     return \%metainfo;
 }
 
