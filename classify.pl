@@ -4,20 +4,24 @@ use warnings;
 
 BEGIN {
     use FindBin '$Bin';
+    use Getopt::Long;
     require "$Bin/share/flagdefinitions.pl";
 }
 
 # Takes as input the mapped reads and output the contact list with flags
 #
 
-if ($#ARGV != 2) {
-	print "usage: ./classify.pl leftmap rightmap classification\n";
+my $minqual = 30;
+GetOptions("minq=i" => \$minqual)    # integer arg
+  or die("Error in command line arguments\n");
+
+if ($#ARGV != 1) {
+	print STDERR "usage: ./classify.pl [--minq=30] leftmap rightmap "
+	              . "> classification\n";
 	exit;
 };
 
-my ($leftmapfn, $rightmapfn, $classificationfn) = @ARGV;
-
-my $minqual = 30;
+my ($leftmapfn, $rightmapfn) = @ARGV;
 
 # open input files
 if ($leftmapfn =~ /\.gz$/) {
@@ -29,13 +33,6 @@ if ($rightmapfn =~ /\.gz$/) {
     open(RIGHTMAP, "gzip -d -c $rightmapfn |");
 } else {
     open(RIGHTMAP, "< $rightmapfn");
-}
-# open output file
-if ($classificationfn eq '-') {
-    *CLASSIFIC = *STDOUT;
-} else {
-    my $gzipit =  ($classificationfn =~ /\.gz$/) ? "| gzip -c" : "";
-    open(CLASSIFIC, "$gzipit > $classificationfn");
 }
 
 print "Starting classification\n";
@@ -74,7 +71,7 @@ for (my $num = 0; ; $num++) {
 	$distance = "*";
 	$rstdist = "*";
     }
-    print CLASSIFIC $num, "\t", $flag, "\t"
+    print $num, "\t", $flag, "\t"
 	, $leftchr, "\t", $leftpos, "\t", $leftrst, "\t"
 	, $rightchr, "\t", $rightpos, "\t", $rightrst, "\t"
 	, $distance, "\t", $rstdist, "\n";
@@ -82,7 +79,6 @@ for (my $num = 0; ; $num++) {
     last if (eof(LEFTMAP) && eof(RIGHTMAP));
 }
 
-close CLASSIFIC;
 close LEFTMAP;
 close RIGHTMAP;
 
