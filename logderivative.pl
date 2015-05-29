@@ -4,19 +4,9 @@ use warnings;
 
 # Takes as input matrix, output a vector
 
-if ($#ARGV != 0) {
-    print STDERR "usage: ./colmean.pl vector\n";
+if ($#ARGV != -1) {
+    print STDERR "usage: ./logderivative.pl < vector > deriv\n";
     exit -1;
-}
-my $vectorfn = shift @ARGV;
-
-# open input files
-if ($vectorfn eq '-') {
-    *VECTOR = *STDIN;
-} elsif ($vectorfn =~ /\.gz$/) {
-    open(VECTOR, "gzip -d -c $vectorfn |");
-} else {
-    open(VECTOR, "< $vectorfn");
 }
 
 # load vector into memory
@@ -24,7 +14,7 @@ my @xax;
 my @histogram;
 my @variance;
 my $novariance = 0;
-while(<VECTOR>) {
+while(<>) {
     chomp;
     my ($x,$y,$z) = split("\t");
     $novariance++ unless defined($z);
@@ -32,7 +22,6 @@ while(<VECTOR>) {
     push @histogram, $y;
     push @variance, $z;
 }
-close(VECTOR);
 
 # guess steps and if it is logarithmic
 my $m = 0; my $v = 0;
