@@ -21,11 +21,19 @@ while (<>) {
     my @campi = split("\t");
     my $flag = $campi[1];
     $tot++;
-    $al++ if aligned($flag);
-    $sin++ if single($flag);
-    $un++ if bothunaligned($flag);
-    $schr++ if (is(FL_INTRA_CHR, $flag) && aligned($flag));
-    $dangling++ if plusmin($flag);
+    if (bothunaligned($flag)) {
+	$un++;
+    } elsif (single($flag)) {
+	$sin++;
+    } elsif (aligned($flag)) {
+	$al++;
+	if (is(FL_INTRA_CHR, $flag)) {
+	    $schr++;
+	    $dangling++ if (plusmin($flag));
+	}
+    } else {
+	die "Should never arrive here";
+    }
 }
 
 print sprintf("%d Total, ", $tot)
