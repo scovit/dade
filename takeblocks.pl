@@ -20,11 +20,15 @@ die "N should be a number" if (!looks_like_number($N));
 my @blockstrings = @ARGV;
 die "Number of blocks different from N" if (scalar(@blockstrings) != $N);
 
+# Check if stdout is a pipe
+my $nopipe = (-p STDOUT ? 0 : 1);
+
 my @pids;
 my @tmpfiles;
 my @to_kids;
 my $nprocs = $N+$N*($N-1)/2;
-print STDERR "Starting $nprocs parallel jobs and temporary files\n";
+print STDERR "Starting $nprocs parallel jobs and temporary files\n"
+    if $nopipe;
 
 for my $i (0..$N-1) {
     my $block=$blockstrings[$i];
@@ -101,7 +105,8 @@ for my $i (0..$nprocs-1) {
 }
 die if $todie;
 
-print STDERR "Assembling\n";
+print STDERR "Assembling\n"
+    if $nopipe;
 
 for my $i (0..$N-1) {
     open(my $blockfile, shift(@tmpfiles));
@@ -137,6 +142,7 @@ for my $i (0..$N-1) {
 die "Internal error" unless (scalar(@tmpfiles) == 0);
 
 $|++;
-print STDERR "Done\n";
+print STDERR "Done\n"
+    if $nopipe;
 
 0;
