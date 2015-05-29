@@ -65,8 +65,6 @@ for my $i (0..$N-1) {
     }
 }
 
-print STDERR join("\n", @tmpfiles), "\n";
-
 die "Internal error" unless
     scalar(@pids) == $nprocs &&
     scalar(@tmpfiles) == $nprocs &&
