@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+use Getopt::Long;
 
 # Takes as input matrix, output a vector
 
@@ -10,7 +11,7 @@ GetOptions("alg" => \$isalg)    # flag
 
 
 if ($#ARGV != -1) {
-    print STDERR "usage: ./colsum.pl [--alg] < matrix > sums\n\n";
+    print STDERR "usage: ./colsum.pl [--alg] < matrix > sums\n";
     exit -1;
 }
 
