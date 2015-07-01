@@ -35,7 +35,7 @@ if ($rightmapfn =~ /\.gz$/) {
     open(RIGHTMAP, "< $rightmapfn");
 }
 
-print "Starting classification\n";
+print STDERR "Starting classification\n";
 
 for (my $num = 0; ; $num++) {
 
