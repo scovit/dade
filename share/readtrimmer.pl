@@ -11,7 +11,7 @@ sub trimthread {
     while (<FILE>) {
 	my $i = ($. - 1) / 4;
 
-	my $trim=${ $length }[$i];
+	my $trim = $length->[$i];
 	$maxtrim = $trim if $trim > $maxtrim;
 
 	if ($. % 2 == 0) {
