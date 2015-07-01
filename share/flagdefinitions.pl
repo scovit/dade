@@ -25,7 +25,7 @@ sub parse_class (_) {
     my $arg = $_;
     chomp $arg;
     my @arr = split("\t", $arg);
-    die "Class file format error" unless ($#arr == 9);
+    die "Class file format error", join("~", @arr) unless ($#arr == 9);
 
     my %q;
     @q{qw(INDEX FLAG LEFTCHR LEFTPOS LEFTRST RIGHTCHR RIGHTPOS RIGHTRST DIST RSTDIST)}= @arr;
