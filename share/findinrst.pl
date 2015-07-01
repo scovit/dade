@@ -13,7 +13,7 @@ sub readrsttable {
     my $fname = $_[0];
     my $oldnum;
 
-    open RSTTABLE, "<", $fname or die $!;
+    open RSTTABLE, "<", $fname or die "$fname, ", $!;
     while (<RSTTABLE>) {
 	chomp;
 	my ($index, $chrnam, $num, $st, $en) = split("\t", $_);
@@ -21,7 +21,7 @@ sub readrsttable {
 	unless (exists $rsttable{$chrnam}) {
 	    $rsttable{$chrnam} = [];
 	    push @chrnames, $chrnam;
-	    die "Index errors" if (($st != 0) || ($num != 0));
+	    die "Index errors" if (($st != 1) || ($num != 0));
 	    $oldnum = -1;
 	}
 
@@ -60,7 +60,7 @@ sub readrsttable_from_header {
 	    $rsttable{$chrnam} = [];
 	    push @chrnames, $chrnam;
 	    die "Index errors, loaded records: $#rstarray"
-		if ($#rstarray >= 0 && ($st != 0 || $num != 0));
+		if ($#rstarray >= 0 && ($st != 1 || $num != 0));
 	    $oldnum = $num - 1;
 	}
 
@@ -94,9 +94,15 @@ sub findinrst {
     if ($chrnam eq "*") {
 	return "*";
     }
-    die "Chromosome not found, ", $chrnam unless exists $chrlength{$chrnam};
-    die "Read out of chromosome, ", $chrnam, " ", $ele 
-	if $ele > $chrlength{$chrnam};
+
+    unless (exists $chrlength{$chrnam}) {
+	warn "Chromosome not found, ", $chrnam;
+	return undef;
+    }
+    if ($ele >= $chrlength{$chrnam}) {
+	warn "Read out of chromosome, ", $chrnam, " ", $ele;
+	return undef;
+    }
 
     my $aref = $rsttable{$chrnam};
 
