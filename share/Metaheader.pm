@@ -139,10 +139,15 @@ sub findinheader {
     if ($chrnam eq "*") {
 	return "*";
     }
-    die "Chromosome not found, ", $chrnam unless
-	exists $self->{chrlength}->{$chrnam};
-    die "Read out of chromosome, ", $chrnam, " ", $ele 
-	if $ele > $self->{chrlength}->{$chrnam};
+
+    unless (exists $self->{chrlength}->{$chrnam}) {
+        warn "Chromosome not found, ", $chrnam;
+        return undef;
+    }
+    if ($ele >= $self->{chrlength}->{$chrnam}) {
+        warn "Read out of chromosome, ", $chrnam, " ", $ele;
+        return undef;
+    }
 
     my $aref = $self->{chrrows}->{$chrnam};
     die "Findinheader works only if st and en fields are specified" 
