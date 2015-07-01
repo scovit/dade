@@ -4,7 +4,7 @@ use warnings;
 
 use Scalar::Util qw(looks_like_number);
 use POSIX qw/floor/;
-use List::Util qw(any);
+use List::MoreUtils qw(any);
 
 BEGIN {
     use FindBin '$Bin';
