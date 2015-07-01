@@ -87,10 +87,10 @@ for (my $i = 0; $i <  $numfiles; $i++) {
 
     my @matches;
     while ($contentstr =~ /$rstcode/g) {
-	push @matches, $-[0] + $cutsite;
+	push @matches, $-[0] + $cutsite + 1; # 1-based coordinate
     }
 
-    my $old = 0;
+    my $old = 1;
     my $discarded = 0;
     for my $j (0 .. $#matches) {
 	if ($old == $matches[$j]) {
@@ -103,6 +103,6 @@ for (my $i = 0; $i <  $numfiles; $i++) {
 	$index++;
     }
     print join("\t", $index, $chrnames[$i],
-	       @matches - $discarded, $old, $chrlength, "\n");
+	       @matches - $discarded, $old, $chrlength + 1, "\n");
     $index++;
 }
