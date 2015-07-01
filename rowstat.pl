@@ -6,7 +6,7 @@ use warnings;
 # Basically a oneliner, but since we have colsum ....
 
 if ($#ARGV != -1) {
-    print STDERR "usage: ./rowsum.pl < matrix\n";
+    print STDERR "usage: ./rowstat.pl < matrix\n";
     exit;
 }
 
