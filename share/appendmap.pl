@@ -7,6 +7,8 @@ BEGIN {
     require "$Bin/share/findinrst.pl";
 }
 
+our %chrlength;
+
 sub appendmap {
     if ($#_ != 5 ) {
 	print "appendmap needs 6 arguments: mapfile, samfile, length, step, readlength, minq\n";
@@ -23,35 +25,51 @@ sub appendmap {
             print $_,"\n";
         } else {
             my ($NAME, $FLAG, $CHR, $POS, $MAPQ) = split("\t");
-            while (${ $length }[$index] == 0) {
+            while ($length->[$index] == 0) {
                 $index++;
             }
 
             if (($MAPQ < $minq) || ($_ =~ /XS:i:[0-9-]/)) {
 # Unmapped
-		my $lengthvar = ${ $length }[$index];
+		my $lengthvar = $length->[$index];
 
 		# if it's last iteration, just print it.
 		if ($lengthvar == $rlength) {
-		    $POS += ${ $length }[$index] if ($FLAG & 16);
+		    $POS += ($length->[$index] - 1) if ($FLAG & 16);
 		    $FLAG |= 4096 if ($_ =~ /XS:i:[0-9-]/);
-		    print $mapfile $index, "\t", $NAME, "\t", $FLAG, "\t", $CHR
-			, "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\t"
-			, findinrst($POS, $CHR), "\n";
+		    my $RST = findinrst($POS, $CHR);
+		    if (!defined $RST) {
+			warn "Could not find RST, setting last, out: $_";
+			if ($POS >= $chrlength{$CHR}) {
+			    $POS = $chrlength{$CHR}-1;
+			} else { die; }
+			$RST = findinrst($POS, $CHR);
+		    }			
+		    print $mapfile join("\t", $index, $NAME, $FLAG, $CHR
+					, $POS, $MAPQ, $length->[$index],
+					, $RST), "\n";
 		} else {
 		    my $newlength = $lengthvar + $step;
 		    if ($newlength > $rlength) {
 			$newlength = $rlength;
 		    }
-		    ${ $length }[$index] = $newlength;
+		    $length->[$index] = $newlength;
 		}
             } else {
 # Mapped
-		$POS += ${ $length }[$index] if ($FLAG & 16);
-		print $mapfile $index, "\t", $NAME, "\t", $FLAG, "\t", $CHR
-		    , "\t", $POS, "\t", $MAPQ, "\t", ${ $length }[$index], "\t"
-		    , findinrst($POS, $CHR), "\n";
-		${ $length }[$index] = 0;
+		$POS += ($length->[$index] - 1) if ($FLAG & 16);
+		my $RST = findinrst($POS, $CHR);
+		if (!defined $RST) {
+		    warn "Could not find RST, setting last, out: $_";
+		    if ($POS >= $chrlength{$CHR}) {
+			$POS = $chrlength{$CHR}-1;
+		    } else { die; }
+		    $RST = findinrst($POS, $CHR);
+		}
+		print $mapfile join("\t", $index, $NAME, $FLAG, $CHR
+				    , $POS, $MAPQ, $length->[$index]
+				    , $RST), "\n";
+		$length->[$index] = 0;
 	    }
 	    $index++;
 	}
