@@ -61,7 +61,7 @@ my $enpos = getpos($#rowarray);
 my $dist = $enpos - $ipos;
 my $maxind = ($islog
 	      ? floor(log($dist) / log($steps))
-	      : floor($dist / $steps)) - 1;
+	      : floor($dist / $steps));
 
 print join("\t", "\"PDC\"", map { binscale($_); } (0 .. $maxind)), "\n";
 
@@ -72,7 +72,7 @@ while(<>) {
     my $head = shift @records;
     my $frag = $metah->metarecord($head);
 
-    last if ($i == $#rowarray);
+#    last if ($i == $#rowarray);
 
     $ipos = getpos($i);
     $dist = $enpos - $ipos;
@@ -82,19 +82,17 @@ while(<>) {
 
     # Make single restriction fragment histogram
     my @tmphisto = (0) x ($maxind+1);
-    for my $j ($i+1 .. $#rowarray) {
+    for my $j ($i .. $#rowarray) {
 	my $jpos = getpos($j);
 	my $hits = $records[$j-$i];
 	my $ijdist = $jpos - $ipos;
-	    
+
 	my $bin = ($islog
 		   ? floor(log($ijdist) / log($steps))
 		   : floor($ijdist / $steps));
-	    
+
 	$tmphisto[$bin]+=$hits;
     }
-
-    $maxind--;
 
     my @reshisto = map { $tmphisto[$_] / binsize($_) } (0 .. $maxind);
 
