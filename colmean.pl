@@ -37,7 +37,7 @@ for my $j (0..$#n) {
 }
 
 for my $j (0..$#n) {
-    print $outputtit[$j], "\t", $mean[$j], "\t", sqrt($var[$j]/$n[$j]), "\n";
+    print $outputtit[$j], "\t", $mean[$j], "\t", sqrt($var[$j]), "\n";
 }
 
 0;
