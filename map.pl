@@ -6,6 +6,7 @@ use Scalar::Util qw(looks_like_number);
 
 BEGIN {
     use FindBin '$Bin';
+    use Getopt::Long;
     require "$Bin/share/mktemp_linux.pl";
     require "$Bin/share/readtrimmer.pl";
     require "$Bin/share/bowtie2align.pl";
@@ -13,11 +14,20 @@ BEGIN {
     require "$Bin/share/findinrst.pl";
 }
 
-# This the mapping pipeline (Mirny), it takes as input the sequencing data and output the alignemnt data
+# This the mapping pipeline (Mirny), it takes as input the sequencing data
+# and output the alignemnt data
 #
-    
+
+my $stepl = 20;
+my $minlength = 20;
+my $minqual = 30;
+GetOptions("minq=i" => \$minqual,
+	   "stepl=i" => \$stepl,
+	   "minl=i" => \$minlength)
+  or die("Error in command line arguments\n");
+
 if (($#ARGV != 5) and ($#ARGV != 6)) {
-    print "usage: ./map.pl leftsource <rightsource> readlength refgenome rsttable leftmap rightmap\n";
+    print "usage: ./map.pl [--minq=30] [--minl=20] [--stepl=20] leftsource <rightsource> readlength refgenome rsttable leftmap rightmap\n";
     exit;
 }
 
@@ -44,7 +54,7 @@ print "Opening input files\n";
 if (`file $leftsource` =~ /gzip/) {
     my $tmpfile=mktemp_linux("tmp.XXXXXXXX.fastq") or
 	die "Could not create temporary file";
-    system("gzip -c -d $leftsource > $tmpfile");
+    system("pigz -c -d $leftsource > $tmpfile");
     $leftsource = $tmpfile;
 }
 
@@ -74,7 +84,7 @@ unless (defined $rightsource) {
     if (`file $rightsource` =~ /gzip/) {
 	my $tmpfile=mktemp_linux("tmp.XXXXXXXX.fastq") or
 	die "Could not create temporary file";
-	system("gzip -c -d $rightsource > $tmpfile");
+	system("pigz -c -d $rightsource > $tmpfile");
 	$rightsource = $tmpfile;
     }
 }
@@ -88,9 +98,6 @@ print $N, " reads found\n";
 
 readrsttable($rsttablefn);
 
-my $stepl = 5;
-my $minlength = 20;
-my $minqual = 30;
 my @leftl = ($minlength) x $N;
 my @rightl = ($minlength) x $N;
 
@@ -101,9 +108,9 @@ my $rightreads=mktemp_linux("tmp.XXXXXXXX.fastq") or
 	die "Could not create temporary file";
 
 # open output files
-my $gzipit =  ($leftmapfn =~ /\.gz$/) ? "| gzip" : "";
+my $gzipit =  ($leftmapfn =~ /\.gz$/) ? "| pigz" : "";
 open( my $leftmap,  "| sort -g --temporary-directory=$TMPDIR $gzipit > $leftmapfn");
-$gzipit =  ($rightmapfn =~ /\.gz$/) ? "| gzip" : "";
+$gzipit =  ($rightmapfn =~ /\.gz$/) ? "| pigz" : "";
 open( my $rightmap, "| sort -g --temporary-directory=$TMPDIR $gzipit > $rightmapfn");
 
 #################################################
