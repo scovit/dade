@@ -11,8 +11,8 @@ sub bowtie2align
        die "Bowtie2 not found at $progfile" unless -x $fullpath;
     }
 
-#    my $settings="--score-min L,0.6,0.2 --very-sensitive -p 8";
-    my $settings="--very-sensitive -p 14";
+# This disables gaps
+    my $settings="--very-sensitive --rdg 500,3 --rfg 500,3 -p 14";
 
     my $comando="$progfile $settings $notchangeset -x $_[1] -U $_[0]";
 
