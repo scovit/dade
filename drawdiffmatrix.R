@@ -15,13 +15,15 @@ library('parallel');
 
 args <- commandArgs(trailingOnly = TRUE);
 if (length(args) != 3) {
-    write("Usage: ./drawmatrix.R matrix1 matrix2 pdffile", stderr());
+    write("Usage: ./drawdiffmatrix.R matrix1 matrix2 pdffile", stderr());
     quit(status=-1);
 }
 fname1 <- args[1];
 fname2 <- args[2];
 fpdf   <- args[3];
 ncpus  <- 16;
+userPallette <- c("black", "green", "yellow", "red");
+
 
 # Thresholds
 significant <- 0.0005;
@@ -113,8 +115,7 @@ pushViewport(viewport(layout.pos.col = 1, layout.pos.row = 1))
 print(levelplot(-log10(qval), xlab = NULL, ylab = NULL,
                 par.settings=list(layout.heights=list(top.padding=-3,
                                       bottom.padding=-1)),
-                col.regions = colorRampPalette(c("black",
-                    "green", "yellow", "red"))(100),
+                col.regions = colorRampPalette(userPallette)(100),
                 ## col.regions = colorRampPalette(c("#00007F", "blue", 
                 ##    "white",
                 ##    "red", "#7F0000"))(100),
@@ -142,6 +143,6 @@ print(levelplot(-log10(qval), xlab = NULL, ylab = NULL,
 ##           gp=gpar(col="darkred", fontsize=14));
 popViewport()
 popViewport()
-dev.off()
+garbage <- dev.off()
 
 quit();

@@ -5,14 +5,14 @@ library(lattice)
 library(latticeExtra)
 
 args <- commandArgs(trailingOnly = TRUE);
-if (length(args) != 2) {
-    write("Usage: ./drawmatrix.R matrix pdffile", stderr());
+if (length(args) != 1) {
+    write("Usage: ./drawmatrix.R colors < matrix > pdffile\nSample colors:\n'#00007F blue #007FFF cyan #7FFF7F yellow #FF7F00 red #7F0000'\nquotes are important!!", stderr());
     quit(status=-1);
 }
-fname=args[1];
-fpdf=args[2];
+qw <- function(x) unlist(strsplit(x, "[[:space:]]+"))
+userPallette <- qw(args[1]);
 
-pdf(file=fpdf, width= 8.3, height = 8.3)
+pdf(file="/dev/stdout", width= 8.3, height = 8.3)
 pushViewport(viewport(layout = grid.layout(nrow = 1, ncol = 1)))
 
 read.updiag <- function (file) {
@@ -28,21 +28,18 @@ read.updiag <- function (file) {
     a
 }
 
-m <- read.updiag(fname)
+m <- read.updiag("/dev/stdin");
 #labe <- sapply(strsplit(rownames(m), '~'), function (x) {paste(x[4])})
 labe <- sapply(strsplit(rownames(m), '~'), function (x) {paste(x[1])})
 nele <- length(labe)
 m <- (m + t(as.matrix(m)) + 1);
-m <- m/sum(m);
-m <- log(m)
+#m <- m/sum(m);
+m <- log(m)/log(10);
 pushViewport(viewport(layout.pos.col = 1, layout.pos.row = 1))
 print(levelplot(m, xlab = NULL, ylab = NULL,
                 par.settings=list(layout.heights=list(top.padding=-3,
                                       bottom.padding=-1)),
-                col.regions = colorRampPalette(c("#00007F", "blue", 
-                    "#007FFF", "cyan",
-                    "#7FFF7F", "yellow",
-                    "#FF7F00", "red", "#7F0000"))(100),
+                col.regions = colorRampPalette(userPallette)(100),
                 ## col.regions = colorRampPalette(c("#7F0000", "red", 
                 ##     "#FF7F00", "yellow",
                 ##     "#7FFF7F", "yellow",
@@ -63,6 +60,6 @@ print(levelplot(m, xlab = NULL, ylab = NULL,
 ##           gp=gpar(col="darkred", fontsize=14));
 popViewport()
 popViewport()
-dev.off()
+garbage <- dev.off();
 
 quit();
