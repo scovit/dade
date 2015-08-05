@@ -12,28 +12,12 @@ if ($#ARGV != 3) {
 my ($leftsource, $rightsource, $leftout, $rightout) = @ARGV;
 
 # open input files
-if ($leftsource =~ /\.gz$/) {
-    open(LEFT, "gzip -d -c $leftsource |");
-} else {
-    open(LEFT, "< $leftsource");
-}
-if ($rightsource =~ /\.gz$/) {
-    open(RIGHT, "gzip -d -c $rightsource |");
-} else {
-    open(RIGHT, "< $rightsource");
-}
+open(LEFT, "< $leftsource");
+open(RIGHT, "< $rightsource");
 
 # open output files
-if  ($leftout =~ /\.gz$/) {
-    open(LOUT, "| gzip > $leftout");
-} else {
-    open(LOUT, "> $leftout");
-}
-if  ($rightout =~ /\.gz$/) {
-    open(ROUT, "| gzip > $rightout");
-} else {
-    open(ROUT, "> $rightout");
-}
+open(LOUT, "> $leftout");
+open(ROUT, "> $rightout");
 
 my $f = 0;
 my %group;
