@@ -12,11 +12,12 @@ BEGIN {
 #
 
 my $minqual = 30;
-GetOptions("minq=i" => \$minqual)    # integer arg
+my $noambig = 0;
+GetOptions("minq=i" => \$minqual, 'noambig' => \$noambig)    # integer arg
   or die("Error in command line arguments\n");
 
 if ($#ARGV != 1) {
-	print STDERR "usage: ./classify.pl [--minq=30] leftmap rightmap "
+	print STDERR "usage: ./classify.pl [--minq=30] [--noambig] leftmap rightmap "
 	              . "> classification\n";
 	exit;
 };
@@ -24,18 +25,22 @@ if ($#ARGV != 1) {
 my ($leftmapfn, $rightmapfn) = @ARGV;
 
 # open input files
-if ($leftmapfn =~ /\.gz$/) {
-    open(LEFTMAP, "gzip -d -c $leftmapfn |");
-} else {
-    open(LEFTMAP, "< $leftmapfn");
-}
-if ($rightmapfn =~ /\.gz$/) {
-    open(RIGHTMAP, "gzip -d -c $rightmapfn |");
-} else {
-    open(RIGHTMAP, "< $rightmapfn");
-}
+open(LEFTMAP, "< $leftmapfn");
+open(RIGHTMAP, "< $rightmapfn");
 
 print STDERR "Starting classification\n";
+
+my $aligne = ($noambig
+	      ? sub {
+		  my ($flag, $qual) = @_;
+		  return ((!($flag & 4))
+			  && (!($flag & 4096))
+			  && ($qual >= $minqual)); }
+	      : sub {
+                  my ($flag, $qual) = @_;
+                  return ((!($flag & 4))
+                          && ($qual >= $minqual)); }
+    );
 
 for (my $num = 0; ; $num++) {
 
@@ -49,13 +54,9 @@ for (my $num = 0; ; $num++) {
     my $flag = 0;
     $flag |= FL_LEFT_INVERSE if ($leftflag & 16);
     $flag |= FL_RIGHT_INVERSE if ($rightflag & 16);
-    $flag |= FL_LEFT_ALIGN if ((!($leftflag & 4))
-			       && (!($leftflag & 4096))
-			       && ($leftqual >= 30));
-    $flag |= FL_RIGHT_ALIGN if ((!($rightflag & 4))
-				&& (!($rightflag & 4096))
-				&& ($rightqual >= 30));
-    $flag |= FL_INTRA_CHR if (($leftchr eq $rightchr) && ($leftchr ne "*") && ($rightchr ne "*"));
+    $flag |= FL_LEFT_ALIGN if &$aligne($leftflag, $leftqual);
+    $flag |= FL_RIGHT_ALIGN if &$aligne($rightflag, $rightqual);
+    $flag |= FL_INTRA_CHR if (($leftchr eq $rightchr) && ($leftchr ne "*"));
 
     my $distance; my $rstdist;
     if ($flag & FL_INTRA_CHR) {
