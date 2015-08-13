@@ -1129,7 +1129,7 @@
       <code>
 	./sparse.pl BC176_CGAT.7k~rebinned BC176_CGAT.7k~rebinned.dat
       </code>
-      to export to a sparse matrix. Alternatively, you can load upper
+      to export to a sparse matrix.<br />Alternatively, you can load upper
       diagonal matrices directly
       in <a href="http://www.r-project.org/">R</a> by defining the
       following function: 
@@ -1147,7 +1147,36 @@ read.updiag &lt;- function (file) {
     a
 }</pre>
       and subsequently using the function as 
-      <code class="inplace">matrix <- read.updiag("matrixfilename");</code> .
+      <code class="inplace">matrix
+      <- read.updiag("matrixfilename");</code> . Or load upper
+      diagonal matrices in <a href="http://www.python.org/">Python</a>
+      with <a href="http://www.numpy.org/">Numpy</a> by defining the
+      following function:
+      <pre>
+import numpy as np;
+def fromupdiag( filename ):
+    f = open(filename);
+    header = f.readline().split();
+    header.pop(0);
+    total=len(header);
+    result = np.zeros((total, total));
+    count = 0;
+    for line in f:
+        data = line.split();
+        data.pop(0);
+        len(data);
+        result[count,count:total]=data;
+        count += 1;
+    return result;
+      </pre> and subsequently using the funciton
+      as <code class="inplace">matrix =
+      fromupdiag("matrixfilename");</code> . Don't forget, in case you
+      plan to use algorithm which expect a symmetric matrix (e.g. some
+      normalization algorithms), to 
+      symmetrize the matrix (in R with <code class="inplace">
+	matrix <- (matrix + t(as.matrix(matrix));</code> ; in Python
+      with <code class="inplace">
+		  matrix = matrix + np.transpose(matrix);</code> ).
       <h3>Experimentations on an advanced filtering algorithm</h3>
       <h3>Plotting the genomic distance contact probability</h3>
       <h3>Conclusions</h3>    
