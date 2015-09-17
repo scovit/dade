@@ -809,12 +809,14 @@
       <code>
 	AsyncYeast3.0C:<br />
 	./classify.pl
-	BC76_CTGT.dat.end1.pcrfree.map.gz
-	BC76_CTGT.dat.end2.pcrfree.map.gz BC76_CTGT.class;<br /><br />
+	&lt;(gzip -dc BC76_CTGT.dat.end1.pcrfree.map.gz)
+	&lt;(gzip -dc BC76_CTGT.dat.end2.pcrfree.map.gz)
+        &gt; BC76_CTGT.class;<br /><br />
 	G2mYeast3.0C:<br />
-	./classify.pl BC176_CGAT.dat.end1.pcrfree.map.gz
-	BC176_CGAT.dat.end2.pcrfree.map.gz
-	BC176_CGAT.class;
+	./classify.pl
+	&lt;(gzip -dc BC176_CGAT.dat.end1.pcrfree.map.gz)
+	&lt;(gzip -dc BC176_CGAT.dat.end2.pcrfree.map.gz)
+	&gt BC176_CGAT.class;
       </code>
       this way we obtain a file (BC76_CTGT.class.gz and
       BC176_CGAT.class.gz) with all the read pairs, their aligment
@@ -825,9 +827,9 @@
       command:
       <code>
 	AsyncYeast3.0C:<br />
-	./statistics BC76_CTGT.class;<br /><br />
+	./statistics &gt; BC76_CTGT.class;<br /><br />
 	G2mYeast3.0C:<br />
-	./statisitcs BC176_CGAT.class;
+	./statisitcs &gt; BC176_CGAT.class;
       </code>
 
       In order to make a filter on the
@@ -888,8 +890,8 @@
       matrices is a question of running the following code in both 
       AsyncYeast3.0C and G2mYeast3.0C directories:
       <code>	
-	for i in *.class.??; do ./rstmatrix.pl $i ref/DpnIIrst.txt
-	$i.mat; done;
+	for i in *.class.??; do ./rstmatrix.pl ref/DpnIIrst.txt &lt; $i 
+	&gt; $i.mat; done;
       </code>
       then just run
       <code class="inplace">ls *.mat</code>
@@ -963,7 +965,7 @@
       following cycle:
       <code>
 	for i in BC176_CGAT.class.[pm][pm].mat ;
-	do ./colsum.pl $i &gt; $i.rstd;
+	do ./colsum.pl &lt; $i &gt; $i.rstd;
 	done;
       </code>
       if we make a plot of the "*.rstd" files (e.g. with tools like
@@ -1095,8 +1097,8 @@
       want to make a matrix rebinned to 7 kilobases, it suffices that we
       type:
       <code>
-	./rebin.pl BC176_CGAT.class.pp~mm~pm~mp~xc~filt.mat
-	ref/DpnIIrst.txt 7000 BC176_CGAT.7k~rebinned
+	./rebin.pl 7000 &lt; BC176_CGAT.class.pp~mm~pm~mp~xc~filt.mat
+	&gt; BC176_CGAT.7k~rebinned
       </code>
       obtaining a rebinned matrix in
       <code class="inplace">BC176_CGAT.7k~rebinned</code>. Attention:
@@ -1123,11 +1125,11 @@
       opening them with those tools you can export them with
       the following commands:
       <code>
-	./todense.pl BC176_CGAT.7k~rebinned BC176_CGAT.7k~rebinned.dat
+	./todense.pl &lt; BC176_CGAT.7k~rebinned &gt; BC176_CGAT.7k~rebinned.dat
       </code>
       to export to a dense matrix, or
       <code>
-	./sparse.pl BC176_CGAT.7k~rebinned BC176_CGAT.7k~rebinned.dat
+	./tosparse.pl &lt; BC176_CGAT.7k~rebinned &gt; BC176_CGAT.7k~rebinned.dat
       </code>
       to export to a sparse matrix.<br />Alternatively, you can load upper
       diagonal matrices directly
