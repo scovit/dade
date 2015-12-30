@@ -99,10 +99,11 @@ my $todie = 0;
 	}
     }
 }
-waitpid($_, 0) for (@pids);
+
 for my $i (0..$nprocs-1) {
     close($to_kids[$i]) unless $dead[$i];
 }
+waitpid($_, 0) for (@pids);
 die if $todie;
 
 print STDERR "Assembling\n"
