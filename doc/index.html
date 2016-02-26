@@ -1157,19 +1157,20 @@ read.updiag &lt;- function (file) {
       <pre>
 import numpy as np;
 def fromupdiag( filename ):
-    f = open(filename);
-    header = f.readline().split();
-    header.pop(0);
-    total=len(header);
-    result = np.zeros((total, total));
-    count = 0;
-    for line in f:
-        data = line.split();
-        data.pop(0);
-        len(data);
-        result[count,count:total]=data;
-        count += 1;
-    return result;
+    result = None
+    with open(filename) as f:
+        header = f.readline().split()
+        header.pop(0)
+        total = len(header)
+        result = np.zeros((total, total))
+        count = 0
+        for line in f:
+            data = line.split()
+            data.pop(0)
+            len(data)
+            result[count,count:total] = data
+            count += 1
+    return result
       </pre> and subsequently using the funciton
       as <code class="inplace">matrix =
       fromupdiag("matrixfilename");</code> . Don't forget, in case you
