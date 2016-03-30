@@ -22,7 +22,7 @@ my $binsize = shift @ARGV;
 die "Binsize should be a number" if (!looks_like_number($binsize));
 
 # Read the header
-my $header = <>;
+my $header = <STDIN>;
 chomp($header);
 my $metah = Metaheader->new($header);
 my @rsts = @{ $metah->{rowinfo} };
@@ -70,37 +70,30 @@ print join("\t", "\"BIN\"", @bintitle), "\n";
 
 # Cycle over bins (output rows)
 for my $binan (0 .. $#bins) {
-    my @inputs;
     my @output = (0) x ($#bins - $binan + 1);
 
     print STDERR "\33[2K\rElaborating bin $binan out of $#bins";
 
-    # Load the whole rows of bin into memory (note, the script eats an
-    # amount of memory proportional to the bin size)
+    # Cycle over bins (column index)
     for my $i (0 .. $#{$bins[$binan]}) {
-	my $line = <>;
+	my $line = <STDIN>;
 	defined $line or die "Input format error";
 	chomp $line;
 
 	my @input = split("\t", $line); shift(@input);
-	push @inputs, \@input;
-    }
 
-    # Cycle over bins (column index)
-    for my $binbn ($binan .. $#bins) {
+	for my $binbn ($binan .. $#bins) {
 
-	for my $i (0 .. $#{$bins[$binan]}) {
 	    for my $j (0 .. $#{$bins[$binbn]}) {
 		next if (($binbn == $binan) && ($j < $i));
 		my $coln = $bins[$binbn]->[$j] - $bins[$binan]->[$i];
 
-		$output[$binbn - $binan] += $inputs[$i]->[$coln] //
+		$output[$binbn - $binan] += $input[$coln] //
 		    die "Missing columns in input";
 	    }
 	}
-
     }
-    
+
     print join("\t", $bintitle[$binan], @output), "\n";
 }
 
