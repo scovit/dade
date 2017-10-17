@@ -30,8 +30,16 @@ read.updiag <- function (file) {
 
 m <- read.updiag("/dev/stdin");
 #labe <- sapply(strsplit(rownames(m), '~'), function (x) {paste(x[4])})
-labe <- sapply(strsplit(rownames(m), '~'), function (x) {paste(x[1])})
+labe <- sapply(strsplit(rownames(m), '~'), function (x) {paste(x[4])})
+#sp1 <- (which(labe>719756))[[1]]
+#sp2 <- (which(labe>849206))[[1]]
 nele <- length(labe)
+labereal <- labe[round(pretty(1:nele)+1)];
+labeat <- round(pretty(1:nele)+1);
+#labereal <- labe[sort(c(sp1, sp2, round(pretty(1:nele)+1)))];
+#labeat <- sort(c(sp1, sp2, round(pretty(1:nele)+1)));
+#labereal <- labe[c(sp1,sp2)];
+#labeat <- c(sp1,sp2);
 m <- (m + t(as.matrix(m)) + 1);
 #m <- m/sum(m);
 m <- log(m)/log(10);
@@ -49,11 +57,11 @@ print(levelplot(m, xlab = NULL, ylab = NULL,
                 ## interpolate=TRUE,
                 scales=list(
                     y=list(alternating=1,
-                        labels=labe[round(pretty(1:nele)+1)],
-                        at=pretty(1:nele)+1),
+                        labels=labereal,
+                        at=labeat),
                     x=list(alternating=1,
-                        labels=labe[round(pretty(1:nele)+1)],
-                        at=pretty(1:nele)+1)
+                        labels=labereal,
+                        at=labeat)
                     )
                 ), newpage = FALSE)
 ## grid.text(fname, x=unit(0.5,"npc"), y=unit(0.03,"npc"),

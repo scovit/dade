@@ -3,6 +3,7 @@
 #  Prog to make Fisher test along two matrices
 #  apply qvalues
 #  add parralelisation
+#  vittore.scolari@pasteur.fr
 
 library('grid');
 library('RColorBrewer');
@@ -68,7 +69,7 @@ m2 <- m2 + t(as.matrix(m2))
 # m1 <- as.matrix(m1);
 # m2 <- as.matrix(m2);
 
-# Calculate row sums
+# Calculate row and columns sums
 
 sum1 <- matrix(rowSums(m1),nrow=nrow(m1),ncol=ncol(m1));
 sum2 <- matrix(rowSums(m2),nrow=nrow(m2),ncol=ncol(m2));

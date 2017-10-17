@@ -21,17 +21,27 @@ BEGIN {
 my $stepl = 20;
 my $minlength = 20;
 my $minqual = 30;
+my $tmpd = "/tmp";
+my $maxlength;
 GetOptions("minq=i" => \$minqual,
 	   "stepl=i" => \$stepl,
-	   "minl=i" => \$minlength)
+           "tmp=s" => \$tmpd,
+	   "minl=i" => \$minlength,
+	   "maxl=i" => \$maxlength
+    )
   or die("Error in command line arguments\n");
 
 if (($#ARGV != 5) and ($#ARGV != 6)) {
-    print "usage: ./map.pl [--minq=30] [--minl=20] [--stepl=20] leftsource <rightsource> readlength refgenome rsttable leftmap rightmap\n";
+    print "usage: ./map.pl [--minq=30] [--minl=20] [--maxl=inf] [--stepl=20] [--tmp=/tmp] leftsource <rightsource> readlength refgenome rsttable leftmap rightmap\n";
     exit;
 }
 
-our $TMPDIR;
+our $TMPDIR=$tmpd;
+die "$TMPDIR does not exists or is not a directory"
+    unless (-d $TMPDIR);
+die "$TMPDIR shuld be writeable, redeable and accessible"
+    . " (run: chmod 0777 $TMPDIR)"
+    unless ((-r $TMPDIR) && (-w $TMPDIR) && (-x $TMPDIR));
 
 my ($leftsource, $rightsource, $readlength, $refgenome, $rsttablefn, $leftmapfn, $rightmapfn) = 
     (undef, undef, undef, undef, undef, undef, undef);
@@ -118,19 +128,20 @@ open( my $rightmap, "| sort -g --temporary-directory=$TMPDIR $gzipit > $rightmap
 #################################################
 
 print "Starting trimmering\n";
-for (my $trimmered = $minlength; $trimmered < $readlength + $stepl;
+for (my $trimmered = $minlength;
+     $trimmered < (($maxlength // $readlength) + $stepl);
      $trimmered += $stepl) {
     readtrimmer($leftsource, $rightsource, \@leftl, \@rightl,
 		$leftreads, $rightreads);
 
     my $alignedfile = bowtie2align($leftreads, $refgenome);
     appendmap($leftmap, $alignedfile, \@leftl, $stepl,
-	      $readlength, $minqual);
+	      $maxlength // $readlength, $minqual);
     close ($alignedfile);
 
     $alignedfile = bowtie2align($rightreads, $refgenome);
     appendmap($rightmap, $alignedfile, \@rightl, $stepl,
-	      $readlength, $minqual);
+	      $maxlength // $readlength, $minqual);
     close ($alignedfile);
 }
 

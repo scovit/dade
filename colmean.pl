@@ -14,12 +14,12 @@ my @mean;
 my @var;
 my @stddev;
 my @n;
-my $header = <>;
+my $header = <STDIN>;
 chomp($header);
 my @outputtit = split("\t", $header);
 shift @outputtit;
 
-while(<>) {
+while(<STDIN>) {
     chomp;
     my @input = split("\t");
     my $title = shift(@input);

@@ -1,5 +1,7 @@
 #!/usr/bin/env perl
 
+use Getopt::Long;
+
 # 19/03/2015
 # Take two fastq files together and revove the PCR duplicates i.e whose ends have exactly the same sequences.
 # and remove tags of 10 bp 
@@ -38,8 +40,8 @@ while (1) {
 
     my $line1 = <LEFT> or die "Unexpected line ending";
     my $line2 = <RIGHT> or die "Unexpected line ending";
-    my $word1 = substr $line1, $skip, $compr;
-    my $word2 = substr $line2, $skip, $compr;
+    my $word1 = substr $line1, $skip, $cmpr;
+    my $word2 = substr $line2, $skip, $cmpr;
 
     if (exists($group{$word1.$word2}) || exists($group{$word2.$word1}) || ($word1 eq $word2)) {
         <LEFT> or die "Unexpected line ending";

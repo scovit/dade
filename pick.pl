@@ -22,15 +22,15 @@ die $@ unless($compiled);
 open(my $left , "<", $leftmapfn);
 open(my $right, "<", $rightmapfn);
 
+my $leftl; my $rigtl; my $ln;
 while (<STDIN>) {
     my %in = parse_class;
 
     if ($compiled->(\%in)) {
 	# Find the sequences
-	my $leftl; my $rigtl;
-	while($leftl = <$left>) {
+	while(($ln != $in{INDEX} * 4 + 2) && defined($leftl = <$left>)) {
 	    $rigtl = <$right>;
-	    last if($. == $in{INDEX} * 4 + 2);
+	    $ln = $.;
 	}
 
 	print join("\t", $in{INDEX}, $in{FLAG},
