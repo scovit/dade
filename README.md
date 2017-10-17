@@ -19,6 +19,7 @@ COPYRIGHT AND LICENSE
 =====================
 
 (c) 2014 NCBS, National Centre Biological Sciences, Bangalore (India)
+
 (c) from 2015 Pasteur Institut, Paris (France)
 
 This library is free software; you can redistribute it and/or modify it under the GPL License 3.0.
