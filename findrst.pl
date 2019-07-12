@@ -1,19 +1,23 @@
-#!/usr/bin/perl
+#!/bin/env perl
+use v5.26.0;
+
 use strict;
 use warnings;
+use List::MoreUtils qw/first_index/;
 
 BEGIN {
     use FindBin '$Bin';
 }
 
 if ($#ARGV < 1) {
-    print "usage: ./findrst.pl name chr1.fa <chr2.fa ... chrN.fa>\n"
+    print "usage: ./findrst.pl names chr1.fa <chr2.fa ... chrN.fa>\n"
+        , "  different restriction enzimes can be specified separated by a semicolon,\n"
 	, "  output will be printed on console\n"
 	, "  (redirect to a file with \"> filename\")\n";
     exit;
 }
 
-my $name = $ARGV[0];
+my @names = split(/:/, $ARGV[0]);
 my @chrfiles = @ARGV;
 shift @chrfiles;
 my $numfiles = $#ARGV;
@@ -24,35 +28,42 @@ for (@chrnames) {
     s{\.[^.]+$}{}; # removes extension
 }
 
-# Get restriction factor code
-open REBASE, "< $Bin/share/bionetc.txt";
-my @rebaselines = grep(/^$name /, <REBASE>);
-die "Restriction factor search error, not found" if ($#rebaselines < 0);
-die "More than one restriction factor found in search" if ($#rebaselines > 0);
-my $rebaseline = shift @rebaselines;
-close REBASE;
-(my $rstcode = $rebaseline) =~ s{.* }{}; chomp($rstcode);
-my $cutsite = index($rstcode, '^');
-
-if ($cutsite < 0) {
-    warn "No cutsite in rstcode: $rstcode\n";
-    $cutsite = int(length($rstcode) / 2);
-} else {
-    $rstcode =~ s{\^}{};
+my $regex;
+if (@names > 1) {
+    $regex = join "|^", map { $_ . " " } @names;
+}
+else {
+    $regex = "^" . $names[0] . " ";
 }
 
-# Build the regex string
-$rstcode =~ s{R}{[AGR]}g;
-$rstcode =~ s{Y}{[TCY]}g;
-$rstcode =~ s{W}{[ATW]}g;
-$rstcode =~ s{S}{[GCS]}g;
-$rstcode =~ s{M}{[ACM]}g;
-$rstcode =~ s{K}{[GTK]}g;
-$rstcode =~ s{H}{[ATCHMWY]}g;
-$rstcode =~ s{B}{[GCTBKSY]}g;
-$rstcode =~ s{V}{[GACVMSR]}g;
-$rstcode =~ s{D}{[GATDKWR]}g;
-$rstcode =~ s{N}{[GATCNDVBHKMSWYR]}g;
+# Get restriction factors code
+open REBASE, "< $Bin/share/bionetc.txt";
+my @rebaselines = grep(/$regex/, <REBASE>);
+die "Restriction factor search error, not found" if (@rebaselines == 0);
+close REBASE;
+
+my @rstcode = map { (my $rstcode = $_) =~ s{.* }{}; chomp($rstcode); $rstcode } @rebaselines;
+my @cutsite = map { my $r = index($_, '^'); $r < 0 ? int(length($_) / 2) : $r } @rstcode;
+@rstcode = map { 
+    s{\^}{};
+    my $rstcode = $_;
+    # Build the regex string
+    $rstcode =~ s{R}{[AGR]}g;
+    $rstcode =~ s{Y}{[TCY]}g;
+    $rstcode =~ s{W}{[ATW]}g;
+    $rstcode =~ s{S}{[GCS]}g;
+    $rstcode =~ s{M}{[ACM]}g;
+    $rstcode =~ s{K}{[GTK]}g;
+    $rstcode =~ s{H}{[ATCHMWY]}g;
+    $rstcode =~ s{B}{[GCTBKSY]}g;
+    $rstcode =~ s{V}{[GACVMSR]}g;
+    $rstcode =~ s{D}{[GATDKWR]}g;
+    $rstcode =~ s{N}{[GATCNDVBHKMSWYR]}g;
+    $rstcode = '(' . $rstcode . ')';
+    $rstcode
+} @rstcode;
+
+my $rstregex = join("|", @rstcode);
 
 my $index = 0;
 # Let's search the string in every file
@@ -86,10 +97,10 @@ for (my $i = 0; $i <  $numfiles; $i++) {
     my $chrlength = length($contentstr);
 
     my @matches;
-    while ($contentstr =~ /$rstcode/g) {
-	push @matches, $-[0] + $cutsite + 1; # 1-based coordinate
+    while ($contentstr =~ /$rstregex/g) {
+        my $i = first_index { defined } @{^CAPTURE};
+	push @matches, $-[0] + $cutsite[$i] + 1; # 1-based coordinate
     }
-
     my $old = 1;
     my $discarded = 0;
     for my $j (0 .. $#matches) {
